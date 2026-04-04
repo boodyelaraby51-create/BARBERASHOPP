@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Ragab Barber - الصفحة الرئيسية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <img src="public/logo.jpeg" alt="Logo">
+                <span>M-Ragab Barber</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">الرئيسية</a></li>
+                <li><a href="about.html">عن الصالون</a></li>
+                <li><a href="booking.html">الحجز</a></li>
+                <li><a href="gallery.html">المعرض</a></li>
+                <li><a href="https://www.tiktok.com/@elhamoo1?_r=1&_t=ZS-95B1kK1XP4T" target="_blank"><i class="fab fa-tiktok"></i></a></li>
+                <li><a href="admin.html" style="font-size: 0.8rem; color: #71717a;">الإدارة</a></li>
+            </ul>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="container">
+            <img src="public/logo.jpeg" alt="M-Ragab Barber" class="hero-logo">
+            <h1>M-Ragab Barber</h1>
+            <p class="subtitle">قصات مميزة، حلاقة نظيفة، وعناية عصرية</p>
+            <p class="tagline">تجربة حلاقة احترافية بأسلوب عصري</p>
+            <div class="btn-group">
+                <a href="booking.html" class="btn">احجز الآن</a>
+                <a href="gallery.html" class="btn btn-secondary">شاهد الأعمال</a>
+            </div>
+            <div class="btn-group" style="margin-top: 20px;">
+                <a href="https://wa.me/201094582069" target="_blank" class="btn" style="background: #25D366;"><i class="fab fa-whatsapp"></i> واتساب</a>
+                <a href="https://www.tiktok.com/@elhamoo1?_r=1&_t=ZS-95B1kK1XP4T" target="_blank" class="btn btn-secondary"><i class="fab fa-tiktok"></i> تيك توك</a>
+            </div>
+            <div style="margin-top: 30px;">
+                <span id="statusBadge" class="status-badge"></span>
+            </div>
+        </div>
+    </section>
+    <section class="services-preview">
+        <div class="container">
+            <h2 class="section-title">خدماتنا</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <div class="service-icon">✂️</div>
+                    <h3>قصات شعر عصرية</h3>
+                    <p>أحدث القصات والتسريحات العصرية بأيدي خبراء</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">💈</div>
+                    <h3>حلاقة ذقن احترافية</h3>
+                    <p>حلاقة دقيقة وتشذيب احترافي للذقن</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">✨</div>
+                    <h3>عناية بالشعر</h3>
+                    <p>علاجات وعناية متكاملة للشعر</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div class="social-links">
+            <a href="https://wa.me/201094582069" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.tiktok.com/@elhamoo1?_r=1&_t=ZS-95B1kK1XP4T" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.facebook.com/share/1G3VwSP7JD/" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/el__h_a_1_m_o?igsh=Mmdxazd5d3hscTYz" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p>السنبلاوين - قرية الحصاينة</p>
+        <p style="margin-top: 5px;">من 2:00 م إلى 11:00 م · مغلق يوم الإثنين</p>
+        <p style="margin-top: 10px; font-size: 0.8rem; color: #71717a;">&copy; 2026 M-Ragab Barber. جميع الحقوق محفوظة.</p>
+    </footer>
+    <a href="https://wa.me/201094582069" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
+    <script>
+        function updateStatus() {
+            const now = new Date();
+            const day = now.getDay();
+            const hour = now.getHours();
+            const isMonday = day === 1;
+            const isOpenHour = hour >= 14 && hour < 23;
+            const isOpen = !isMonday && isOpenHour;
+            const badge = document.getElementById('statusBadge');
+            if (isOpen) {
+                badge.innerHTML = '🟢 متاح الآن';
+                badge.style.background = 'rgba(16, 185, 129, 0.1)';
+                badge.style.color = '#10b981';
+            } else {
+                badge.innerHTML = '🔴 مغلق';
+                badge.style.background = 'rgba(239, 68, 68, 0.1)';
+                badge.style.color = '#ef4444';
+            }
+            badge.style.display = 'inline-block';
+            badge.style.padding = '10px 20px';
+            badge.style.borderRadius = '50px';
+            badge.style.border = '1px solid #3f3f46';
+            badge.style.fontSize = '0.9rem';
+        }
+        updateStatus();
+        setInterval(updateStatus, 60000);
+    </script>
+</body>
+</html>

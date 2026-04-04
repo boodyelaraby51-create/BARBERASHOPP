@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Ragab Barber - المعرض</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <img src="public/logo.jpeg" alt="Logo">
+                <span>M-Ragab Barber</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="about.html">عن الصالون</a></li>
+                <li><a href="booking.html">الحجز</a></li>
+                <li><a href="gallery.html" class="active">المعرض</a></li>
+                <li><a href="admin.html">الإدارة</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Gallery Section -->
+    <section class="gallery-page">
+        <div class="container">
+            <h1 class="page-title">معرض الأعمال</h1>
+            
+            <div class="gallery-grid" id="galleryGrid">
+                <p style="text-align: center; color: #a1a1aa;">لا توجد صور حالياً. استخدم لوحة التحكم لإضافة صور.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="https://wa.me/201094582069" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.tiktok.com/@elhamoo1?_r=1&_t=ZS-95B1kK1XP4T" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.facebook.com/share/1G3VwSP7JD/" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/el__h_a_1_m_o?igsh=Mmdxazd5d3hscTYz" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p>السنبلاوين - قرية الحصاينة</p>
+        <p style="margin-top: 5px;">من 2:00 م إلى 11:00 م · مغلق يوم الإثنين</p>
+        <p style="margin-top: 10px;">&copy; 2026 M-Ragab Barber. All rights reserved.</p>
+        <p style="font-size: 0.9rem; margin-top: 5px;">Designed by ABDO ELARABY</p>
+    </footer>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/201094582069" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script>
+        window.addEventListener('load', () => {
+            const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
+            const grid = document.getElementById('galleryGrid');
+            
+            if (gallery.length > 0) {
+                grid.innerHTML = gallery.map(item => `
+                    <div class="gallery-item">
+                        <img src="${item.image}" alt="${item.title}">
+                        <div class="gallery-info">
+                            <h4>${item.title}</h4>
+                            <p>${item.description}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+</html>
