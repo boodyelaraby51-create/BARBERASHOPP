@@ -1,9 +1,4 @@
 /**
- * Firebase Authentication
- *
- * @packageDocumentation
- */
-/**
  * @license
  * Copyright 2017 Google LLC
  *
@@ -19,20 +14,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './src/model/public_types';
-export { FactorId, ProviderId, SignInMethod, OperationType, ActionCodeOperation } from './src/model/enum_maps';
-export * from './src';
-import { browserLocalPersistence } from './src/platform_browser/persistence/local_storage';
-import { browserCookiePersistence } from './src/platform_browser/persistence/cookie_storage';
-import { browserSessionPersistence } from './src/platform_browser/persistence/session_storage';
-import { indexedDBLocalPersistence } from './src/platform_browser/persistence/indexed_db';
-import { PhoneAuthProvider } from './src/platform_browser/providers/phone';
-import { signInWithPhoneNumber, linkWithPhoneNumber, reauthenticateWithPhoneNumber, updatePhoneNumber } from './src/platform_browser/strategies/phone';
-import { signInWithPopup, linkWithPopup, reauthenticateWithPopup } from './src/platform_browser/strategies/popup';
-import { signInWithRedirect, linkWithRedirect, reauthenticateWithRedirect, getRedirectResult } from './src/platform_browser/strategies/redirect';
-import { RecaptchaVerifier } from './src/platform_browser/recaptcha/recaptcha_verifier';
-import { browserPopupRedirectResolver } from './src/platform_browser/popup_redirect';
-import { PhoneMultiFactorGenerator } from './src/platform_browser/mfa/assertions/phone';
-import { TotpMultiFactorGenerator, TotpSecret } from './src/mfa/assertions/totp';
-import { getAuth } from './src/platform_browser';
-export { browserLocalPersistence, browserCookiePersistence, browserSessionPersistence, indexedDBLocalPersistence, PhoneAuthProvider, signInWithPhoneNumber, linkWithPhoneNumber, reauthenticateWithPhoneNumber, updatePhoneNumber, signInWithPopup, linkWithPopup, reauthenticateWithPopup, signInWithRedirect, linkWithRedirect, reauthenticateWithRedirect, getRedirectResult, RecaptchaVerifier, browserPopupRedirectResolver, PhoneMultiFactorGenerator, TotpMultiFactorGenerator, TotpSecret, getAuth };
+export * from './core';
+export * from './mfa';
