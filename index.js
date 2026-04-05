@@ -1,63 +1,6 @@
-import { _getProvider, getApp } from '@firebase/app';
-import { _ as _signInWithRedirect, a as _reauthenticateWithRedirect, b as _linkWithRedirect, r as registerAuth, i as initializeAuth, c as indexedDBLocalPersistence, d as cordovaPopupRedirectResolver } from './popup_redirect-5ec7b405.js';
-export { A as ActionCodeOperation, a6 as ActionCodeURL, y as AuthCredential, w as AuthErrorCodes, E as EmailAuthCredential, D as EmailAuthProvider, G as FacebookAuthProvider, F as FactorId, I as GithubAuthProvider, H as GoogleAuthProvider, z as OAuthCredential, J as OAuthProvider, O as OperationType, B as PhoneAuthCredential, P as ProviderId, K as SAMLAuthProvider, S as SignInMethod, T as TwitterAuthProvider, W as applyActionCode, j as beforeAuthStateChanged, e as browserLocalPersistence, f as browserSessionPersistence, X as checkActionCode, V as confirmPasswordReset, x as connectAuthEmulator, d as cordovaPopupRedirectResolver, Z as createUserWithEmailAndPassword, q as debugErrorMap, p as deleteUser, a3 as fetchSignInMethodsForEmail, ae as getAdditionalUserInfo, ab as getIdToken, ac as getIdTokenResult, ag as getMultiFactorResolver, g as getRedirectResult, C as inMemoryPersistence, c as indexedDBLocalPersistence, i as initializeAuth, h as initializeRecaptchaConfig, a1 as isSignInWithEmailLink, N as linkWithCredential, ah as multiFactor, k as onAuthStateChanged, o as onIdTokenChanged, a7 as parseActionCodeURL, t as prodErrorMap, Q as reauthenticateWithCredential, af as reload, n as revokeAccessToken, a4 as sendEmailVerification, U as sendPasswordResetEmail, a0 as sendSignInLinkToEmail, s as setPersistence, L as signInAnonymously, M as signInWithCredential, R as signInWithCustomToken, $ as signInWithEmailAndPassword, a2 as signInWithEmailLink, m as signOut, ad as unlink, l as updateCurrentUser, a9 as updateEmail, aa as updatePassword, a8 as updateProfile, u as useDeviceLanguage, v as validatePassword, a5 as verifyBeforeUpdateEmail, Y as verifyPasswordResetCode } from './popup_redirect-5ec7b405.js';
+export { A as ActionCodeOperation, aj as ActionCodeURL, M as AuthCredential, J as AuthErrorCodes, N as EmailAuthCredential, W as EmailAuthProvider, X as FacebookAuthProvider, F as FactorId, Z as GithubAuthProvider, Y as GoogleAuthProvider, Q as OAuthCredential, _ as OAuthProvider, O as OperationType, U as PhoneAuthCredential, P as PhoneAuthProvider, n as PhoneMultiFactorGenerator, q as ProviderId, R as RecaptchaVerifier, $ as SAMLAuthProvider, S as SignInMethod, T as TotpMultiFactorGenerator, o as TotpSecret, a0 as TwitterAuthProvider, a8 as applyActionCode, y as beforeAuthStateChanged, a as browserCookiePersistence, b as browserLocalPersistence, m as browserPopupRedirectResolver, c as browserSessionPersistence, a9 as checkActionCode, a7 as confirmPasswordReset, L as connectAuthEmulator, ab as createUserWithEmailAndPassword, H as debugErrorMap, G as deleteUser, ag as fetchSignInMethodsForEmail, ar as getAdditionalUserInfo, p as getAuth, ao as getIdToken, ap as getIdTokenResult, at as getMultiFactorResolver, k as getRedirectResult, V as inMemoryPersistence, i as indexedDBLocalPersistence, K as initializeAuth, v as initializeRecaptchaConfig, ae as isSignInWithEmailLink, a3 as linkWithCredential, l as linkWithPhoneNumber, e as linkWithPopup, h as linkWithRedirect, au as multiFactor, z as onAuthStateChanged, x as onIdTokenChanged, ak as parseActionCodeURL, I as prodErrorMap, a4 as reauthenticateWithCredential, r as reauthenticateWithPhoneNumber, f as reauthenticateWithPopup, j as reauthenticateWithRedirect, as as reload, E as revokeAccessToken, ah as sendEmailVerification, a6 as sendPasswordResetEmail, ad as sendSignInLinkToEmail, t as setPersistence, a1 as signInAnonymously, a2 as signInWithCredential, a5 as signInWithCustomToken, ac as signInWithEmailAndPassword, af as signInWithEmailLink, s as signInWithPhoneNumber, d as signInWithPopup, g as signInWithRedirect, D as signOut, aq as unlink, C as updateCurrentUser, am as updateEmail, an as updatePassword, u as updatePhoneNumber, al as updateProfile, B as useDeviceLanguage, w as validatePassword, ai as verifyBeforeUpdateEmail, aa as verifyPasswordResetCode } from './index-dfb5c973.js';
+import '@firebase/app';
 import '@firebase/util';
-import '@firebase/component';
 import '@firebase/logger';
-
-/**
- * @license
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-function signInWithRedirect(auth, provider, resolver) {
-    return _signInWithRedirect(auth, provider, resolver);
-}
-function reauthenticateWithRedirect(user, provider, resolver) {
-    return _reauthenticateWithRedirect(user, provider, resolver);
-}
-function linkWithRedirect(user, provider, resolver) {
-    return _linkWithRedirect(user, provider, resolver);
-}
-
-/**
- * @license
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-function getAuth(app = getApp()) {
-    const provider = _getProvider(app, 'auth');
-    if (provider.isInitialized()) {
-        return provider.getImmediate();
-    }
-    return initializeAuth(app, {
-        persistence: indexedDBLocalPersistence,
-        popupRedirectResolver: cordovaPopupRedirectResolver
-    });
-}
-registerAuth("Cordova" /* ClientPlatform.CORDOVA */);
-
-export { getAuth, linkWithRedirect, reauthenticateWithRedirect, signInWithRedirect };
+import '@firebase/component';
 //# sourceMappingURL=index.js.map
