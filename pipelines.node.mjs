@@ -1,5 +1,5 @@
-import { F as Firestore, j as FirestoreError, bd as isString, be as DOCUMENT_KEY_NAME, b0 as documentId$1, f as fieldPathFromArgument, bf as hardAssert, bg as parseData, bh as toStringValue, bi as isCollectionReference, D as DocumentReference, k as Code, aF as CollectionReference, bj as isOptionalEqual, E as cast, G as ensureFirestoreConfigured, c as newUserDataReader, J as ExpUserDataWriter, bk as firestoreClientExecutePipeline, bl as isPlainObject, aJ as VectorValue, bb as vector, w as isCollectionGroupQuery, bm as isDocumentQuery$1, a7 as doc, o as queryNormalizedOrderBy, bn as OptionsUtil, b7 as refEqual, bo as isNumber$1, bp as StructuredPipelineOptions, m as FieldFilter, X as fail, C as CompositeFilter, bq as toMapValue, br as toNumber, bs as toPipelineValue, bt as isUserData, bu as StructuredPipeline } from './common-abbd8850.node.mjs';
-export { bv as _internalPipelineToExecutePipelineRequestProto } from './common-abbd8850.node.mjs';
+import { bd as isPlainObject, i as FirestoreError, be as isString, bf as DOCUMENT_KEY_NAME, aE as documentId$1, f as fieldPathFromArgument, bg as hardAssert, bh as parseData, bi as toStringValue, a$ as VectorValue, a_ as vector, bj as toMapValue, t as isCollectionGroupQuery, bk as isDocumentQuery, an as doc, m as queryNormalizedOrderBy, k as FieldFilter, ab as fail, C as CompositeFilter, bl as OptionsUtil, bm as toNumber, bn as toPipelineValue, bo as isUserData, bp as isCollectionReference, D as DocumentReference, j as Code, aS as CollectionReference, bq as isOptionalEqual, aT as refEqual, br as isNumber, z as cast, F as Firestore, E as ensureFirestoreConfigured, n as newUserDataReader, I as ExpUserDataWriter, bs as StructuredPipelineOptions, bt as StructuredPipeline, bu as firestoreClientExecutePipeline } from './common-e122c13e.node.mjs';
+export { bv as _internalPipelineToExecutePipelineRequestProto } from './common-e122c13e.node.mjs';
 import '@firebase/app';
 import '@firebase/util';
 import '@firebase/webchannel-wrapper/bloom-blob';
@@ -2875,7 +2875,7 @@ function toPipeline(query, db) {
     if (isCollectionGroupQuery(query)) {
         pipeline = db.pipeline().collectionGroup(query.collectionGroup);
     }
-    else if (isDocumentQuery$1(query)) {
+    else if (isDocumentQuery(query)) {
         pipeline = db.pipeline().documents([doc(db, query.path.canonicalString())]);
     }
     else {
@@ -4185,7 +4185,7 @@ class Pipeline$1 {
         // Process argument union(s) from method overloads
         let options;
         let offset;
-        if (isNumber$1(offsetOrOptions)) {
+        if (isNumber(offsetOrOptions)) {
             options = {};
             offset = offsetOrOptions;
         }
@@ -4200,8 +4200,8 @@ class Pipeline$1 {
     }
     limit(limitOrOptions) {
         // Process argument union(s) from method overloads
-        const options = isNumber$1(limitOrOptions) ? {} : limitOrOptions;
-        const limit = isNumber$1(limitOrOptions)
+        const options = isNumber(limitOrOptions) ? {} : limitOrOptions;
+        const limit = isNumber(limitOrOptions)
             ? limitOrOptions
             : limitOrOptions.limit;
         // Create stage object
@@ -4310,14 +4310,14 @@ class Pipeline$1 {
     }
     sample(documentsOrOptions) {
         // Process argument union(s) from method overloads
-        const options = isNumber$1(documentsOrOptions) ? {} : documentsOrOptions;
+        const options = isNumber(documentsOrOptions) ? {} : documentsOrOptions;
         let rate;
         let mode;
-        if (isNumber$1(documentsOrOptions)) {
+        if (isNumber(documentsOrOptions)) {
             rate = documentsOrOptions;
             mode = 'documents';
         }
-        else if (isNumber$1(documentsOrOptions.documents)) {
+        else if (isNumber(documentsOrOptions.documents)) {
             rate = documentsOrOptions.documents;
             mode = 'documents';
         }
