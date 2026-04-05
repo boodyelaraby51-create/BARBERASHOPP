@@ -1,98 +1,63 @@
-'use strict';
+import { _getProvider, getApp } from '@firebase/app';
+import { _ as _signInWithRedirect, a as _reauthenticateWithRedirect, b as _linkWithRedirect, r as registerAuth, i as initializeAuth, c as indexedDBLocalPersistence, d as cordovaPopupRedirectResolver } from './popup_redirect-5ec7b405.js';
+export { A as ActionCodeOperation, a6 as ActionCodeURL, y as AuthCredential, w as AuthErrorCodes, E as EmailAuthCredential, D as EmailAuthProvider, G as FacebookAuthProvider, F as FactorId, I as GithubAuthProvider, H as GoogleAuthProvider, z as OAuthCredential, J as OAuthProvider, O as OperationType, B as PhoneAuthCredential, P as ProviderId, K as SAMLAuthProvider, S as SignInMethod, T as TwitterAuthProvider, W as applyActionCode, j as beforeAuthStateChanged, e as browserLocalPersistence, f as browserSessionPersistence, X as checkActionCode, V as confirmPasswordReset, x as connectAuthEmulator, d as cordovaPopupRedirectResolver, Z as createUserWithEmailAndPassword, q as debugErrorMap, p as deleteUser, a3 as fetchSignInMethodsForEmail, ae as getAdditionalUserInfo, ab as getIdToken, ac as getIdTokenResult, ag as getMultiFactorResolver, g as getRedirectResult, C as inMemoryPersistence, c as indexedDBLocalPersistence, i as initializeAuth, h as initializeRecaptchaConfig, a1 as isSignInWithEmailLink, N as linkWithCredential, ah as multiFactor, k as onAuthStateChanged, o as onIdTokenChanged, a7 as parseActionCodeURL, t as prodErrorMap, Q as reauthenticateWithCredential, af as reload, n as revokeAccessToken, a4 as sendEmailVerification, U as sendPasswordResetEmail, a0 as sendSignInLinkToEmail, s as setPersistence, L as signInAnonymously, M as signInWithCredential, R as signInWithCustomToken, $ as signInWithEmailAndPassword, a2 as signInWithEmailLink, m as signOut, ad as unlink, l as updateCurrentUser, a9 as updateEmail, aa as updatePassword, a8 as updateProfile, u as useDeviceLanguage, v as validatePassword, a5 as verifyBeforeUpdateEmail, Y as verifyPasswordResetCode } from './popup_redirect-5ec7b405.js';
+import '@firebase/util';
+import '@firebase/component';
+import '@firebase/logger';
 
-Object.defineProperty(exports, '__esModule', { value: true });
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function signInWithRedirect(auth, provider, resolver) {
+    return _signInWithRedirect(auth, provider, resolver);
+}
+function reauthenticateWithRedirect(user, provider, resolver) {
+    return _reauthenticateWithRedirect(user, provider, resolver);
+}
+function linkWithRedirect(user, provider, resolver) {
+    return _linkWithRedirect(user, provider, resolver);
+}
 
-var index = require('./index-e6fab08e.js');
-require('@firebase/app');
-require('@firebase/util');
-require('@firebase/logger');
-require('@firebase/component');
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function getAuth(app = getApp()) {
+    const provider = _getProvider(app, 'auth');
+    if (provider.isInitialized()) {
+        return provider.getImmediate();
+    }
+    return initializeAuth(app, {
+        persistence: indexedDBLocalPersistence,
+        popupRedirectResolver: cordovaPopupRedirectResolver
+    });
+}
+registerAuth("Cordova" /* ClientPlatform.CORDOVA */);
 
-
-
-exports.ActionCodeOperation = index.ActionCodeOperation;
-exports.ActionCodeURL = index.ActionCodeURL;
-exports.AuthCredential = index.AuthCredential;
-exports.AuthErrorCodes = index.AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY;
-exports.EmailAuthCredential = index.EmailAuthCredential;
-exports.EmailAuthProvider = index.EmailAuthProvider;
-exports.FacebookAuthProvider = index.FacebookAuthProvider;
-exports.FactorId = index.FactorId;
-exports.GithubAuthProvider = index.GithubAuthProvider;
-exports.GoogleAuthProvider = index.GoogleAuthProvider;
-exports.OAuthCredential = index.OAuthCredential;
-exports.OAuthProvider = index.OAuthProvider;
-exports.OperationType = index.OperationType;
-exports.PhoneAuthCredential = index.PhoneAuthCredential;
-exports.PhoneAuthProvider = index.PhoneAuthProvider;
-exports.PhoneMultiFactorGenerator = index.PhoneMultiFactorGenerator;
-exports.ProviderId = index.ProviderId;
-exports.RecaptchaVerifier = index.RecaptchaVerifier;
-exports.SAMLAuthProvider = index.SAMLAuthProvider;
-exports.SignInMethod = index.SignInMethod;
-exports.TotpMultiFactorGenerator = index.TotpMultiFactorGenerator;
-exports.TotpSecret = index.TotpSecret;
-exports.TwitterAuthProvider = index.TwitterAuthProvider;
-exports.applyActionCode = index.applyActionCode;
-exports.beforeAuthStateChanged = index.beforeAuthStateChanged;
-exports.browserCookiePersistence = index.browserCookiePersistence;
-exports.browserLocalPersistence = index.browserLocalPersistence;
-exports.browserPopupRedirectResolver = index.browserPopupRedirectResolver;
-exports.browserSessionPersistence = index.browserSessionPersistence;
-exports.checkActionCode = index.checkActionCode;
-exports.confirmPasswordReset = index.confirmPasswordReset;
-exports.connectAuthEmulator = index.connectAuthEmulator;
-exports.createUserWithEmailAndPassword = index.createUserWithEmailAndPassword;
-exports.debugErrorMap = index.debugErrorMap;
-exports.deleteUser = index.deleteUser;
-exports.fetchSignInMethodsForEmail = index.fetchSignInMethodsForEmail;
-exports.getAdditionalUserInfo = index.getAdditionalUserInfo;
-exports.getAuth = index.getAuth;
-exports.getIdToken = index.getIdToken;
-exports.getIdTokenResult = index.getIdTokenResult;
-exports.getMultiFactorResolver = index.getMultiFactorResolver;
-exports.getRedirectResult = index.getRedirectResult;
-exports.inMemoryPersistence = index.inMemoryPersistence;
-exports.indexedDBLocalPersistence = index.indexedDBLocalPersistence;
-exports.initializeAuth = index.initializeAuth;
-exports.initializeRecaptchaConfig = index.initializeRecaptchaConfig;
-exports.isSignInWithEmailLink = index.isSignInWithEmailLink;
-exports.linkWithCredential = index.linkWithCredential;
-exports.linkWithPhoneNumber = index.linkWithPhoneNumber;
-exports.linkWithPopup = index.linkWithPopup;
-exports.linkWithRedirect = index.linkWithRedirect;
-exports.multiFactor = index.multiFactor;
-exports.onAuthStateChanged = index.onAuthStateChanged;
-exports.onIdTokenChanged = index.onIdTokenChanged;
-exports.parseActionCodeURL = index.parseActionCodeURL;
-exports.prodErrorMap = index.prodErrorMap;
-exports.reauthenticateWithCredential = index.reauthenticateWithCredential;
-exports.reauthenticateWithPhoneNumber = index.reauthenticateWithPhoneNumber;
-exports.reauthenticateWithPopup = index.reauthenticateWithPopup;
-exports.reauthenticateWithRedirect = index.reauthenticateWithRedirect;
-exports.reload = index.reload;
-exports.revokeAccessToken = index.revokeAccessToken;
-exports.sendEmailVerification = index.sendEmailVerification;
-exports.sendPasswordResetEmail = index.sendPasswordResetEmail;
-exports.sendSignInLinkToEmail = index.sendSignInLinkToEmail;
-exports.setPersistence = index.setPersistence;
-exports.signInAnonymously = index.signInAnonymously;
-exports.signInWithCredential = index.signInWithCredential;
-exports.signInWithCustomToken = index.signInWithCustomToken;
-exports.signInWithEmailAndPassword = index.signInWithEmailAndPassword;
-exports.signInWithEmailLink = index.signInWithEmailLink;
-exports.signInWithPhoneNumber = index.signInWithPhoneNumber;
-exports.signInWithPopup = index.signInWithPopup;
-exports.signInWithRedirect = index.signInWithRedirect;
-exports.signOut = index.signOut;
-exports.unlink = index.unlink;
-exports.updateCurrentUser = index.updateCurrentUser;
-exports.updateEmail = index.updateEmail;
-exports.updatePassword = index.updatePassword;
-exports.updatePhoneNumber = index.updatePhoneNumber;
-exports.updateProfile = index.updateProfile;
-exports.useDeviceLanguage = index.useDeviceLanguage;
-exports.validatePassword = index.validatePassword;
-exports.verifyBeforeUpdateEmail = index.verifyBeforeUpdateEmail;
-exports.verifyPasswordResetCode = index.verifyPasswordResetCode;
+export { getAuth, linkWithRedirect, reauthenticateWithRedirect, signInWithRedirect };
 //# sourceMappingURL=index.js.map
