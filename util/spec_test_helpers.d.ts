@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2017 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface Resolver<R> {
-    (value: R | Promise<R>): void;
-}
-export interface Rejecter {
-    (reason?: Error): void;
-}
-export declare class Deferred<R> {
-    promise: Promise<R>;
-    resolve: Resolver<R>;
-    reject: Rejecter;
-    constructor();
-}
+import * as api from '../../src/protos/firestore_proto_api';
+import { WatchChange } from '../../src/remote/watch_change';
+export declare function encodeWatchChange(watchChange: WatchChange): api.ListenResponse;

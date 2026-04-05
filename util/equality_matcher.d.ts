@@ -14,15 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface Resolver<R> {
-    (value: R | Promise<R>): void;
+/**
+ * Duck-typed interface for objects that have an isEqual() method.
+ *
+ * Note: This is copied from src/util/misc.ts to avoid importing private types.
+ */
+export interface Equatable<T> {
+    isEqual(other: T): boolean;
 }
-export interface Rejecter {
-    (reason?: Error): void;
+/**
+ * Custom equals override for types that have a free-standing equals functions
+ *  (such as `queryEquals()`).
+ */
+export interface CustomMatcher<T> {
+    equalsFn: (left: T, right: T) => boolean;
+    forType: Function;
 }
-export declare class Deferred<R> {
-    promise: Promise<R>;
-    resolve: Resolver<R>;
-    reject: Rejecter;
-    constructor();
-}
+export declare function addEqualityMatcher(...customMatchers: Array<CustomMatcher<any>>): void;

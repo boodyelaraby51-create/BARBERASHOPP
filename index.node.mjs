@@ -1,14 +1,21 @@
-import { _isFirebaseServerApp, _getProvider, getApp, _registerComponent, registerVersion } from '@firebase/app';
+import { _registerComponent, registerVersion, SDK_VERSION } from '@firebase/app';
 import { Component } from '@firebase/component';
-import { FirebaseError, Deferred, getModularInstance } from '@firebase/util';
-import { Logger } from '@firebase/logger';
+import { A as AbstractUserDataWriter, B as Bytes, D as DocumentReference, n as newTextEncoder, p as property, s as setSDKVersion, F as Firestore, a as FirebaseAuthCredentialsProvider, b as FirebaseAppCheckTokenProvider, d as databaseIdFromApp, O as ObjectValue, Q as Query, q as queryWithAddedFilter, c as newUserDataReader, f as fieldPathFromArgument, C as CompositeFilter, e as queryWithAddedOrderBy, g as queryWithLimit, v as validatePositiveNumber, h as queryWithStartAt, i as queryWithEndAt, j as FirestoreError, k as Code, l as parseQueryValue, m as FieldFilter, o as queryNormalizedOrderBy, r as refValue, t as isServerTimestamp, u as Bound, w as isCollectionGroupQuery, R as ResourcePath, x as DocumentKey, y as valueDescription, z as queryEqual, E as cast, G as ensureFirestoreConfigured, H as mapToArray, I as firestoreClientRunAggregateQuery, J as ExpUserDataWriter, K as validateJSON, L as newSerializer, M as createBundleReaderSync, N as BundleLoader, P as fromDocument, S as AutoId, T as fromBundledQuery, U as DocumentSet, V as ViewSnapshot, W as documentKeySet, X as fail, Y as parseSetData, Z as Precondition, _ as FieldPath, $ as parseUpdateVarargs, a0 as parseUpdateData, a1 as DeleteMutation, a2 as firestoreClientTransaction, a3 as firestoreClientGetDocumentViaSnapshotListener, a4 as firestoreClientGetDocumentFromLocalCache, a5 as firestoreClientGetDocumentsViaSnapshotListener, a6 as firestoreClientGetDocumentsFromLocalCache, a7 as doc, a8 as newQueryForPath, a9 as firestoreClientListen, aa as firestoreClientAddSnapshotsInSyncListener, ab as firestoreClientWrite, ac as logWarn, ad as firestoreClientSetIndexConfiguration, ae as fieldPathFromDotSeparatedString, af as FieldIndex, ag as IndexState, ah as firestoreClientDeleteAllFieldIndexes, ai as logDebug, aj as firestoreClientSetPersistentCacheIndexAutoCreationEnabled, ak as OrderBy, al as AggregateImpl, am as OnlineComponentProvider, an as LruGcMemoryOfflineComponentProvider, ao as MemoryOfflineComponentProvider, ap as IndexedDbOfflineComponentProvider, aq as MultiTabOfflineComponentProvider, ar as loadBundle, as as namedQuery, at as IndexSegment, au as setTestingHooksSpi, av as Timestamp, aw as JsonProtoSerializer, ax as UserDataReader, ay as fromTimestamp, az as toName, aA as toTimestamp, aB as toQueryTarget, aC as queryToTarget, aD as parseObject } from './common-abbd8850.node.mjs';
+export { A as AbstractUserDataWriter, B as Bytes, aE as CACHE_SIZE_UNLIMITED, aF as CollectionReference, D as DocumentReference, _ as FieldPath, aG as FieldValue, F as Firestore, j as FirestoreError, aH as GeoPoint, aI as LoadBundleTask, Q as Query, av as Timestamp, aJ as VectorValue, S as _AutoId, aK as _ByteString, aL as _DatabaseId, x as _DocumentKey, aM as _EmptyAppCheckTokenProvider, aN as _EmptyAuthCredentialsProvider, aO as _FieldPath, E as _cast, aP as _debugAssert, aQ as _internalAggregationQueryToProtoRunAggregationQueryRequest, aR as _internalQueryToProtoQueryTarget, aS as _isBase64Available, ac as _logWarn, aT as _validateIsNotUsedTogether, aU as arrayRemove, aV as arrayUnion, aW as clearIndexedDbPersistence, aX as collection, aY as collectionGroup, aZ as connectFirestoreEmulator, a_ as deleteField, a$ as disableNetwork, a7 as doc, b0 as documentId, b1 as enableIndexedDbPersistence, b2 as enableMultiTabIndexedDbPersistence, b3 as enableNetwork, G as ensureFirestoreConfigured, b4 as getFirestore, b5 as increment, b6 as initializeFirestore, ar as loadBundle, as as namedQuery, z as queryEqual, b7 as refEqual, b8 as serverTimestamp, b9 as setLogLevel, ba as terminate, bb as vector, bc as waitForPendingWrites } from './common-abbd8850.node.mjs';
+import { getModularInstance, deepEqual } from '@firebase/util';
+import '@firebase/webchannel-wrapper/bloom-blob';
+import '@firebase/logger';
+import 'util';
+import 'crypto';
+import '@grpc/grpc-js';
+import '@grpc/proto-loader';
 
-var name = "@firebase/ai";
-var version = "2.10.0";
+const name$1 = "@firebase/firestore";
+const version = "4.13.0";
 
 /**
  * @license
- * Copyright 2024 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +29,23 @@ var version = "2.10.0";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const AI_TYPE = 'AI';
-const DEFAULT_LOCATION = 'us-central1';
-const DEFAULT_DOMAIN = 'firebasevertexai.googleapis.com';
-const DEFAULT_API_VERSION = 'v1beta';
-const PACKAGE_VERSION = version;
-const LANGUAGE_TAG = 'gl-js';
-const HYBRID_TAG = 'hybrid';
-const DEFAULT_FETCH_TIMEOUT_MS = 180 * 1000;
-/**
- * Defines the name of the default in-cloud model to use for hybrid inference.
- */
-const DEFAULT_HYBRID_IN_CLOUD_MODEL = 'gemini-2.5-flash-lite';
+function registerFirestore(variant, useFetchStreams = true) {
+    setSDKVersion(SDK_VERSION);
+    _registerComponent(new Component('firestore', (container, { instanceIdentifier: databaseId, options: settings }) => {
+        const app = container.getProvider('app').getImmediate();
+        const firestoreInstance = new Firestore(new FirebaseAuthCredentialsProvider(container.getProvider('auth-internal')), new FirebaseAppCheckTokenProvider(app, container.getProvider('app-check-internal')), databaseIdFromApp(app, databaseId), app);
+        settings = { useFetchStreams, ...settings };
+        firestoreInstance._setSettings(settings);
+        return firestoreInstance;
+    }, 'PUBLIC').setMultipleInstances(true));
+    registerVersion(name$1, version, variant);
+    // BUILD_TARGET will be replaced by values like esm, cjs, etc during the compilation
+    registerVersion(name$1, version, 'esm2020');
+}
 
 /**
  * @license
- * Copyright 2024 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,790 +60,206 @@ const DEFAULT_HYBRID_IN_CLOUD_MODEL = 'gemini-2.5-flash-lite';
  * limitations under the License.
  */
 /**
- * Error class for the Firebase AI SDK.
- *
- * @public
+ * Represents an aggregation that can be performed by Firestore.
  */
-class AIError extends FirebaseError {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+class AggregateField {
     /**
-     * Constructs a new instance of the `AIError` class.
-     *
-     * @param code - The error code from {@link (AIErrorCode:type)}.
-     * @param message - A human-readable message describing the error.
-     * @param customErrorData - Optional error data.
+     * Create a new AggregateField<T>
+     * @param aggregateType - Specifies the type of aggregation operation to perform.
+     * @param _internalFieldPath - Optionally specifies the field that is aggregated.
+     * @internal
      */
-    constructor(code, message, customErrorData) {
-        // Match error format used by FirebaseError from ErrorFactory
-        const service = AI_TYPE;
-        const fullCode = `${service}/${code}`;
-        const fullMessage = `${service}: ${message} (${fullCode})`;
-        super(code, fullMessage);
-        this.code = code;
-        this.customErrorData = customErrorData;
-        // FirebaseError initializes a stack trace, but it assumes the error is created from the error
-        // factory. Since we break this assumption, we set the stack trace to be originating from this
-        // constructor.
-        // This is only supported in V8.
-        if (Error.captureStackTrace) {
-            // Allows us to initialize the stack trace without including the constructor itself at the
-            // top level of the stack trace.
-            Error.captureStackTrace(this, AIError);
+    constructor(aggregateType = 'count', _internalFieldPath) {
+        this._internalFieldPath = _internalFieldPath;
+        /** A type string to uniquely identify instances of this class. */
+        this.type = 'AggregateField';
+        this.aggregateType = aggregateType;
+    }
+}
+/**
+ * The results of executing an aggregation query.
+ */
+class AggregateQuerySnapshot {
+    /** @hideconstructor */
+    constructor(query, _userDataWriter, _data) {
+        this._userDataWriter = _userDataWriter;
+        this._data = _data;
+        /** A type string to uniquely identify instances of this class. */
+        this.type = 'AggregateQuerySnapshot';
+        this.query = query;
+    }
+    /**
+     * Returns the results of the aggregations performed over the underlying
+     * query.
+     *
+     * The keys of the returned object will be the same as those of the
+     * `AggregateSpec` object specified to the aggregation method, and the values
+     * will be the corresponding aggregation result.
+     *
+     * @returns The results of the aggregations performed over the underlying
+     * query.
+     */
+    data() {
+        return this._userDataWriter.convertObjectMap(this._data);
+    }
+    /**
+     * @internal
+     * @private
+     *
+     * Retrieves all fields in the snapshot as a proto value.
+     *
+     * @returns An `Object` containing all fields in the snapshot.
+     */
+    _fieldsProto() {
+        // Wrap data in an ObjectValue to clone it.
+        const dataClone = new ObjectValue({
+            mapValue: { fields: this._data }
+        }).clone();
+        // Return the cloned value to prevent manipulation of the Snapshot's data
+        return dataClone.value.mapValue.fields;
+    }
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * A `DocumentSnapshot` contains data read from a document in your Firestore
+ * database. The data can be extracted with `.data()` or `.get(<field>)` to
+ * get a specific field.
+ *
+ * For a `DocumentSnapshot` that points to a non-existing document, any data
+ * access will return 'undefined'. You can use the `exists()` method to
+ * explicitly verify a document's existence.
+ */
+class DocumentSnapshot$1 {
+    // Note: This class is stripped down version of the DocumentSnapshot in
+    // the legacy SDK. The changes are:
+    // - No support for SnapshotMetadata.
+    // - No support for SnapshotOptions.
+    /** @hideconstructor protected */
+    constructor(_firestore, _userDataWriter, _key, _document, _converter) {
+        this._firestore = _firestore;
+        this._userDataWriter = _userDataWriter;
+        this._key = _key;
+        this._document = _document;
+        this._converter = _converter;
+    }
+    /** Property of the `DocumentSnapshot` that provides the document's ID. */
+    get id() {
+        return this._key.path.lastSegment();
+    }
+    /**
+     * The `DocumentReference` for the document included in the `DocumentSnapshot`.
+     */
+    get ref() {
+        return new DocumentReference(this._firestore, this._converter, this._key);
+    }
+    /**
+     * Signals whether or not the document at the snapshot's location exists.
+     *
+     * @returns true if the document exists.
+     */
+    exists() {
+        return this._document !== null;
+    }
+    /**
+     * Retrieves all fields in the document as an `Object`. Returns `undefined` if
+     * the document doesn't exist.
+     *
+     * @returns An `Object` containing all fields in the document or `undefined`
+     * if the document doesn't exist.
+     */
+    data() {
+        if (!this._document) {
+            return undefined;
         }
-        // Allows instanceof AIError in ES5/ES6
-        // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
-        // TODO(dlarocque): Replace this with `new.target`: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#support-for-newtarget
-        //                   which we can now use since we no longer target ES5.
-        Object.setPrototypeOf(this, AIError.prototype);
-        // Since Error is an interface, we don't inherit toString and so we define it ourselves.
-        this.toString = () => fullMessage;
-    }
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Possible roles.
- * @public
- */
-const POSSIBLE_ROLES = ['user', 'model', 'function', 'system'];
-/**
- * Harm categories that would cause prompts or candidates to be blocked.
- * @public
- */
-const HarmCategory = {
-    HARM_CATEGORY_HATE_SPEECH: 'HARM_CATEGORY_HATE_SPEECH',
-    HARM_CATEGORY_SEXUALLY_EXPLICIT: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-    HARM_CATEGORY_HARASSMENT: 'HARM_CATEGORY_HARASSMENT',
-    HARM_CATEGORY_DANGEROUS_CONTENT: 'HARM_CATEGORY_DANGEROUS_CONTENT'
-};
-/**
- * Threshold above which a prompt or candidate will be blocked.
- * @public
- */
-const HarmBlockThreshold = {
-    /**
-     * Content with `NEGLIGIBLE` will be allowed.
-     */
-    BLOCK_LOW_AND_ABOVE: 'BLOCK_LOW_AND_ABOVE',
-    /**
-     * Content with `NEGLIGIBLE` and `LOW` will be allowed.
-     */
-    BLOCK_MEDIUM_AND_ABOVE: 'BLOCK_MEDIUM_AND_ABOVE',
-    /**
-     * Content with `NEGLIGIBLE`, `LOW`, and `MEDIUM` will be allowed.
-     */
-    BLOCK_ONLY_HIGH: 'BLOCK_ONLY_HIGH',
-    /**
-     * All content will be allowed.
-     */
-    BLOCK_NONE: 'BLOCK_NONE',
-    /**
-     * All content will be allowed. This is the same as `BLOCK_NONE`, but the metadata corresponding
-     * to the {@link (HarmCategory:type)} will not be present in the response.
-     */
-    OFF: 'OFF'
-};
-/**
- * This property is not supported in the Gemini Developer API ({@link GoogleAIBackend}).
- *
- * @public
- */
-const HarmBlockMethod = {
-    /**
-     * The harm block method uses both probability and severity scores.
-     */
-    SEVERITY: 'SEVERITY',
-    /**
-     * The harm block method uses the probability score.
-     */
-    PROBABILITY: 'PROBABILITY'
-};
-/**
- * Probability that a prompt or candidate matches a harm category.
- * @public
- */
-const HarmProbability = {
-    /**
-     * Content has a negligible chance of being unsafe.
-     */
-    NEGLIGIBLE: 'NEGLIGIBLE',
-    /**
-     * Content has a low chance of being unsafe.
-     */
-    LOW: 'LOW',
-    /**
-     * Content has a medium chance of being unsafe.
-     */
-    MEDIUM: 'MEDIUM',
-    /**
-     * Content has a high chance of being unsafe.
-     */
-    HIGH: 'HIGH'
-};
-/**
- * Harm severity levels.
- * @public
- */
-const HarmSeverity = {
-    /**
-     * Negligible level of harm severity.
-     */
-    HARM_SEVERITY_NEGLIGIBLE: 'HARM_SEVERITY_NEGLIGIBLE',
-    /**
-     * Low level of harm severity.
-     */
-    HARM_SEVERITY_LOW: 'HARM_SEVERITY_LOW',
-    /**
-     * Medium level of harm severity.
-     */
-    HARM_SEVERITY_MEDIUM: 'HARM_SEVERITY_MEDIUM',
-    /**
-     * High level of harm severity.
-     */
-    HARM_SEVERITY_HIGH: 'HARM_SEVERITY_HIGH',
-    /**
-     * Harm severity is not supported.
-     *
-     * @remarks
-     * The GoogleAI backend does not support `HarmSeverity`, so this value is used as a fallback.
-     */
-    HARM_SEVERITY_UNSUPPORTED: 'HARM_SEVERITY_UNSUPPORTED'
-};
-/**
- * Reason that a prompt was blocked.
- * @public
- */
-const BlockReason = {
-    /**
-     * Content was blocked by safety settings.
-     */
-    SAFETY: 'SAFETY',
-    /**
-     * Content was blocked, but the reason is uncategorized.
-     */
-    OTHER: 'OTHER',
-    /**
-     * Content was blocked because it contained terms from the terminology blocklist.
-     */
-    BLOCKLIST: 'BLOCKLIST',
-    /**
-     * Content was blocked due to prohibited content.
-     */
-    PROHIBITED_CONTENT: 'PROHIBITED_CONTENT'
-};
-/**
- * Reason that a candidate finished.
- * @public
- */
-const FinishReason = {
-    /**
-     * Natural stop point of the model or provided stop sequence.
-     */
-    STOP: 'STOP',
-    /**
-     * The maximum number of tokens as specified in the request was reached.
-     */
-    MAX_TOKENS: 'MAX_TOKENS',
-    /**
-     * The candidate content was flagged for safety reasons.
-     */
-    SAFETY: 'SAFETY',
-    /**
-     * The candidate content was flagged for recitation reasons.
-     */
-    RECITATION: 'RECITATION',
-    /**
-     * Unknown reason.
-     */
-    OTHER: 'OTHER',
-    /**
-     * The candidate content contained forbidden terms.
-     */
-    BLOCKLIST: 'BLOCKLIST',
-    /**
-     * The candidate content potentially contained prohibited content.
-     */
-    PROHIBITED_CONTENT: 'PROHIBITED_CONTENT',
-    /**
-     * The candidate content potentially contained Sensitive Personally Identifiable Information (SPII).
-     */
-    SPII: 'SPII',
-    /**
-     * The function call generated by the model was invalid.
-     */
-    MALFORMED_FUNCTION_CALL: 'MALFORMED_FUNCTION_CALL'
-};
-/**
- * @public
- */
-const FunctionCallingMode = {
-    /**
-     * Default model behavior; model decides to predict either a function call
-     * or a natural language response.
-     */
-    AUTO: 'AUTO',
-    /**
-     * Model is constrained to always predicting a function call only.
-     * If `allowed_function_names` is set, the predicted function call will be
-     * limited to any one of `allowed_function_names`, else the predicted
-     * function call will be any one of the provided `function_declarations`.
-     */
-    ANY: 'ANY',
-    /**
-     * Model will not predict any function call. Model behavior is same as when
-     * not passing any function declarations.
-     */
-    NONE: 'NONE'
-};
-/**
- * Content part modality.
- * @public
- */
-const Modality = {
-    /**
-     * Unspecified modality.
-     */
-    MODALITY_UNSPECIFIED: 'MODALITY_UNSPECIFIED',
-    /**
-     * Plain text.
-     */
-    TEXT: 'TEXT',
-    /**
-     * Image.
-     */
-    IMAGE: 'IMAGE',
-    /**
-     * Video.
-     */
-    VIDEO: 'VIDEO',
-    /**
-     * Audio.
-     */
-    AUDIO: 'AUDIO',
-    /**
-     * Document (for example, PDF).
-     */
-    DOCUMENT: 'DOCUMENT'
-};
-/**
- * Generation modalities to be returned in generation responses.
- *
- * @beta
- */
-const ResponseModality = {
-    /**
-     * Text.
-     * @beta
-     */
-    TEXT: 'TEXT',
-    /**
-     * Image.
-     * @beta
-     */
-    IMAGE: 'IMAGE',
-    /**
-     * Audio.
-     * @beta
-     */
-    AUDIO: 'AUDIO'
-};
-/**
- * Determines whether inference happens on-device or in-cloud.
- *
- * @remarks
- * <b>PREFER_ON_DEVICE:</b> Attempt to make inference calls using an
- * on-device model. If on-device inference is not available, the SDK
- * will fall back to using a cloud-hosted model.
- * <br/>
- * <b>ONLY_ON_DEVICE:</b> Only attempt to make inference calls using an
- * on-device model. The SDK will not fall back to a cloud-hosted model.
- * If on-device inference is not available, inference methods will throw.
- * <br/>
- * <b>ONLY_IN_CLOUD:</b> Only attempt to make inference calls using a
- * cloud-hosted model. The SDK will not fall back to an on-device model.
- * <br/>
- * <b>PREFER_IN_CLOUD:</b> Attempt to make inference calls to a
- * cloud-hosted model. If not available, the SDK will fall back to an
- * on-device model.
- *
- * @beta
- */
-const InferenceMode = {
-    'PREFER_ON_DEVICE': 'prefer_on_device',
-    'ONLY_ON_DEVICE': 'only_on_device',
-    'ONLY_IN_CLOUD': 'only_in_cloud',
-    'PREFER_IN_CLOUD': 'prefer_in_cloud'
-};
-/**
- * Indicates whether inference happened on-device or in-cloud.
- *
- * @beta
- */
-const InferenceSource = {
-    'ON_DEVICE': 'on_device',
-    'IN_CLOUD': 'in_cloud'
-};
-/**
- * Represents the result of the code execution.
- *
- * @public
- */
-const Outcome = {
-    UNSPECIFIED: 'OUTCOME_UNSPECIFIED',
-    OK: 'OUTCOME_OK',
-    FAILED: 'OUTCOME_FAILED',
-    DEADLINE_EXCEEDED: 'OUTCOME_DEADLINE_EXCEEDED'
-};
-/**
- * The programming language of the code.
- *
- * @public
- */
-const Language = {
-    UNSPECIFIED: 'LANGUAGE_UNSPECIFIED',
-    PYTHON: 'PYTHON'
-};
-/**
- * A preset that controls the model's "thinking" process. Use
- * `ThinkingLevel.LOW` for faster responses on less complex tasks, and
- * `ThinkingLevel.HIGH` for better reasoning on more complex tasks.
- *
- * @public
- */
-const ThinkingLevel = {
-    MINIMAL: 'MINIMAL',
-    LOW: 'LOW',
-    MEDIUM: 'MEDIUM',
-    HIGH: 'HIGH'
-};
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * The status of a URL retrieval.
- *
- * @remarks
- * <b>URL_RETRIEVAL_STATUS_UNSPECIFIED:</b> Unspecified retrieval status.
- * <br/>
- * <b>URL_RETRIEVAL_STATUS_SUCCESS:</b> The URL retrieval was successful.
- * <br/>
- * <b>URL_RETRIEVAL_STATUS_ERROR:</b> The URL retrieval failed.
- * <br/>
- * <b>URL_RETRIEVAL_STATUS_PAYWALL:</b> The URL retrieval failed because the content is behind a paywall.
- * <br/>
- * <b>URL_RETRIEVAL_STATUS_UNSAFE:</b> The URL retrieval failed because the content is unsafe.
- * <br/>
- *
- * @public
- */
-const URLRetrievalStatus = {
-    /**
-     * Unspecified retrieval status.
-     */
-    URL_RETRIEVAL_STATUS_UNSPECIFIED: 'URL_RETRIEVAL_STATUS_UNSPECIFIED',
-    /**
-     * The URL retrieval was successful.
-     */
-    URL_RETRIEVAL_STATUS_SUCCESS: 'URL_RETRIEVAL_STATUS_SUCCESS',
-    /**
-     * The URL retrieval failed.
-     */
-    URL_RETRIEVAL_STATUS_ERROR: 'URL_RETRIEVAL_STATUS_ERROR',
-    /**
-     * The URL retrieval failed because the content is behind a paywall.
-     */
-    URL_RETRIEVAL_STATUS_PAYWALL: 'URL_RETRIEVAL_STATUS_PAYWALL',
-    /**
-     * The URL retrieval failed because the content is unsafe.
-     */
-    URL_RETRIEVAL_STATUS_UNSAFE: 'URL_RETRIEVAL_STATUS_UNSAFE'
-};
-/**
- * The types of responses that can be returned by {@link LiveSession.receive}.
- *
- * @beta
- */
-const LiveResponseType = {
-    SERVER_CONTENT: 'serverContent',
-    TOOL_CALL: 'toolCall',
-    TOOL_CALL_CANCELLATION: 'toolCallCancellation',
-    GOING_AWAY_NOTICE: 'goingAwayNotice'
-};
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Standardized error codes that {@link AIError} can have.
- *
- * @public
- */
-const AIErrorCode = {
-    /** A generic error occurred. */
-    ERROR: 'error',
-    /** An error occurred in a request. */
-    REQUEST_ERROR: 'request-error',
-    /** An error occurred in a response. */
-    RESPONSE_ERROR: 'response-error',
-    /** An error occurred while performing a fetch. */
-    FETCH_ERROR: 'fetch-error',
-    /** An error occurred because an operation was attempted on a closed session. */
-    SESSION_CLOSED: 'session-closed',
-    /** An error associated with a Content object.  */
-    INVALID_CONTENT: 'invalid-content',
-    /** An error due to the Firebase API not being enabled in the Console. */
-    API_NOT_ENABLED: 'api-not-enabled',
-    /** An error due to invalid Schema input.  */
-    INVALID_SCHEMA: 'invalid-schema',
-    /** An error occurred due to a missing Firebase API key. */
-    NO_API_KEY: 'no-api-key',
-    /** An error occurred due to a missing Firebase app ID. */
-    NO_APP_ID: 'no-app-id',
-    /** An error occurred due to a model name not being specified during initialization. */
-    NO_MODEL: 'no-model',
-    /** An error occurred due to a missing project ID. */
-    NO_PROJECT_ID: 'no-project-id',
-    /** An error occurred while parsing. */
-    PARSE_FAILED: 'parse-failed',
-    /** An error occurred due an attempt to use an unsupported feature. */
-    UNSUPPORTED: 'unsupported'
-};
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Contains the list of OpenAPI data types
- * as defined by the
- * {@link https://swagger.io/docs/specification/data-models/data-types/ | OpenAPI specification}
- * @public
- */
-const SchemaType = {
-    /** String type. */
-    STRING: 'string',
-    /** Number type. */
-    NUMBER: 'number',
-    /** Integer type. */
-    INTEGER: 'integer',
-    /** Boolean type. */
-    BOOLEAN: 'boolean',
-    /** Array type. */
-    ARRAY: 'array',
-    /** Object type. */
-    OBJECT: 'object'
-};
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * A filter level controlling how aggressively to filter sensitive content.
- *
- * Text prompts provided as inputs and images (generated or uploaded) through Imagen on Vertex AI
- * are assessed against a list of safety filters, which include 'harmful categories' (for example,
- * `violence`, `sexual`, `derogatory`, and `toxic`). This filter level controls how aggressively to
- * filter out potentially harmful content from responses. See the {@link http://firebase.google.com/docs/vertex-ai/generate-images | documentation }
- * and the {@link https://cloud.google.com/vertex-ai/generative-ai/docs/image/responsible-ai-imagen#safety-filters | Responsible AI and usage guidelines}
- * for more details.
- *
- * @public
- */
-const ImagenSafetyFilterLevel = {
-    /**
-     * The most aggressive filtering level; most strict blocking.
-     */
-    BLOCK_LOW_AND_ABOVE: 'block_low_and_above',
-    /**
-     * Blocks some sensitive prompts and responses.
-     */
-    BLOCK_MEDIUM_AND_ABOVE: 'block_medium_and_above',
-    /**
-     * Blocks few sensitive prompts and responses.
-     */
-    BLOCK_ONLY_HIGH: 'block_only_high',
-    /**
-     * The least aggressive filtering level; blocks very few sensitive prompts and responses.
-     *
-     * Access to this feature is restricted and may require your case to be reviewed and approved by
-     * Cloud support.
-     */
-    BLOCK_NONE: 'block_none'
-};
-/**
- * A filter level controlling whether generation of images containing people or faces is allowed.
- *
- * See the <a href="http://firebase.google.com/docs/vertex-ai/generate-images">personGeneration</a>
- * documentation for more details.
- *
- * @public
- */
-const ImagenPersonFilterLevel = {
-    /**
-     * Disallow generation of images containing people or faces; images of people are filtered out.
-     */
-    BLOCK_ALL: 'dont_allow',
-    /**
-     * Allow generation of images containing adults only; images of children are filtered out.
-     *
-     * Generation of images containing people or faces may require your use case to be
-     * reviewed and approved by Cloud support; see the {@link https://cloud.google.com/vertex-ai/generative-ai/docs/image/responsible-ai-imagen#person-face-gen | Responsible AI and usage guidelines}
-     * for more details.
-     */
-    ALLOW_ADULT: 'allow_adult',
-    /**
-     * Allow generation of images containing adults only; images of children are filtered out.
-     *
-     * Generation of images containing people or faces may require your use case to be
-     * reviewed and approved by Cloud support; see the {@link https://cloud.google.com/vertex-ai/generative-ai/docs/image/responsible-ai-imagen#person-face-gen | Responsible AI and usage guidelines}
-     * for more details.
-     */
-    ALLOW_ALL: 'allow_all'
-};
-/**
- * Aspect ratios for Imagen images.
- *
- * To specify an aspect ratio for generated images, set the `aspectRatio` property in your
- * {@link ImagenGenerationConfig}.
- *
- * See the {@link http://firebase.google.com/docs/vertex-ai/generate-images | documentation }
- * for more details and examples of the supported aspect ratios.
- *
- * @public
- */
-const ImagenAspectRatio = {
-    /**
-     * Square (1:1) aspect ratio.
-     */
-    'SQUARE': '1:1',
-    /**
-     * Landscape (3:4) aspect ratio.
-     */
-    'LANDSCAPE_3x4': '3:4',
-    /**
-     * Portrait (4:3) aspect ratio.
-     */
-    'PORTRAIT_4x3': '4:3',
-    /**
-     * Landscape (16:9) aspect ratio.
-     */
-    'LANDSCAPE_16x9': '16:9',
-    /**
-     * Portrait (9:16) aspect ratio.
-     */
-    'PORTRAIT_9x16': '9:16'
-};
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * An enum-like object containing constants that represent the supported backends
- * for the Firebase AI SDK.
- * This determines which backend service (Vertex AI Gemini API or Gemini Developer API)
- * the SDK will communicate with.
- *
- * These values are assigned to the `backendType` property within the specific backend
- * configuration objects ({@link GoogleAIBackend} or {@link VertexAIBackend}) to identify
- * which service to target.
- *
- * @public
- */
-const BackendType = {
-    /**
-     * Identifies the backend service for the Vertex AI Gemini API provided through Google Cloud.
-     * Use this constant when creating a {@link VertexAIBackend} configuration.
-     */
-    VERTEX_AI: 'VERTEX_AI',
-    /**
-     * Identifies the backend service for the Gemini Developer API ({@link https://ai.google/ | Google AI}).
-     * Use this constant when creating a {@link GoogleAIBackend} configuration.
-     */
-    GOOGLE_AI: 'GOOGLE_AI'
-}; // Using 'as const' makes the string values literal types
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Abstract base class representing the configuration for an AI service backend.
- * This class should not be instantiated directly. Use its subclasses; {@link GoogleAIBackend} for
- * the Gemini Developer API (via {@link https://ai.google/ | Google AI}), and
- * {@link VertexAIBackend} for the Vertex AI Gemini API.
- *
- * @public
- */
-class Backend {
-    /**
-     * Protected constructor for use by subclasses.
-     * @param type - The backend type.
-     */
-    constructor(type) {
-        this.backendType = type;
-    }
-}
-/**
- * Configuration class for the Gemini Developer API.
- *
- * Use this with {@link AIOptions} when initializing the AI service via
- * {@link getAI | getAI()} to specify the Gemini Developer API as the backend.
- *
- * @public
- */
-class GoogleAIBackend extends Backend {
-    /**
-     * Creates a configuration object for the Gemini Developer API backend.
-     */
-    constructor() {
-        super(BackendType.GOOGLE_AI);
-    }
-    /**
-     * @internal
-     */
-    _getModelPath(project, model) {
-        return `/${DEFAULT_API_VERSION}/projects/${project}/${model}`;
-    }
-    /**
-     * @internal
-     */
-    _getTemplatePath(project, templateId) {
-        return `/${DEFAULT_API_VERSION}/projects/${project}/templates/${templateId}`;
-    }
-}
-/**
- * Configuration class for the Vertex AI Gemini API.
- *
- * Use this with {@link AIOptions} when initializing the AI service via
- * {@link getAI | getAI()} to specify the Vertex AI Gemini API as the backend.
- *
- * @public
- */
-class VertexAIBackend extends Backend {
-    /**
-     * Creates a configuration object for the Vertex AI backend.
-     *
-     * @param location - The region identifier, defaulting to `us-central1`;
-     * see {@link https://firebase.google.com/docs/vertex-ai/locations#available-locations | Vertex AI locations}
-     * for a list of supported locations.
-     */
-    constructor(location = DEFAULT_LOCATION) {
-        super(BackendType.VERTEX_AI);
-        if (!location) {
-            this.location = DEFAULT_LOCATION;
+        else if (this._converter) {
+            // We only want to use the converter and create a new DocumentSnapshot
+            // if a converter has been provided.
+            const snapshot = new QueryDocumentSnapshot$1(this._firestore, this._userDataWriter, this._key, this._document, 
+            /* converter= */ null);
+            return this._converter.fromFirestore(snapshot);
         }
         else {
-            this.location = location;
+            return this._userDataWriter.convertValue(this._document.data.value);
         }
     }
     /**
      * @internal
+     * @private
+     *
+     * Retrieves all fields in the document as a proto Value. Returns `undefined` if
+     * the document doesn't exist.
+     *
+     * @returns An `Object` containing all fields in the document or `undefined`
+     * if the document doesn't exist.
      */
-    _getModelPath(project, model) {
-        return `/${DEFAULT_API_VERSION}/projects/${project}/locations/${this.location}/${model}`;
+    _fieldsProto() {
+        // Return a cloned value to prevent manipulation of the Snapshot's data
+        return this._document?.data.clone().value.mapValue.fields ?? undefined;
     }
     /**
-     * @internal
+     * Retrieves the field specified by `fieldPath`. Returns `undefined` if the
+     * document or field doesn't exist.
+     *
+     * @param fieldPath - The path (for example 'foo' or 'foo.bar') to a specific
+     * field.
+     * @returns The data at the specified field location or undefined if no such
+     * field exists in the document.
      */
-    _getTemplatePath(project, templateId) {
-        return `/${DEFAULT_API_VERSION}/projects/${project}/locations/${this.location}/templates/${templateId}`;
+    // We are using `any` here to avoid an explicit cast by our users.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    get(fieldPath) {
+        if (this._document) {
+            const value = this._document.data.field(fieldPathFromArgument('DocumentSnapshot.get', fieldPath));
+            if (value !== null) {
+                return this._userDataWriter.convertValue(value);
+            }
+        }
+        return undefined;
+    }
+}
+/**
+ * A `QueryDocumentSnapshot` contains data read from a document in your
+ * Firestore database as part of a query. The document is guaranteed to exist
+ * and its data can be extracted with `.data()` or `.get(<field>)` to get a
+ * specific field.
+ *
+ * A `QueryDocumentSnapshot` offers the same API surface as a
+ * `DocumentSnapshot`. Since query results contain only existing documents, the
+ * `exists` property will always be true and `data()` will never return
+ * 'undefined'.
+ */
+class QueryDocumentSnapshot$1 extends DocumentSnapshot$1 {
+    /**
+     * Retrieves all fields in the document as an `Object`.
+     *
+     * @override
+     * @returns An `Object` containing all fields in the document.
+     */
+    data() {
+        return super.data();
     }
 }
 
 /**
  * @license
- * Copyright 2025 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -849,51 +273,608 @@ class VertexAIBackend extends Backend {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * Encodes a {@link Backend} into a string that will be used to uniquely identify {@link AI}
- * instances by backend type.
- *
- * @internal
- */
-function encodeInstanceIdentifier(backend) {
-    if (backend instanceof GoogleAIBackend) {
-        return `${AI_TYPE}/googleai`;
+function validateHasExplicitOrderByForLimitToLast(query) {
+    if (query.limitType === "L" /* LimitType.Last */ &&
+        query.explicitOrderBy.length === 0) {
+        throw new FirestoreError(Code.UNIMPLEMENTED, 'limitToLast() queries require specifying at least one orderBy() clause');
     }
-    else if (backend instanceof VertexAIBackend) {
-        return `${AI_TYPE}/vertexai/${backend.location}`;
+}
+/**
+ * An `AppliableConstraint` is an abstraction of a constraint that can be applied
+ * to a Firestore query.
+ */
+class AppliableConstraint {
+}
+/**
+ * A `QueryConstraint` is used to narrow the set of documents returned by a
+ * Firestore query. `QueryConstraint`s are created by invoking {@link where},
+ * {@link orderBy}, {@link (startAt:1)}, {@link (startAfter:1)}, {@link
+ * (endBefore:1)}, {@link (endAt:1)}, {@link limit}, {@link limitToLast} and
+ * can then be passed to {@link (query:1)} to create a new query instance that
+ * also contains this `QueryConstraint`.
+ */
+class QueryConstraint extends AppliableConstraint {
+}
+function query(query, queryConstraint, ...additionalQueryConstraints) {
+    let queryConstraints = [];
+    if (queryConstraint instanceof AppliableConstraint) {
+        queryConstraints.push(queryConstraint);
+    }
+    queryConstraints = queryConstraints.concat(additionalQueryConstraints);
+    validateQueryConstraintArray(queryConstraints);
+    for (const constraint of queryConstraints) {
+        query = constraint._apply(query);
+    }
+    return query;
+}
+/**
+ * A `QueryFieldFilterConstraint` is used to narrow the set of documents returned by
+ * a Firestore query by filtering on one or more document fields.
+ * `QueryFieldFilterConstraint`s are created by invoking {@link where} and can then
+ * be passed to {@link (query:1)} to create a new query instance that also contains
+ * this `QueryFieldFilterConstraint`.
+ */
+class QueryFieldFilterConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(_field, _op, _value) {
+        super();
+        this._field = _field;
+        this._op = _op;
+        this._value = _value;
+        /** The type of this query constraint */
+        this.type = 'where';
+    }
+    static _create(_field, _op, _value) {
+        return new QueryFieldFilterConstraint(_field, _op, _value);
+    }
+    _apply(query) {
+        const filter = this._parse(query);
+        validateNewFieldFilter(query._query, filter);
+        return new Query(query.firestore, query.converter, queryWithAddedFilter(query._query, filter));
+    }
+    _parse(query) {
+        const reader = newUserDataReader(query.firestore);
+        const filter = newQueryFilter(query._query, 'where', reader, query.firestore._databaseId, this._field, this._op, this._value);
+        return filter;
+    }
+}
+/**
+ * Creates a {@link QueryFieldFilterConstraint} that enforces that documents
+ * must contain the specified field and that the value should satisfy the
+ * relation constraint provided.
+ *
+ * @param fieldPath - The path to compare
+ * @param opStr - The operation string (e.g "&lt;", "&lt;=", "==", "&lt;",
+ *   "&lt;=", "!=").
+ * @param value - The value for comparison
+ * @returns The created {@link QueryFieldFilterConstraint}.
+ */
+function where(fieldPath, opStr, value) {
+    const op = opStr;
+    const field = fieldPathFromArgument('where', fieldPath);
+    return QueryFieldFilterConstraint._create(field, op, value);
+}
+/**
+ * A `QueryCompositeFilterConstraint` is used to narrow the set of documents
+ * returned by a Firestore query by performing the logical OR or AND of multiple
+ * {@link QueryFieldFilterConstraint}s or {@link QueryCompositeFilterConstraint}s.
+ * `QueryCompositeFilterConstraint`s are created by invoking {@link or} or
+ * {@link and} and can then be passed to {@link (query:1)} to create a new query
+ * instance that also contains the `QueryCompositeFilterConstraint`.
+ */
+class QueryCompositeFilterConstraint extends AppliableConstraint {
+    /**
+     * @internal
+     */
+    constructor(
+    /** The type of this query constraint */
+    type, _queryConstraints) {
+        super();
+        this.type = type;
+        this._queryConstraints = _queryConstraints;
+    }
+    static _create(type, _queryConstraints) {
+        return new QueryCompositeFilterConstraint(type, _queryConstraints);
+    }
+    _parse(query) {
+        const parsedFilters = this._queryConstraints
+            .map(queryConstraint => {
+            return queryConstraint._parse(query);
+        })
+            .filter(parsedFilter => parsedFilter.getFilters().length > 0);
+        if (parsedFilters.length === 1) {
+            return parsedFilters[0];
+        }
+        return CompositeFilter.create(parsedFilters, this._getOperator());
+    }
+    _apply(query) {
+        const parsedFilter = this._parse(query);
+        if (parsedFilter.getFilters().length === 0) {
+            // Return the existing query if not adding any more filters (e.g. an empty
+            // composite filter).
+            return query;
+        }
+        validateNewFilter(query._query, parsedFilter);
+        return new Query(query.firestore, query.converter, queryWithAddedFilter(query._query, parsedFilter));
+    }
+    _getQueryConstraints() {
+        return this._queryConstraints;
+    }
+    _getOperator() {
+        return this.type === 'and' ? "and" /* CompositeOperator.AND */ : "or" /* CompositeOperator.OR */;
+    }
+}
+/**
+ * Creates a new {@link QueryCompositeFilterConstraint} that is a disjunction of
+ * the given filter constraints. A disjunction filter includes a document if it
+ * satisfies any of the given filters.
+ *
+ * @param queryConstraints - Optional. The list of
+ * {@link QueryFilterConstraint}s to perform a disjunction for. These must be
+ * created with calls to {@link where}, {@link or}, or {@link and}.
+ * @returns The newly created {@link QueryCompositeFilterConstraint}.
+ */
+function or(...queryConstraints) {
+    // Only support QueryFilterConstraints
+    queryConstraints.forEach(queryConstraint => validateQueryFilterConstraint('or', queryConstraint));
+    return QueryCompositeFilterConstraint._create("or" /* CompositeOperator.OR */, queryConstraints);
+}
+/**
+ * Creates a new {@link QueryCompositeFilterConstraint} that is a conjunction of
+ * the given filter constraints. A conjunction filter includes a document if it
+ * satisfies all of the given filters.
+ *
+ * @param queryConstraints - Optional. The list of
+ * {@link QueryFilterConstraint}s to perform a conjunction for. These must be
+ * created with calls to {@link where}, {@link or}, or {@link and}.
+ * @returns The newly created {@link QueryCompositeFilterConstraint}.
+ */
+function and(...queryConstraints) {
+    // Only support QueryFilterConstraints
+    queryConstraints.forEach(queryConstraint => validateQueryFilterConstraint('and', queryConstraint));
+    return QueryCompositeFilterConstraint._create("and" /* CompositeOperator.AND */, queryConstraints);
+}
+/**
+ * A `QueryOrderByConstraint` is used to sort the set of documents returned by a
+ * Firestore query. `QueryOrderByConstraint`s are created by invoking
+ * {@link orderBy} and can then be passed to {@link (query:1)} to create a new query
+ * instance that also contains this `QueryOrderByConstraint`.
+ *
+ * Note: Documents that do not contain the orderBy field will not be present in
+ * the query result.
+ */
+class QueryOrderByConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(_field, _direction) {
+        super();
+        this._field = _field;
+        this._direction = _direction;
+        /** The type of this query constraint */
+        this.type = 'orderBy';
+    }
+    static _create(_field, _direction) {
+        return new QueryOrderByConstraint(_field, _direction);
+    }
+    _apply(query) {
+        const orderBy = newQueryOrderBy(query._query, this._field, this._direction);
+        return new Query(query.firestore, query.converter, queryWithAddedOrderBy(query._query, orderBy));
+    }
+}
+/**
+ * Creates a {@link QueryOrderByConstraint} that sorts the query result by the
+ * specified field, optionally in descending order instead of ascending.
+ *
+ * Note: Documents that do not contain the specified field will not be present
+ * in the query result.
+ *
+ * @param fieldPath - The field to sort by.
+ * @param directionStr - Optional direction to sort by ('asc' or 'desc'). If
+ * not specified, order will be ascending.
+ * @returns The created {@link QueryOrderByConstraint}.
+ */
+function orderBy(fieldPath, directionStr = 'asc') {
+    const direction = directionStr;
+    const path = fieldPathFromArgument('orderBy', fieldPath);
+    return QueryOrderByConstraint._create(path, direction);
+}
+/**
+ * A `QueryLimitConstraint` is used to limit the number of documents returned by
+ * a Firestore query.
+ * `QueryLimitConstraint`s are created by invoking {@link limit} or
+ * {@link limitToLast} and can then be passed to {@link (query:1)} to create a new
+ * query instance that also contains this `QueryLimitConstraint`.
+ */
+class QueryLimitConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(
+    /** The type of this query constraint */
+    type, _limit, _limitType) {
+        super();
+        this.type = type;
+        this._limit = _limit;
+        this._limitType = _limitType;
+    }
+    static _create(type, _limit, _limitType) {
+        return new QueryLimitConstraint(type, _limit, _limitType);
+    }
+    _apply(query) {
+        return new Query(query.firestore, query.converter, queryWithLimit(query._query, this._limit, this._limitType));
+    }
+}
+/**
+ * Creates a {@link QueryLimitConstraint} that only returns the first matching
+ * documents.
+ *
+ * @param limit - The maximum number of items to return.
+ * @returns The created {@link QueryLimitConstraint}.
+ */
+function limit(limit) {
+    validatePositiveNumber('limit', limit);
+    return QueryLimitConstraint._create('limit', limit, "F" /* LimitType.First */);
+}
+/**
+ * Creates a {@link QueryLimitConstraint} that only returns the last matching
+ * documents.
+ *
+ * You must specify at least one `orderBy` clause for `limitToLast` queries,
+ * otherwise an exception will be thrown during execution.
+ *
+ * @param limit - The maximum number of items to return.
+ * @returns The created {@link QueryLimitConstraint}.
+ */
+function limitToLast(limit) {
+    validatePositiveNumber('limitToLast', limit);
+    return QueryLimitConstraint._create('limitToLast', limit, "L" /* LimitType.Last */);
+}
+/**
+ * A `QueryStartAtConstraint` is used to exclude documents from the start of a
+ * result set returned by a Firestore query.
+ * `QueryStartAtConstraint`s are created by invoking {@link (startAt:1)} or
+ * {@link (startAfter:1)} and can then be passed to {@link (query:1)} to create a
+ * new query instance that also contains this `QueryStartAtConstraint`.
+ */
+class QueryStartAtConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(
+    /** The type of this query constraint */
+    type, _docOrFields, _inclusive) {
+        super();
+        this.type = type;
+        this._docOrFields = _docOrFields;
+        this._inclusive = _inclusive;
+    }
+    static _create(type, _docOrFields, _inclusive) {
+        return new QueryStartAtConstraint(type, _docOrFields, _inclusive);
+    }
+    _apply(query) {
+        const bound = newQueryBoundFromDocOrFields(query, this.type, this._docOrFields, this._inclusive);
+        return new Query(query.firestore, query.converter, queryWithStartAt(query._query, bound));
+    }
+}
+function startAt(...docOrFields) {
+    return QueryStartAtConstraint._create('startAt', docOrFields, 
+    /*inclusive=*/ true);
+}
+function startAfter(...docOrFields) {
+    return QueryStartAtConstraint._create('startAfter', docOrFields, 
+    /*inclusive=*/ false);
+}
+/**
+ * A `QueryEndAtConstraint` is used to exclude documents from the end of a
+ * result set returned by a Firestore query.
+ * `QueryEndAtConstraint`s are created by invoking {@link (endAt:1)} or
+ * {@link (endBefore:1)} and can then be passed to {@link (query:1)} to create a new
+ * query instance that also contains this `QueryEndAtConstraint`.
+ */
+class QueryEndAtConstraint extends QueryConstraint {
+    /**
+     * @internal
+     */
+    constructor(
+    /** The type of this query constraint */
+    type, _docOrFields, _inclusive) {
+        super();
+        this.type = type;
+        this._docOrFields = _docOrFields;
+        this._inclusive = _inclusive;
+    }
+    static _create(type, _docOrFields, _inclusive) {
+        return new QueryEndAtConstraint(type, _docOrFields, _inclusive);
+    }
+    _apply(query) {
+        const bound = newQueryBoundFromDocOrFields(query, this.type, this._docOrFields, this._inclusive);
+        return new Query(query.firestore, query.converter, queryWithEndAt(query._query, bound));
+    }
+}
+function endBefore(...docOrFields) {
+    return QueryEndAtConstraint._create('endBefore', docOrFields, 
+    /*inclusive=*/ false);
+}
+function endAt(...docOrFields) {
+    return QueryEndAtConstraint._create('endAt', docOrFields, 
+    /*inclusive=*/ true);
+}
+/** Helper function to create a bound from a document or fields */
+function newQueryBoundFromDocOrFields(query, methodName, docOrFields, inclusive) {
+    docOrFields[0] = getModularInstance(docOrFields[0]);
+    if (docOrFields[0] instanceof DocumentSnapshot$1) {
+        return newQueryBoundFromDocument(query._query, query.firestore._databaseId, methodName, docOrFields[0]._document, inclusive);
     }
     else {
-        throw new AIError(AIErrorCode.ERROR, `Invalid backend: ${JSON.stringify(backend.backendType)}`);
+        const reader = newUserDataReader(query.firestore);
+        return newQueryBoundFromFields(query._query, query.firestore._databaseId, reader, methodName, docOrFields, inclusive);
+    }
+}
+function newQueryFilter(query, methodName, dataReader, databaseId, fieldPath, op, value) {
+    let fieldValue;
+    if (fieldPath.isKeyField()) {
+        if (op === "array-contains" /* Operator.ARRAY_CONTAINS */ || op === "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid Query. You can't perform '${op}' queries on documentId().`);
+        }
+        else if (op === "in" /* Operator.IN */ || op === "not-in" /* Operator.NOT_IN */) {
+            validateDisjunctiveFilterElements(value, op);
+            const referenceList = [];
+            for (const arrayValue of value) {
+                referenceList.push(parseDocumentIdValue(databaseId, query, arrayValue));
+            }
+            fieldValue = { arrayValue: { values: referenceList } };
+        }
+        else {
+            fieldValue = parseDocumentIdValue(databaseId, query, value);
+        }
+    }
+    else {
+        if (op === "in" /* Operator.IN */ ||
+            op === "not-in" /* Operator.NOT_IN */ ||
+            op === "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */) {
+            validateDisjunctiveFilterElements(value, op);
+        }
+        fieldValue = parseQueryValue(dataReader, methodName, value, 
+        /* allowArrays= */ op === "in" /* Operator.IN */ || op === "not-in" /* Operator.NOT_IN */);
+    }
+    const filter = FieldFilter.create(fieldPath, op, fieldValue);
+    return filter;
+}
+function newQueryOrderBy(query, fieldPath, direction) {
+    if (query.startAt !== null) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Invalid query. You must not call startAt() or startAfter() before ' +
+            'calling orderBy().');
+    }
+    if (query.endAt !== null) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Invalid query. You must not call endAt() or endBefore() before ' +
+            'calling orderBy().');
+    }
+    const orderBy = new OrderBy(fieldPath, direction);
+    return orderBy;
+}
+/**
+ * Create a `Bound` from a query and a document.
+ *
+ * Note that the `Bound` will always include the key of the document
+ * and so only the provided document will compare equal to the returned
+ * position.
+ *
+ * Will throw if the document does not contain all fields of the order by
+ * of the query or if any of the fields in the order by are an uncommitted
+ * server timestamp.
+ */
+function newQueryBoundFromDocument(query, databaseId, methodName, doc, inclusive) {
+    if (!doc) {
+        throw new FirestoreError(Code.NOT_FOUND, `Can't use a DocumentSnapshot that doesn't exist for ` +
+            `${methodName}().`);
+    }
+    const components = [];
+    // Because people expect to continue/end a query at the exact document
+    // provided, we need to use the implicit sort order rather than the explicit
+    // sort order, because it's guaranteed to contain the document key. That way
+    // the position becomes unambiguous and the query continues/ends exactly at
+    // the provided document. Without the key (by using the explicit sort
+    // orders), multiple documents could match the position, yielding duplicate
+    // results.
+    for (const orderBy of queryNormalizedOrderBy(query)) {
+        if (orderBy.field.isKeyField()) {
+            components.push(refValue(databaseId, doc.key));
+        }
+        else {
+            const value = doc.data.field(orderBy.field);
+            if (isServerTimestamp(value)) {
+                throw new FirestoreError(Code.INVALID_ARGUMENT, 'Invalid query. You are trying to start or end a query using a ' +
+                    'document for which the field "' +
+                    orderBy.field +
+                    '" is an uncommitted server timestamp. (Since the value of ' +
+                    'this field is unknown, you cannot start/end a query with it.)');
+            }
+            else if (value !== null) {
+                components.push(value);
+            }
+            else {
+                const field = orderBy.field.canonicalString();
+                throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. You are trying to start or end a query using a ` +
+                    `document for which the field '${field}' (used as the ` +
+                    `orderBy) does not exist.`);
+            }
+        }
+    }
+    return new Bound(components, inclusive);
+}
+/**
+ * Converts a list of field values to a `Bound` for the given query.
+ */
+function newQueryBoundFromFields(query, databaseId, dataReader, methodName, values, inclusive) {
+    // Use explicit order by's because it has to match the query the user made
+    const orderBy = query.explicitOrderBy;
+    if (values.length > orderBy.length) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, `Too many arguments provided to ${methodName}(). ` +
+            `The number of arguments must be less than or equal to the ` +
+            `number of orderBy() clauses`);
+    }
+    const components = [];
+    for (let i = 0; i < values.length; i++) {
+        const rawValue = values[i];
+        const orderByComponent = orderBy[i];
+        if (orderByComponent.field.isKeyField()) {
+            if (typeof rawValue !== 'string') {
+                throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. Expected a string for document ID in ` +
+                    `${methodName}(), but got a ${typeof rawValue}`);
+            }
+            if (!isCollectionGroupQuery(query) && rawValue.indexOf('/') !== -1) {
+                throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. When querying a collection and ordering by documentId(), ` +
+                    `the value passed to ${methodName}() must be a plain document ID, but ` +
+                    `'${rawValue}' contains a slash.`);
+            }
+            const path = query.path.child(ResourcePath.fromString(rawValue));
+            if (!DocumentKey.isDocumentKey(path)) {
+                throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. When querying a collection group and ordering by ` +
+                    `documentId(), the value passed to ${methodName}() must result in a ` +
+                    `valid document path, but '${path}' is not because it contains an odd number ` +
+                    `of segments.`);
+            }
+            const key = new DocumentKey(path);
+            components.push(refValue(databaseId, key));
+        }
+        else {
+            const wrapped = parseQueryValue(dataReader, methodName, rawValue);
+            components.push(wrapped);
+        }
+    }
+    return new Bound(components, inclusive);
+}
+/**
+ * Parses the given `documentIdValue` into a `ReferenceValue`, throwing
+ * appropriate errors if the value is anything other than a `DocumentReference`
+ * or `string`, or if the string is malformed.
+ */
+function parseDocumentIdValue(databaseId, query, documentIdValue) {
+    documentIdValue = getModularInstance(documentIdValue);
+    if (typeof documentIdValue === 'string') {
+        if (documentIdValue === '') {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, 'Invalid query. When querying with documentId(), you ' +
+                'must provide a valid document ID, but it was an empty string.');
+        }
+        if (!isCollectionGroupQuery(query) && documentIdValue.indexOf('/') !== -1) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. When querying a collection by ` +
+                `documentId(), you must provide a plain document ID, but ` +
+                `'${documentIdValue}' contains a '/' character.`);
+        }
+        const path = query.path.child(ResourcePath.fromString(documentIdValue));
+        if (!DocumentKey.isDocumentKey(path)) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. When querying a collection group by ` +
+                `documentId(), the value provided must result in a valid document path, ` +
+                `but '${path}' is not because it has an odd number of segments (${path.length}).`);
+        }
+        return refValue(databaseId, new DocumentKey(path));
+    }
+    else if (documentIdValue instanceof DocumentReference) {
+        return refValue(databaseId, documentIdValue._key);
+    }
+    else {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. When querying with documentId(), you must provide a valid ` +
+            `string or a DocumentReference, but it was: ` +
+            `${valueDescription(documentIdValue)}.`);
     }
 }
 /**
- * Decodes an instance identifier string into a {@link Backend}.
- *
- * @internal
+ * Validates that the value passed into a disjunctive filter satisfies all
+ * array requirements.
  */
-function decodeInstanceIdentifier(instanceIdentifier) {
-    const identifierParts = instanceIdentifier.split('/');
-    if (identifierParts[0] !== AI_TYPE) {
-        throw new AIError(AIErrorCode.ERROR, `Invalid instance identifier, unknown prefix '${identifierParts[0]}'`);
+function validateDisjunctiveFilterElements(value, operator) {
+    if (!Array.isArray(value) || value.length === 0) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Invalid Query. A non-empty array is required for ' +
+            `'${operator.toString()}' filters.`);
     }
-    const backendType = identifierParts[1];
-    switch (backendType) {
-        case 'vertexai':
-            const location = identifierParts[2];
-            if (!location) {
-                throw new AIError(AIErrorCode.ERROR, `Invalid instance identifier, unknown location '${instanceIdentifier}'`);
-            }
-            return new VertexAIBackend(location);
-        case 'googleai':
-            return new GoogleAIBackend();
+}
+/**
+ * Given an operator, returns the set of operators that cannot be used with it.
+ *
+ * This is not a comprehensive check, and this function should be removed in the
+ * long term. Validations should occur in the Firestore backend.
+ *
+ * Operators in a query must adhere to the following set of rules:
+ * 1. Only one inequality per query.
+ * 2. `NOT_IN` cannot be used with array, disjunctive, or `NOT_EQUAL` operators.
+ */
+function conflictingOps(op) {
+    switch (op) {
+        case "!=" /* Operator.NOT_EQUAL */:
+            return ["!=" /* Operator.NOT_EQUAL */, "not-in" /* Operator.NOT_IN */];
+        case "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */:
+        case "in" /* Operator.IN */:
+            return ["not-in" /* Operator.NOT_IN */];
+        case "not-in" /* Operator.NOT_IN */:
+            return [
+                "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */,
+                "in" /* Operator.IN */,
+                "not-in" /* Operator.NOT_IN */,
+                "!=" /* Operator.NOT_EQUAL */
+            ];
         default:
-            throw new AIError(AIErrorCode.ERROR, `Invalid instance identifier string: '${instanceIdentifier}'`);
+            return [];
+    }
+}
+function validateNewFieldFilter(query, fieldFilter) {
+    const conflictingOp = findOpInsideFilters(query.filters, conflictingOps(fieldFilter.op));
+    if (conflictingOp !== null) {
+        // Special case when it's a duplicate op to give a slightly clearer error message.
+        if (conflictingOp === fieldFilter.op) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, 'Invalid query. You cannot use more than one ' +
+                `'${fieldFilter.op.toString()}' filter.`);
+        }
+        else {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, `Invalid query. You cannot use '${fieldFilter.op.toString()}' filters ` +
+                `with '${conflictingOp.toString()}' filters.`);
+        }
+    }
+}
+function validateNewFilter(query, filter) {
+    let testQuery = query;
+    const subFilters = filter.getFlattenedFilters();
+    for (const subFilter of subFilters) {
+        validateNewFieldFilter(testQuery, subFilter);
+        testQuery = queryWithAddedFilter(testQuery, subFilter);
+    }
+}
+// Checks if any of the provided filter operators are included in the given list of filters and
+// returns the first one that is, or null if none are.
+function findOpInsideFilters(filters, operators) {
+    for (const filter of filters) {
+        for (const fieldFilter of filter.getFlattenedFilters()) {
+            if (operators.indexOf(fieldFilter.op) >= 0) {
+                return fieldFilter.op;
+            }
+        }
+    }
+    return null;
+}
+function validateQueryFilterConstraint(functionName, queryConstraint) {
+    if (!(queryConstraint instanceof QueryFieldFilterConstraint) &&
+        !(queryConstraint instanceof QueryCompositeFilterConstraint)) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, `Function ${functionName}() requires AppliableConstraints created with a call to 'where(...)', 'or(...)', or 'and(...)'.`);
+    }
+}
+function validateQueryConstraintArray(queryConstraint) {
+    const compositeFilterCount = queryConstraint.filter(filter => filter instanceof QueryCompositeFilterConstraint).length;
+    const fieldFilterCount = queryConstraint.filter(filter => filter instanceof QueryFieldFilterConstraint).length;
+    if (compositeFilterCount > 1 ||
+        (compositeFilterCount > 0 && fieldFilterCount > 0)) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'InvalidQuery. When using composite filters, you cannot use ' +
+            'more than one filter at the top level. Consider nesting the multiple ' +
+            'filters within an `and(...)` statement. For example: ' +
+            'change `query(query, where(...), or(...))` to ' +
+            '`query(query, and(where(...), or(...)))`.');
     }
 }
 
 /**
  * @license
- * Copyright 2024 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -907,676 +888,1463 @@ function decodeInstanceIdentifier(instanceIdentifier) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class AIService {
-    constructor(app, backend, authProvider, appCheckProvider, chromeAdapterFactory) {
-        this.app = app;
-        this.backend = backend;
-        this.chromeAdapterFactory = chromeAdapterFactory;
-        const appCheck = appCheckProvider?.getImmediate({ optional: true });
-        const auth = authProvider?.getImmediate({ optional: true });
-        this.auth = auth || null;
-        this.appCheck = appCheck || null;
-        if (backend instanceof VertexAIBackend) {
-            this.location = backend.location;
+/**
+ * Converts custom model object of type T into `DocumentData` by applying the
+ * converter if it exists.
+ *
+ * This function is used when converting user objects to `DocumentData`
+ * because we want to provide the user with a more specific error message if
+ * their `set()` or fails due to invalid data originating from a `toFirestore()`
+ * call.
+ */
+function applyFirestoreDataConverter(converter, value, options) {
+    let convertedValue;
+    if (converter) {
+        if (options && (options.merge || options.mergeFields)) {
+            // Cast to `any` in order to satisfy the union type constraint on
+            // toFirestore().
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            convertedValue = converter.toFirestore(value, options);
         }
         else {
-            this.location = '';
+            convertedValue = converter.toFirestore(value);
         }
     }
-    _delete() {
+    else {
+        convertedValue = value;
+    }
+    return convertedValue;
+}
+class LiteUserDataWriter extends AbstractUserDataWriter {
+    constructor(firestore) {
+        super();
+        this.firestore = firestore;
+    }
+    convertBytes(bytes) {
+        return new Bytes(bytes);
+    }
+    convertReference(name) {
+        const key = this.convertDocumentKey(name, this.firestore._databaseId);
+        return new DocumentReference(this.firestore, /* converter= */ null, key);
+    }
+}
+
+/**
+ * @license
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Create an AggregateField object that can be used to compute the sum of
+ * a specified field over a range of documents in the result set of a query.
+ * @param field - Specifies the field to sum across the result set.
+ */
+function sum(field) {
+    return new AggregateField('sum', fieldPathFromArgument('sum', field));
+}
+/**
+ * Create an AggregateField object that can be used to compute the average of
+ * a specified field over a range of documents in the result set of a query.
+ * @param field - Specifies the field to average across the result set.
+ */
+function average(field) {
+    return new AggregateField('avg', fieldPathFromArgument('average', field));
+}
+/**
+ * Create an AggregateField object that can be used to compute the count of
+ * documents in the result set of a query.
+ */
+function count() {
+    return new AggregateField('count');
+}
+/**
+ * Compares two 'AggregateField` instances for equality.
+ *
+ * @param left - Compare this AggregateField to the `right`.
+ * @param right - Compare this AggregateField to the `left`.
+ */
+function aggregateFieldEqual(left, right) {
+    return (left instanceof AggregateField &&
+        right instanceof AggregateField &&
+        left.aggregateType === right.aggregateType &&
+        left._internalFieldPath?.canonicalString() ===
+            right._internalFieldPath?.canonicalString());
+}
+/**
+ * Compares two `AggregateQuerySnapshot` instances for equality.
+ *
+ * Two `AggregateQuerySnapshot` instances are considered "equal" if they have
+ * underlying queries that compare equal, and the same data.
+ *
+ * @param left - The first `AggregateQuerySnapshot` to compare.
+ * @param right - The second `AggregateQuerySnapshot` to compare.
+ *
+ * @returns `true` if the objects are "equal", as defined above, or `false`
+ * otherwise.
+ */
+function aggregateQuerySnapshotEqual(left, right) {
+    return (queryEqual(left.query, right.query) && deepEqual(left.data(), right.data()));
+}
+
+/**
+ * @license
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Calculates the number of documents in the result set of the given query
+ * without actually downloading the documents.
+ *
+ * Using this function to count the documents is efficient because only the
+ * final count, not the documents' data, is downloaded. This function can
+ * count the documents in cases where the result set is prohibitively large to
+ * download entirely (thousands of documents).
+ *
+ * The result received from the server is presented, unaltered, without
+ * considering any local state. That is, documents in the local cache are not
+ * taken into consideration, neither are local modifications not yet
+ * synchronized with the server. Previously-downloaded results, if any, are not
+ * used. Every invocation of this function necessarily involves a round trip to
+ * the server.
+ *
+ * @param query - The query whose result set size is calculated.
+ * @returns A Promise that will be resolved with the count; the count can be
+ * retrieved from `snapshot.data().count`, where `snapshot` is the
+ * `AggregateQuerySnapshot` to which the returned Promise resolves.
+ */
+function getCountFromServer(query) {
+    const countQuerySpec = {
+        count: count()
+    };
+    return getAggregateFromServer(query, countQuerySpec);
+}
+/**
+ * Calculates the specified aggregations over the documents in the result
+ * set of the given query without actually downloading the documents.
+ *
+ * Using this function to perform aggregations is efficient because only the
+ * final aggregation values, not the documents' data, are downloaded. This
+ * function can perform aggregations of the documents in cases where the result
+ * set is prohibitively large to download entirely (thousands of documents).
+ *
+ * The result received from the server is presented, unaltered, without
+ * considering any local state. That is, documents in the local cache are not
+ * taken into consideration, neither are local modifications not yet
+ * synchronized with the server. Previously-downloaded results, if any, are not
+ * used. Every invocation of this function necessarily involves a round trip to
+ * the server.
+ *
+ * @param query - The query whose result set is aggregated over.
+ * @param aggregateSpec - An `AggregateSpec` object that specifies the aggregates
+ * to perform over the result set. The AggregateSpec specifies aliases for each
+ * aggregate, which can be used to retrieve the aggregate result.
+ * @example
+ * ```typescript
+ * const aggregateSnapshot = await getAggregateFromServer(query, {
+ *   countOfDocs: count(),
+ *   totalHours: sum('hours'),
+ *   averageScore: average('score')
+ * });
+ *
+ * const countOfDocs: number = aggregateSnapshot.data().countOfDocs;
+ * const totalHours: number = aggregateSnapshot.data().totalHours;
+ * const averageScore: number | null = aggregateSnapshot.data().averageScore;
+ * ```
+ */
+function getAggregateFromServer(query, aggregateSpec) {
+    const firestore = cast(query.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    const internalAggregates = mapToArray(aggregateSpec, (aggregate, alias) => {
+        return new AggregateImpl(alias, aggregate.aggregateType, aggregate._internalFieldPath);
+    });
+    // Run the aggregation and convert the results
+    return firestoreClientRunAggregateQuery(client, query._query, internalAggregates).then(aggregateResult => convertToAggregateQuerySnapshot(firestore, query, aggregateResult));
+}
+/**
+ * Converts the core aggregation result to an `AggregateQuerySnapshot`
+ * that can be returned to the consumer.
+ * @param query
+ * @param aggregateResult - Core aggregation result
+ * @internal
+ */
+function convertToAggregateQuerySnapshot(firestore, query, aggregateResult) {
+    const userDataWriter = new ExpUserDataWriter(firestore);
+    const querySnapshot = new AggregateQuerySnapshot(query, userDataWriter, aggregateResult);
+    return querySnapshot;
+}
+
+/**
+ * @license
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class MemoryLocalCacheImpl {
+    constructor(settings) {
+        this.kind = 'memory';
+        this._onlineComponentProvider = OnlineComponentProvider.provider;
+        if (settings?.garbageCollector) {
+            this._offlineComponentProvider =
+                settings.garbageCollector._offlineComponentProvider;
+        }
+        else {
+            this._offlineComponentProvider = {
+                build: () => new LruGcMemoryOfflineComponentProvider(undefined)
+            };
+        }
+    }
+    toJSON() {
+        return { kind: this.kind };
+    }
+}
+class PersistentLocalCacheImpl {
+    constructor(settings) {
+        this.kind = 'persistent';
+        let tabManager;
+        if (settings?.tabManager) {
+            settings.tabManager._initialize(settings);
+            tabManager = settings.tabManager;
+        }
+        else {
+            tabManager = persistentSingleTabManager(undefined);
+            tabManager._initialize(settings);
+        }
+        this._onlineComponentProvider = tabManager._onlineComponentProvider;
+        this._offlineComponentProvider = tabManager._offlineComponentProvider;
+    }
+    toJSON() {
+        return { kind: this.kind };
+    }
+}
+class MemoryEagerGarbageCollectorImpl {
+    constructor() {
+        this.kind = 'memoryEager';
+        this._offlineComponentProvider = MemoryOfflineComponentProvider.provider;
+    }
+    toJSON() {
+        return { kind: this.kind };
+    }
+}
+class MemoryLruGarbageCollectorImpl {
+    constructor(cacheSize) {
+        this.kind = 'memoryLru';
+        this._offlineComponentProvider = {
+            build: () => new LruGcMemoryOfflineComponentProvider(cacheSize)
+        };
+    }
+    toJSON() {
+        return { kind: this.kind };
+    }
+}
+/**
+ * Creates an instance of `MemoryEagerGarbageCollector`. This is also the
+ * default garbage collector unless it is explicitly specified otherwise.
+ */
+function memoryEagerGarbageCollector() {
+    return new MemoryEagerGarbageCollectorImpl();
+}
+/**
+ * Creates an instance of `MemoryLruGarbageCollector`.
+ *
+ * A target size can be specified as part of the setting parameter. The
+ * collector will start deleting documents once the cache size exceeds
+ * the given size. The default cache size is 40MB (40 * 1024 * 1024 bytes).
+ */
+function memoryLruGarbageCollector(settings) {
+    return new MemoryLruGarbageCollectorImpl(settings?.cacheSizeBytes);
+}
+/**
+ * Creates an instance of `MemoryLocalCache`. The instance can be set to
+ * `FirestoreSettings.cache` to tell the SDK which cache layer to use.
+ */
+function memoryLocalCache(settings) {
+    return new MemoryLocalCacheImpl(settings);
+}
+/**
+ * Creates an instance of `PersistentLocalCache`. The instance can be set to
+ * `FirestoreSettings.cache` to tell the SDK which cache layer to use.
+ *
+ * Persistent cache cannot be used in a Node.js environment.
+ */
+function persistentLocalCache(settings) {
+    return new PersistentLocalCacheImpl(settings);
+}
+class SingleTabManagerImpl {
+    constructor(forceOwnership) {
+        this.forceOwnership = forceOwnership;
+        this.kind = 'persistentSingleTab';
+    }
+    toJSON() {
+        return { kind: this.kind };
+    }
+    /**
+     * @internal
+     */
+    _initialize(settings) {
+        this._onlineComponentProvider = OnlineComponentProvider.provider;
+        this._offlineComponentProvider = {
+            build: (onlineComponents) => new IndexedDbOfflineComponentProvider(onlineComponents, settings?.cacheSizeBytes, this.forceOwnership)
+        };
+    }
+}
+class MultiTabManagerImpl {
+    constructor() {
+        this.kind = 'PersistentMultipleTab';
+    }
+    toJSON() {
+        return { kind: this.kind };
+    }
+    /**
+     * @internal
+     */
+    _initialize(settings) {
+        this._onlineComponentProvider = OnlineComponentProvider.provider;
+        this._offlineComponentProvider = {
+            build: (onlineComponents) => new MultiTabOfflineComponentProvider(onlineComponents, settings?.cacheSizeBytes)
+        };
+    }
+}
+/**
+ * Creates an instance of `PersistentSingleTabManager`.
+ *
+ * @param settings - Configures the created tab manager.
+ */
+function persistentSingleTabManager(settings) {
+    return new SingleTabManagerImpl(settings?.forceOwnership);
+}
+/**
+ * Creates an instance of `PersistentMultipleTabManager`.
+ */
+function persistentMultipleTabManager() {
+    return new MultiTabManagerImpl();
+}
+
+const encoder = newTextEncoder();
+function lengthPrefixedString(o) {
+    const str = JSON.stringify(o);
+    const l = encoder.encode(str).byteLength;
+    return `${l}${str}`;
+}
+// TODO(wuandy): Ideally, these should use `TestBundleBuilder` above.
+const meta = {
+    metadata: {
+        id: 'test-bundle',
+        createTime: { seconds: 1577836805, nanos: 6 },
+        version: 1,
+        totalDocuments: 1,
+        totalBytes: 416
+    }
+};
+lengthPrefixedString(meta);
+const doc1Meta = {
+    documentMetadata: {
+        name: 'projects/test-project/databases/(default)/documents/collectionId/doc1',
+        readTime: { seconds: 5, nanos: 6 },
+        exists: true
+    }
+};
+lengthPrefixedString(doc1Meta);
+const doc1 = {
+    document: {
+        name: 'projects/test-project/databases/(default)/documents/collectionId/doc1',
+        createTime: { seconds: 1, nanos: 2000000 },
+        updateTime: { seconds: 3, nanos: 4000 },
+        fields: { foo: { stringValue: 'value' }, bar: { integerValue: -42 } }
+    }
+};
+lengthPrefixedString(doc1);
+const doc2Meta = {
+    documentMetadata: {
+        name: 'projects/test-project/databases/(default)/documents/collectionId/doc2',
+        readTime: { seconds: 5, nanos: 6 },
+        exists: true
+    }
+};
+lengthPrefixedString(doc2Meta);
+const doc2 = {
+    document: {
+        name: 'projects/test-project/databases/(default)/documents/collectionId/doc2',
+        createTime: { seconds: 1, nanos: 2000000 },
+        updateTime: { seconds: 3, nanos: 4000 },
+        fields: {
+            foo: { stringValue: 'value1' },
+            bar: { integerValue: 42 },
+            emptyArray: { arrayValue: {} },
+            emptyMap: { mapValue: {} }
+        }
+    }
+};
+lengthPrefixedString(doc2);
+const noDocMeta = {
+    documentMetadata: {
+        name: 'projects/test-project/databases/(default)/documents/collectionId/nodoc',
+        readTime: { seconds: 5, nanos: 6 },
+        exists: false
+    }
+};
+lengthPrefixedString(noDocMeta);
+const limitQuery = {
+    namedQuery: {
+        name: 'limitQuery',
+        bundledQuery: {
+            parent: 'projects/fireeats-97d5e/databases/(default)/documents',
+            structuredQuery: {
+                from: [{ collectionId: 'node_3.7.5_7Li7XoCjutvNxwD0tpo9' }],
+                orderBy: [{ field: { fieldPath: 'sort' }, direction: 'DESCENDING' }],
+                limit: { 'value': 1 }
+            },
+            limitType: 'FIRST'
+        },
+        readTime: { 'seconds': 1590011379, 'nanos': 191164000 }
+    }
+};
+lengthPrefixedString(limitQuery);
+const limitToLastQuery = {
+    namedQuery: {
+        name: 'limitToLastQuery',
+        bundledQuery: {
+            parent: 'projects/fireeats-97d5e/databases/(default)/documents',
+            structuredQuery: {
+                from: [{ collectionId: 'node_3.7.5_7Li7XoCjutvNxwD0tpo9' }],
+                orderBy: [{ field: { fieldPath: 'sort' }, direction: 'ASCENDING' }],
+                limit: { 'value': 1 }
+            },
+            limitType: 'LAST'
+        },
+        readTime: { 'seconds': 1590011379, 'nanos': 543063000 }
+    }
+};
+lengthPrefixedString(limitToLastQuery);
+
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const BUNDLE_VERSION = 1;
+/**
+ * Builds a Firestore data bundle with results from the given document and query snapshots.
+ */
+class BundleBuilder {
+    constructor(firestore, bundleId) {
+        this.firestore = firestore;
+        this.bundleId = bundleId;
+        // Resulting documents for the bundle, keyed by full document path.
+        this.documents = new Map();
+        // Named queries saved in the bundle, keyed by query name.
+        this.namedQueries = new Map();
+        // The latest read time among all bundled documents and queries.
+        this.latestReadTime = new Timestamp(0, 0);
+        this.databaseId = firestore._databaseId;
+        // useProto3Json is true because the objects will be serialized to JSON string
+        // before being written to the bundle buffer.
+        this.serializer = new JsonProtoSerializer(this.databaseId, 
+        /*useProto3Json=*/ true);
+        this.userDataReader = new UserDataReader(this.databaseId, true, this.serializer);
+    }
+    /**
+     * Adds data from a DocumentSnapshot to the bundle.
+     * @internal
+     * @param docBundleData - A DocumentSnapshotBundleData containing information from the
+     * DocumentSnapshot. Note we cannot accept a DocumentSnapshot directly due to a circular
+     * dependency error.
+     * @param queryName - The name of the QuerySnapshot if this document is part of a Query.
+     */
+    addBundleDocument(docBundleData, queryName) {
+        const originalDocument = this.documents.get(docBundleData.documentPath);
+        const originalQueries = originalDocument?.metadata.queries;
+        const docReadTime = docBundleData.readTime;
+        const origDocReadTime = !!originalDocument?.metadata
+            .readTime
+            ? fromTimestamp(originalDocument.metadata.readTime)
+            : null;
+        const neitherHasReadTime = !docReadTime && origDocReadTime == null;
+        const docIsNewer = docReadTime !== undefined &&
+            (origDocReadTime == null || origDocReadTime < docReadTime);
+        if (neitherHasReadTime || docIsNewer) {
+            // Store document.
+            this.documents.set(docBundleData.documentPath, {
+                document: this.toBundleDocument(docBundleData),
+                metadata: {
+                    name: toName(this.serializer, docBundleData.documentKey),
+                    readTime: !!docReadTime
+                        ? toTimestamp(this.serializer, docReadTime) // Convert Timestamp to proto format.
+                        : undefined,
+                    exists: docBundleData.documentExists
+                }
+            });
+        }
+        if (docReadTime && docReadTime > this.latestReadTime) {
+            this.latestReadTime = docReadTime;
+        }
+        // Update `queries` to include both original and `queryName`.
+        if (queryName) {
+            const newDocument = this.documents.get(docBundleData.documentPath);
+            newDocument.metadata.queries = originalQueries || [];
+            newDocument.metadata.queries.push(queryName);
+        }
+    }
+    /**
+     * Adds data from a QuerySnapshot to the bundle.
+     * @internal
+     * @param docBundleData - A QuerySnapshotBundleData containing information from the
+     * QuerySnapshot. Note we cannot accept a QuerySnapshot directly due to a circular
+     * dependency error.
+     */
+    addBundleQuery(queryBundleData) {
+        if (this.namedQueries.has(queryBundleData.name)) {
+            throw new Error(`Query name conflict: ${name} has already been added.`);
+        }
+        let latestReadTime = new Timestamp(0, 0);
+        for (const docBundleData of queryBundleData.docBundleDataArray) {
+            this.addBundleDocument(docBundleData, queryBundleData.name);
+            if (docBundleData.readTime && docBundleData.readTime > latestReadTime) {
+                latestReadTime = docBundleData.readTime;
+            }
+        }
+        const queryTarget = toQueryTarget(this.serializer, queryToTarget(queryBundleData.query));
+        const bundledQuery = {
+            parent: queryBundleData.parent,
+            structuredQuery: queryTarget.queryTarget.structuredQuery
+        };
+        this.namedQueries.set(queryBundleData.name, {
+            name: queryBundleData.name,
+            bundledQuery,
+            readTime: toTimestamp(this.serializer, latestReadTime)
+        });
+    }
+    /**
+     * Convert data from a DocumentSnapshot into the serialized form within a bundle.
+     * @private
+     * @internal
+     * @param docBundleData - a DocumentSnapshotBundleData containing the data required to
+     * serialize a document.
+     */
+    toBundleDocument(docBundleData) {
+        // a parse context is typically used for validating and parsing user data, but in this
+        // case we are using it internally to convert DocumentData to Proto3 JSON
+        const context = this.userDataReader.createContext(4 /* UserDataSource.ArrayArgument */, 'internal toBundledDocument');
+        const proto3Fields = parseObject(docBundleData.documentData, context);
+        return {
+            name: toName(this.serializer, docBundleData.documentKey),
+            fields: proto3Fields.mapValue.fields,
+            updateTime: toTimestamp(this.serializer, docBundleData.versionTime),
+            createTime: toTimestamp(this.serializer, docBundleData.createdTime)
+        };
+    }
+    /**
+     * Converts a IBundleElement to a Buffer whose content is the length prefixed JSON representation
+     * of the element.
+     * @private
+     * @internal
+     * @param bundleElement - A ProtoBundleElement that is expected to be Proto3 JSON compatible.
+     */
+    lengthPrefixedString(bundleElement) {
+        const str = JSON.stringify(bundleElement);
+        // TODO: it's not ideal to have to re-encode all of these strings multiple times
+        //       It may be more performant to return a UInt8Array that is concatenated to other
+        //       UInt8Arrays instead of returning and concatenating strings and then
+        //       converting the full string to UInt8Array.
+        const l = encoder.encode(str).byteLength;
+        return `${l}${str}`;
+    }
+    /**
+     * Construct a serialized string containing document and query information that has previously
+     * been added to the BundleBuilder through the addBundleDocument and addBundleQuery methods.
+     * @internal
+     */
+    build() {
+        let bundleString = '';
+        for (const namedQuery of this.namedQueries.values()) {
+            bundleString += this.lengthPrefixedString({ namedQuery });
+        }
+        for (const bundledDocument of this.documents.values()) {
+            const documentMetadata = bundledDocument.metadata;
+            bundleString += this.lengthPrefixedString({ documentMetadata });
+            // Write to the bundle if document exists.
+            const document = bundledDocument.document;
+            if (document) {
+                bundleString += this.lengthPrefixedString({ document });
+            }
+        }
+        const metadata = {
+            id: this.bundleId,
+            createTime: toTimestamp(this.serializer, this.latestReadTime),
+            version: BUNDLE_VERSION,
+            totalDocuments: this.documents.size,
+            // TODO: it's not ideal to have to re-encode all of these strings multiple times
+            totalBytes: encoder.encode(bundleString).length
+        };
+        // Prepends the metadata element to the bundleBuffer: `bundleBuffer` is the second argument to `Buffer.concat`.
+        bundleString = this.lengthPrefixedString({ metadata }) + bundleString;
+        return bundleString;
+    }
+}
+
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function buildDocumentSnapshotJsonBundle(db, document, docData, path) {
+    const builder = new BundleBuilder(db, AutoId.newId());
+    builder.addBundleDocument(documentToDocumentSnapshotBundleData(path, docData, document));
+    return builder.build();
+}
+function buildQuerySnapshotJsonBundle(db, query, bundleName, parent, paths, docs, documentData) {
+    const docBundleDataArray = [];
+    for (let i = 0; i < docs.length; i++) {
+        docBundleDataArray.push(documentToDocumentSnapshotBundleData(paths[i], documentData[i], docs[i]));
+    }
+    const bundleData = {
+        name: bundleName,
+        query,
+        parent,
+        docBundleDataArray
+    };
+    const builder = new BundleBuilder(db, bundleName);
+    builder.addBundleQuery(bundleData);
+    return builder.build();
+}
+// Formats Document data for bundling a DocumentSnapshot.
+function documentToDocumentSnapshotBundleData(path, documentData, document) {
+    return {
+        documentData,
+        documentKey: document.mutableCopy().key,
+        documentPath: path,
+        documentExists: true,
+        createdTime: document.createTime.toTimestamp(),
+        readTime: document.readTime.toTimestamp(),
+        versionTime: document.version.toTimestamp()
+    };
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const NOT_SUPPORTED = 'NOT SUPPORTED';
+/**
+ * Metadata about a snapshot, describing the state of the snapshot.
+ */
+class SnapshotMetadata {
+    /** @hideconstructor */
+    constructor(hasPendingWrites, fromCache) {
+        this.hasPendingWrites = hasPendingWrites;
+        this.fromCache = fromCache;
+    }
+    /**
+     * Returns true if this `SnapshotMetadata` is equal to the provided one.
+     *
+     * @param other - The `SnapshotMetadata` to compare against.
+     * @returns true if this `SnapshotMetadata` is equal to the provided one.
+     */
+    isEqual(other) {
+        return (this.hasPendingWrites === other.hasPendingWrites &&
+            this.fromCache === other.fromCache);
+    }
+}
+/**
+ * A `DocumentSnapshot` contains data read from a document in your Firestore
+ * database. The data can be extracted with `.data()` or `.get(<field>)` to
+ * get a specific field.
+ *
+ * For a `DocumentSnapshot` that points to a non-existing document, any data
+ * access will return 'undefined'. You can use the `exists()` method to
+ * explicitly verify a document's existence.
+ */
+class DocumentSnapshot extends DocumentSnapshot$1 {
+    /** @hideconstructor protected */
+    constructor(_firestore, userDataWriter, key, document, metadata, converter) {
+        super(_firestore, userDataWriter, key, document, converter);
+        this._firestore = _firestore;
+        this._firestoreImpl = _firestore;
+        this.metadata = metadata;
+    }
+    /**
+     * Returns whether or not the data exists. True if the document exists.
+     */
+    exists() {
+        return super.exists();
+    }
+    /**
+     * Retrieves all fields in the document as an `Object`. Returns `undefined` if
+     * the document doesn't exist.
+     *
+     * By default, `serverTimestamp()` values that have not yet been
+     * set to their final value will be returned as `null`. You can override
+     * this by passing an options object.
+     *
+     * @param options - An options object to configure how data is retrieved from
+     * the snapshot (for example the desired behavior for server timestamps that
+     * have not yet been set to their final value).
+     * @returns An `Object` containing all fields in the document or `undefined` if
+     * the document doesn't exist.
+     */
+    data(options = {}) {
+        if (!this._document) {
+            return undefined;
+        }
+        else if (this._converter) {
+            // We only want to use the converter and create a new DocumentSnapshot
+            // if a converter has been provided.
+            const snapshot = new QueryDocumentSnapshot(this._firestore, this._userDataWriter, this._key, this._document, this.metadata, 
+            /* converter= */ null);
+            return this._converter.fromFirestore(snapshot, options);
+        }
+        else {
+            return this._userDataWriter.convertValue(this._document.data.value, options.serverTimestamps);
+        }
+    }
+    /**
+     * Retrieves the field specified by `fieldPath`. Returns `undefined` if the
+     * document or field doesn't exist.
+     *
+     * By default, a `serverTimestamp()` that has not yet been set to
+     * its final value will be returned as `null`. You can override this by
+     * passing an options object.
+     *
+     * @param fieldPath - The path (for example 'foo' or 'foo.bar') to a specific
+     * field.
+     * @param options - An options object to configure how the field is retrieved
+     * from the snapshot (for example the desired behavior for server timestamps
+     * that have not yet been set to their final value).
+     * @returns The data at the specified field location or undefined if no such
+     * field exists in the document.
+     */
+    // We are using `any` here to avoid an explicit cast by our users.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    get(fieldPath, options = {}) {
+        if (this._document) {
+            const value = this._document.data.field(fieldPathFromArgument('DocumentSnapshot.get', fieldPath));
+            if (value !== null) {
+                return this._userDataWriter.convertValue(value, options.serverTimestamps);
+            }
+        }
+        return undefined;
+    }
+    /**
+     * Returns a JSON-serializable representation of this `DocumentSnapshot` instance.
+     *
+     * @returns a JSON representation of this object.  Throws a {@link FirestoreError} if this
+     * `DocumentSnapshot` has pending writes.
+     */
+    toJSON() {
+        if (this.metadata.hasPendingWrites) {
+            throw new FirestoreError(Code.FAILED_PRECONDITION, 'DocumentSnapshot.toJSON() attempted to serialize a document with pending writes. ' +
+                'Await waitForPendingWrites() before invoking toJSON().');
+        }
+        const document = this._document;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = {};
+        result['type'] = DocumentSnapshot._jsonSchemaVersion;
+        result['bundle'] = '';
+        result['bundleSource'] = 'DocumentSnapshot';
+        result['bundleName'] = this._key.toString();
+        if (!document ||
+            !document.isValidDocument() ||
+            !document.isFoundDocument()) {
+            return result;
+        }
+        const documentData = this._userDataWriter.convertObjectMap(document.data.value.mapValue.fields, 'previous');
+        result['bundle'] = buildDocumentSnapshotJsonBundle(this._firestore, document, documentData, this.ref.path);
+        return result;
+    }
+}
+DocumentSnapshot._jsonSchemaVersion = 'firestore/documentSnapshot/1.0';
+DocumentSnapshot._jsonSchema = {
+    type: property('string', DocumentSnapshot._jsonSchemaVersion),
+    bundleSource: property('string', 'DocumentSnapshot'),
+    bundleName: property('string'),
+    bundle: property('string')
+};
+function documentSnapshotFromJSON(db, json, converter) {
+    if (validateJSON(json, DocumentSnapshot._jsonSchema)) {
+        if (json.bundle === NOT_SUPPORTED) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, 'The provided JSON object was created in a client environment, which is not supported.');
+        }
+        // Parse the bundle data.
+        const serializer = newSerializer(db._databaseId);
+        const bundleReader = createBundleReaderSync(json.bundle, serializer);
+        const elements = bundleReader.getElements();
+        const bundleLoader = new BundleLoader(bundleReader.getMetadata(), serializer);
+        for (const element of elements) {
+            bundleLoader.addSizedElement(element);
+        }
+        // Ensure that we have the correct number of documents in the bundle.
+        const bundledDocuments = bundleLoader.documents;
+        if (bundledDocuments.length !== 1) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, `Expected bundle data to contain 1 document, but it contains ${bundledDocuments.length} documents.`);
+        }
+        // Build out the internal document data.
+        const document = fromDocument(serializer, bundledDocuments[0].document);
+        const documentKey = new DocumentKey(ResourcePath.fromString(json.bundleName));
+        // Return the external facing DocumentSnapshot.
+        return new DocumentSnapshot(db, new LiteUserDataWriter(db), documentKey, document, new SnapshotMetadata(
+        /* hasPendingWrites= */ false, 
+        /* fromCache= */ false), converter ? converter : null);
+    }
+}
+/**
+ * A `QueryDocumentSnapshot` contains data read from a document in your
+ * Firestore database as part of a query. The document is guaranteed to exist
+ * and its data can be extracted with `.data()` or `.get(<field>)` to get a
+ * specific field.
+ *
+ * A `QueryDocumentSnapshot` offers the same API surface as a
+ * `DocumentSnapshot`. Since query results contain only existing documents, the
+ * `exists` property will always be true and `data()` will never return
+ * 'undefined'.
+ */
+class QueryDocumentSnapshot extends DocumentSnapshot {
+    /**
+     * Retrieves all fields in the document as an `Object`.
+     *
+     * By default, `serverTimestamp()` values that have not yet been
+     * set to their final value will be returned as `null`. You can override
+     * this by passing an options object.
+     *
+     * @override
+     * @param options - An options object to configure how data is retrieved from
+     * the snapshot (for example the desired behavior for server timestamps that
+     * have not yet been set to their final value).
+     * @returns An `Object` containing all fields in the document.
+     */
+    data(options = {}) {
+        return super.data(options);
+    }
+}
+/**
+ * A `QuerySnapshot` contains zero or more `DocumentSnapshot` objects
+ * representing the results of a query. The documents can be accessed as an
+ * array via the `docs` property or enumerated using the `forEach` method. The
+ * number of documents can be determined via the `empty` and `size`
+ * properties.
+ */
+class QuerySnapshot {
+    /** @hideconstructor */
+    constructor(_firestore, _userDataWriter, query, _snapshot) {
+        this._firestore = _firestore;
+        this._userDataWriter = _userDataWriter;
+        this._snapshot = _snapshot;
+        this.metadata = new SnapshotMetadata(_snapshot.hasPendingWrites, _snapshot.fromCache);
+        this.query = query;
+    }
+    /** An array of all the documents in the `QuerySnapshot`. */
+    get docs() {
+        const result = [];
+        this.forEach(doc => result.push(doc));
+        return result;
+    }
+    /** The number of documents in the `QuerySnapshot`. */
+    get size() {
+        return this._snapshot.docs.size;
+    }
+    /** True if there are no documents in the `QuerySnapshot`. */
+    get empty() {
+        return this.size === 0;
+    }
+    /**
+     * Enumerates all of the documents in the `QuerySnapshot`.
+     *
+     * @param callback - A callback to be called with a `QueryDocumentSnapshot` for
+     * each document in the snapshot.
+     * @param thisArg - The `this` binding for the callback.
+     */
+    forEach(callback, thisArg) {
+        this._snapshot.docs.forEach(doc => {
+            callback.call(thisArg, new QueryDocumentSnapshot(this._firestore, this._userDataWriter, doc.key, doc, new SnapshotMetadata(this._snapshot.mutatedKeys.has(doc.key), this._snapshot.fromCache), this.query.converter));
+        });
+    }
+    /**
+     * Returns an array of the documents changes since the last snapshot. If this
+     * is the first snapshot, all documents will be in the list as 'added'
+     * changes.
+     *
+     * @param options - `SnapshotListenOptions` that control whether metadata-only
+     * changes (i.e. only `DocumentSnapshot.metadata` changed) should trigger
+     * snapshot events.
+     */
+    docChanges(options = {}) {
+        const includeMetadataChanges = !!options.includeMetadataChanges;
+        if (includeMetadataChanges && this._snapshot.excludesMetadataChanges) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, 'To include metadata changes with your document changes, you must ' +
+                'also pass { includeMetadataChanges:true } to onSnapshot().');
+        }
+        if (!this._cachedChanges ||
+            this._cachedChangesIncludeMetadataChanges !== includeMetadataChanges) {
+            this._cachedChanges = changesFromSnapshot(this, includeMetadataChanges);
+            this._cachedChangesIncludeMetadataChanges = includeMetadataChanges;
+        }
+        return this._cachedChanges;
+    }
+    /**
+     * Returns a JSON-serializable representation of this `QuerySnapshot` instance.
+     *
+     * @returns a JSON representation of this object. Throws a {@link FirestoreError} if this
+     * `QuerySnapshot` has pending writes.
+     */
+    toJSON() {
+        if (this.metadata.hasPendingWrites) {
+            throw new FirestoreError(Code.FAILED_PRECONDITION, 'QuerySnapshot.toJSON() attempted to serialize a document with pending writes. ' +
+                'Await waitForPendingWrites() before invoking toJSON().');
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = {};
+        result['type'] = QuerySnapshot._jsonSchemaVersion;
+        result['bundleSource'] = 'QuerySnapshot';
+        result['bundleName'] = AutoId.newId();
+        const databaseId = this._firestore._databaseId.database;
+        const projectId = this._firestore._databaseId.projectId;
+        const parent = `projects/${projectId}/databases/${databaseId}/documents`;
+        const documents = [];
+        const documentData = [];
+        const paths = [];
+        this.docs.forEach(doc => {
+            if (doc._document === null) {
+                return;
+            }
+            documents.push(doc._document);
+            documentData.push(this._userDataWriter.convertObjectMap(doc._document.data.value.mapValue.fields, 'previous'));
+            paths.push(doc.ref.path);
+        });
+        result['bundle'] = buildQuerySnapshotJsonBundle(this._firestore, this.query._query, result['bundleName'], parent, paths, documents, documentData);
+        return result;
+    }
+}
+QuerySnapshot._jsonSchemaVersion = 'firestore/querySnapshot/1.0';
+QuerySnapshot._jsonSchema = {
+    type: property('string', QuerySnapshot._jsonSchemaVersion),
+    bundleSource: property('string', 'QuerySnapshot'),
+    bundleName: property('string'),
+    bundle: property('string')
+};
+function querySnapshotFromJSON(db, json, converter) {
+    if (validateJSON(json, QuerySnapshot._jsonSchema)) {
+        if (json.bundle === NOT_SUPPORTED) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, 'The provided JSON object was created in a client environment, which is not supported.');
+        }
+        // Parse the bundle data.
+        const serializer = newSerializer(db._databaseId);
+        const bundleReader = createBundleReaderSync(json.bundle, serializer);
+        const elements = bundleReader.getElements();
+        const bundleLoader = new BundleLoader(bundleReader.getMetadata(), serializer);
+        for (const element of elements) {
+            bundleLoader.addSizedElement(element);
+        }
+        if (bundleLoader.queries.length !== 1) {
+            throw new FirestoreError(Code.INVALID_ARGUMENT, `Snapshot data expected 1 query but found ${bundleLoader.queries.length} queries.`);
+        }
+        // Create an internal Query object from the named query in the bundle.
+        const query = fromBundledQuery(bundleLoader.queries[0].bundledQuery);
+        // Construct the arrays of document data for the query.
+        const bundledDocuments = bundleLoader.documents;
+        let documentSet = new DocumentSet();
+        bundledDocuments.map(bundledDocument => {
+            const document = fromDocument(serializer, bundledDocument.document);
+            documentSet = documentSet.add(document);
+        });
+        // Create a view snapshot of the query and documents.
+        const viewSnapshot = ViewSnapshot.fromInitialDocuments(query, documentSet, documentKeySet() /* Zero mutated keys signifies no pending writes. */, 
+        /* fromCache= */ false, 
+        /* hasCachedResults= */ false);
+        // Create an external Query object, required to construct the QuerySnapshot.
+        const externalQuery = new Query(db, converter ? converter : null, query);
+        // Return a new QuerySnapshot with all of the collected data.
+        return new QuerySnapshot(db, new LiteUserDataWriter(db), externalQuery, viewSnapshot);
+    }
+}
+/** Calculates the array of `DocumentChange`s for a given `ViewSnapshot`. */
+function changesFromSnapshot(querySnapshot, includeMetadataChanges) {
+    if (querySnapshot._snapshot.oldDocs.isEmpty()) {
+        let index = 0;
+        return querySnapshot._snapshot.docChanges.map(change => {
+            const doc = new QueryDocumentSnapshot(querySnapshot._firestore, querySnapshot._userDataWriter, change.doc.key, change.doc, new SnapshotMetadata(querySnapshot._snapshot.mutatedKeys.has(change.doc.key), querySnapshot._snapshot.fromCache), querySnapshot.query.converter);
+            change.doc;
+            return {
+                type: 'added',
+                doc,
+                oldIndex: -1,
+                newIndex: index++
+            };
+        });
+    }
+    else {
+        // A `DocumentSet` that is updated incrementally as changes are applied to use
+        // to lookup the index of a document.
+        let indexTracker = querySnapshot._snapshot.oldDocs;
+        return querySnapshot._snapshot.docChanges
+            .filter(change => includeMetadataChanges || change.type !== 3 /* ChangeType.Metadata */)
+            .map(change => {
+            const doc = new QueryDocumentSnapshot(querySnapshot._firestore, querySnapshot._userDataWriter, change.doc.key, change.doc, new SnapshotMetadata(querySnapshot._snapshot.mutatedKeys.has(change.doc.key), querySnapshot._snapshot.fromCache), querySnapshot.query.converter);
+            let oldIndex = -1;
+            let newIndex = -1;
+            if (change.type !== 0 /* ChangeType.Added */) {
+                oldIndex = indexTracker.indexOf(change.doc.key);
+                indexTracker = indexTracker.delete(change.doc.key);
+            }
+            if (change.type !== 1 /* ChangeType.Removed */) {
+                indexTracker = indexTracker.add(change.doc);
+                newIndex = indexTracker.indexOf(change.doc.key);
+            }
+            return {
+                type: resultChangeType(change.type),
+                doc,
+                oldIndex,
+                newIndex
+            };
+        });
+    }
+}
+function resultChangeType(type) {
+    switch (type) {
+        case 0 /* ChangeType.Added */:
+            return 'added';
+        case 2 /* ChangeType.Modified */:
+        case 3 /* ChangeType.Metadata */:
+            return 'modified';
+        case 1 /* ChangeType.Removed */:
+            return 'removed';
+        default:
+            return fail(0xf03d, { type });
+    }
+}
+// TODO(firestoreexp): Add tests for snapshotEqual with different snapshot
+// metadata
+/**
+ * Returns true if the provided snapshots are equal.
+ *
+ * @param left - A snapshot to compare.
+ * @param right - A snapshot to compare.
+ * @returns true if the snapshots are equal.
+ */
+function snapshotEqual(left, right) {
+    if (left instanceof DocumentSnapshot && right instanceof DocumentSnapshot) {
+        return (left._firestore === right._firestore &&
+            left._key.isEqual(right._key) &&
+            (left._document === null
+                ? right._document === null
+                : left._document.isEqual(right._document)) &&
+            left._converter === right._converter);
+    }
+    else if (left instanceof QuerySnapshot && right instanceof QuerySnapshot) {
+        return (left._firestore === right._firestore &&
+            queryEqual(left.query, right.query) &&
+            left.metadata.isEqual(right.metadata) &&
+            left._snapshot.isEqual(right._snapshot));
+    }
+    return false;
+}
+
+/**
+ * @license
+ * Copyright 2022 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const DEFAULT_TRANSACTION_OPTIONS = {
+    maxAttempts: 5
+};
+function validateTransactionOptions(options) {
+    if (options.maxAttempts < 1) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Max attempts must be at least 1');
+    }
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * A write batch, used to perform multiple writes as a single atomic unit.
+ *
+ * A `WriteBatch` object can be acquired by calling {@link writeBatch}. It
+ * provides methods for adding writes to the write batch. None of the writes
+ * will be committed (or visible locally) until {@link WriteBatch.commit} is
+ * called.
+ */
+class WriteBatch {
+    /** @hideconstructor */
+    constructor(_firestore, _commitHandler) {
+        this._firestore = _firestore;
+        this._commitHandler = _commitHandler;
+        this._mutations = [];
+        this._committed = false;
+        this._dataReader = newUserDataReader(_firestore);
+    }
+    set(documentRef, data, options) {
+        this._verifyNotCommitted();
+        const ref = validateReference(documentRef, this._firestore);
+        const convertedValue = applyFirestoreDataConverter(ref.converter, data, options);
+        const parsed = parseSetData(this._dataReader, 'WriteBatch.set', ref._key, convertedValue, ref.converter !== null, options);
+        this._mutations.push(parsed.toMutation(ref._key, Precondition.none()));
+        return this;
+    }
+    update(documentRef, fieldOrUpdateData, value, ...moreFieldsAndValues) {
+        this._verifyNotCommitted();
+        const ref = validateReference(documentRef, this._firestore);
+        // For Compat types, we have to "extract" the underlying types before
+        // performing validation.
+        fieldOrUpdateData = getModularInstance(fieldOrUpdateData);
+        let parsed;
+        if (typeof fieldOrUpdateData === 'string' ||
+            fieldOrUpdateData instanceof FieldPath) {
+            parsed = parseUpdateVarargs(this._dataReader, 'WriteBatch.update', ref._key, fieldOrUpdateData, value, moreFieldsAndValues);
+        }
+        else {
+            parsed = parseUpdateData(this._dataReader, 'WriteBatch.update', ref._key, fieldOrUpdateData);
+        }
+        this._mutations.push(parsed.toMutation(ref._key, Precondition.exists(true)));
+        return this;
+    }
+    /**
+     * Deletes the document referred to by the provided {@link DocumentReference}.
+     *
+     * @param documentRef - A reference to the document to be deleted.
+     * @returns This `WriteBatch` instance. Used for chaining method calls.
+     */
+    delete(documentRef) {
+        this._verifyNotCommitted();
+        const ref = validateReference(documentRef, this._firestore);
+        this._mutations = this._mutations.concat(new DeleteMutation(ref._key, Precondition.none()));
+        return this;
+    }
+    /**
+     * Commits all of the writes in this write batch as a single atomic unit.
+     *
+     * The result of these writes will only be reflected in document reads that
+     * occur after the returned promise resolves. If the client is offline, the
+     * write fails. If you would like to see local modifications or buffer writes
+     * until the client is online, use the full Firestore SDK.
+     *
+     * @returns A `Promise` resolved once all of the writes in the batch have been
+     * successfully written to the backend as an atomic unit (note that it won't
+     * resolve while you're offline).
+     */
+    commit() {
+        this._verifyNotCommitted();
+        this._committed = true;
+        if (this._mutations.length > 0) {
+            return this._commitHandler(this._mutations);
+        }
         return Promise.resolve();
     }
-    set options(optionsToSet) {
-        this._options = optionsToSet;
-    }
-    get options() {
-        return this._options;
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-function factory(container, { instanceIdentifier }) {
-    if (!instanceIdentifier) {
-        throw new AIError(AIErrorCode.ERROR, 'AIService instance identifier is undefined.');
-    }
-    const backend = decodeInstanceIdentifier(instanceIdentifier);
-    // getImmediate for FirebaseApp will always succeed
-    const app = container.getProvider('app').getImmediate();
-    const auth = container.getProvider('auth-internal');
-    const appCheckProvider = container.getProvider('app-check-internal');
-    return new AIService(app, backend, auth, appCheckProvider);
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Initializes an {@link ApiSettings} object from an {@link AI} instance.
- *
- * If this is a Server App, the {@link ApiSettings} object's `getAppCheckToken()` will resolve
- * with the `FirebaseServerAppSettings.appCheckToken`, instead of requiring that an App Check
- * instance is initialized.
- */
-function initApiSettings(ai) {
-    if (!ai.app?.options?.apiKey) {
-        throw new AIError(AIErrorCode.NO_API_KEY, `The "apiKey" field is empty in the local Firebase config. Firebase AI requires this field to contain a valid API key.`);
-    }
-    else if (!ai.app?.options?.projectId) {
-        throw new AIError(AIErrorCode.NO_PROJECT_ID, `The "projectId" field is empty in the local Firebase config. Firebase AI requires this field to contain a valid project ID.`);
-    }
-    else if (!ai.app?.options?.appId) {
-        throw new AIError(AIErrorCode.NO_APP_ID, `The "appId" field is empty in the local Firebase config. Firebase AI requires this field to contain a valid app ID.`);
-    }
-    const apiSettings = {
-        apiKey: ai.app.options.apiKey,
-        project: ai.app.options.projectId,
-        appId: ai.app.options.appId,
-        automaticDataCollectionEnabled: ai.app.automaticDataCollectionEnabled,
-        location: ai.location,
-        backend: ai.backend
-    };
-    if (_isFirebaseServerApp(ai.app) && ai.app.settings.appCheckToken) {
-        const token = ai.app.settings.appCheckToken;
-        apiSettings.getAppCheckToken = () => {
-            return Promise.resolve({ token });
-        };
-    }
-    else if (ai.appCheck) {
-        if (ai.options?.useLimitedUseAppCheckTokens) {
-            apiSettings.getAppCheckToken = () => ai.appCheck.getLimitedUseToken();
-        }
-        else {
-            apiSettings.getAppCheckToken = () => ai.appCheck.getToken();
-        }
-    }
-    if (ai.auth) {
-        apiSettings.getAuthToken = () => ai.auth.getToken();
-    }
-    return apiSettings;
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Base class for Firebase AI model APIs.
- *
- * Instances of this class are associated with a specific Firebase AI {@link Backend}
- * and provide methods for interacting with the configured generative model.
- *
- * @public
- */
-class AIModel {
-    /**
-     * Constructs a new instance of the {@link AIModel} class.
-     *
-     * This constructor should only be called from subclasses that provide
-     * a model API.
-     *
-     * @param ai - an {@link AI} instance.
-     * @param modelName - The name of the model being used. It can be in one of the following formats:
-     * - `my-model` (short name, will resolve to `publishers/google/models/my-model`)
-     * - `models/my-model` (will resolve to `publishers/google/models/my-model`)
-     * - `publishers/my-publisher/models/my-model` (fully qualified model name)
-     *
-     * @throws If the `apiKey` or `projectId` fields are missing in your
-     * Firebase config.
-     *
-     * @internal
-     */
-    constructor(ai, modelName) {
-        this._apiSettings = initApiSettings(ai);
-        this.model = AIModel.normalizeModelName(modelName, this._apiSettings.backend.backendType);
-    }
-    /**
-     * Normalizes the given model name to a fully qualified model resource name.
-     *
-     * @param modelName - The model name to normalize.
-     * @returns The fully qualified model resource name.
-     *
-     * @internal
-     */
-    static normalizeModelName(modelName, backendType) {
-        if (backendType === BackendType.GOOGLE_AI) {
-            return AIModel.normalizeGoogleAIModelName(modelName);
-        }
-        else {
-            return AIModel.normalizeVertexAIModelName(modelName);
-        }
-    }
-    /**
-     * @internal
-     */
-    static normalizeGoogleAIModelName(modelName) {
-        return `models/${modelName}`;
-    }
-    /**
-     * @internal
-     */
-    static normalizeVertexAIModelName(modelName) {
-        let model;
-        if (modelName.includes('/')) {
-            if (modelName.startsWith('models/')) {
-                // Add 'publishers/google' if the user is only passing in 'models/model-name'.
-                model = `publishers/google/${modelName}`;
-            }
-            else {
-                // Any other custom format (e.g. tuned models) must be passed in correctly.
-                model = modelName;
-            }
-        }
-        else {
-            // If path is not included, assume it's a non-tuned model.
-            model = `publishers/google/models/${modelName}`;
-        }
-        return model;
-    }
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const logger = new Logger('@firebase/vertexai');
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const TIMEOUT_EXPIRED_MESSAGE = 'Timeout has expired.';
-const ABORT_ERROR_NAME = 'AbortError';
-class RequestURL {
-    constructor(params) {
-        this.params = params;
-    }
-    toString() {
-        const url = new URL(this.baseUrl); // Throws if the URL is invalid
-        url.pathname = this.pathname;
-        url.search = this.queryParams.toString();
-        return url.toString();
-    }
-    get pathname() {
-        // We need to construct a different URL if the request is for server side prompt templates,
-        // since the URL patterns are different. Server side prompt templates expect a templateId
-        // instead of a model name.
-        if (this.params.templateId) {
-            return `${this.params.apiSettings.backend._getTemplatePath(this.params.apiSettings.project, this.params.templateId)}:${this.params.task}`;
-        }
-        else {
-            return `${this.params.apiSettings.backend._getModelPath(this.params.apiSettings.project, this.params.model)}:${this.params.task}`;
-        }
-    }
-    get baseUrl() {
-        return (this.params.singleRequestOptions?.baseUrl ?? `https://${DEFAULT_DOMAIN}`);
-    }
-    get queryParams() {
-        const params = new URLSearchParams();
-        if (this.params.stream) {
-            params.set('alt', 'sse');
-        }
-        return params;
-    }
-}
-class WebSocketUrl {
-    constructor(apiSettings) {
-        this.apiSettings = apiSettings;
-    }
-    toString() {
-        const url = new URL(`wss://${DEFAULT_DOMAIN}`);
-        url.pathname = this.pathname;
-        const queryParams = new URLSearchParams();
-        queryParams.set('key', this.apiSettings.apiKey);
-        url.search = queryParams.toString();
-        return url.toString();
-    }
-    get pathname() {
-        if (this.apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-            return 'ws/google.firebase.vertexai.v1beta.GenerativeService/BidiGenerateContent';
-        }
-        else {
-            return `ws/google.firebase.vertexai.v1beta.LlmBidiService/BidiGenerateContent/locations/${this.apiSettings.location}`;
+    _verifyNotCommitted() {
+        if (this._committed) {
+            throw new FirestoreError(Code.FAILED_PRECONDITION, 'A write batch can no longer be used after commit() ' +
+                'has been called.');
         }
     }
 }
-/**
- * Log language and "fire/version" to x-goog-api-client
- */
-function getClientHeaders(url) {
-    const loggingTags = [];
-    loggingTags.push(`${LANGUAGE_TAG}/${PACKAGE_VERSION}`);
-    loggingTags.push(`fire/${PACKAGE_VERSION}`);
-    /**
-     * No call would be made if ONLY_ON_DEVICE.
-     * ONLY_IN_CLOUD does not indicate an intention to use hybrid.
-     */
-    if (url.params.apiSettings.inferenceMode === InferenceMode.PREFER_ON_DEVICE ||
-        url.params.apiSettings.inferenceMode === InferenceMode.PREFER_IN_CLOUD) {
-        // No version
-        loggingTags.push(HYBRID_TAG);
-    }
-    return loggingTags.join(' ');
-}
-async function getHeaders(url) {
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    headers.append('x-goog-api-client', getClientHeaders(url));
-    headers.append('x-goog-api-key', url.params.apiSettings.apiKey);
-    if (url.params.apiSettings.automaticDataCollectionEnabled) {
-        headers.append('X-Firebase-Appid', url.params.apiSettings.appId);
-    }
-    if (url.params.apiSettings.getAppCheckToken) {
-        const appCheckToken = await url.params.apiSettings.getAppCheckToken();
-        if (appCheckToken) {
-            headers.append('X-Firebase-AppCheck', appCheckToken.token);
-            if (appCheckToken.error) {
-                logger.warn(`Unable to obtain a valid App Check token: ${appCheckToken.error.message}`);
-            }
-        }
-    }
-    if (url.params.apiSettings.getAuthToken) {
-        const authToken = await url.params.apiSettings.getAuthToken();
-        if (authToken) {
-            headers.append('Authorization', `Firebase ${authToken.accessToken}`);
-        }
-    }
-    return headers;
-}
-async function makeRequest(requestUrlParams, body) {
-    const url = new RequestURL(requestUrlParams);
-    let response;
-    const externalSignal = requestUrlParams.singleRequestOptions?.signal;
-    const timeoutMillis = requestUrlParams.singleRequestOptions?.timeout != null &&
-        requestUrlParams.singleRequestOptions.timeout >= 0
-        ? requestUrlParams.singleRequestOptions.timeout
-        : DEFAULT_FETCH_TIMEOUT_MS;
-    const internalAbortController = new AbortController();
-    const fetchTimeoutId = setTimeout(() => {
-        internalAbortController.abort(new DOMException(TIMEOUT_EXPIRED_MESSAGE, ABORT_ERROR_NAME));
-        logger.debug(`Aborting request to ${url} due to timeout (${timeoutMillis}ms)`);
-    }, timeoutMillis);
-    // Used to abort the fetch if either the user-defined `externalSignal` is aborted, or if the
-    // internal signal (triggered by timeouts) is aborted.
-    const combinedSignal = AbortSignal.any(externalSignal
-        ? [externalSignal, internalAbortController.signal]
-        : [internalAbortController.signal]);
-    if (externalSignal && externalSignal.aborted) {
-        clearTimeout(fetchTimeoutId);
-        throw new DOMException(externalSignal.reason ?? 'Aborted externally before fetch', ABORT_ERROR_NAME);
-    }
-    try {
-        const fetchOptions = {
-            method: 'POST',
-            headers: await getHeaders(url),
-            signal: combinedSignal,
-            body
-        };
-        response = await fetch(url.toString(), fetchOptions);
-        if (!response.ok) {
-            let message = '';
-            let errorDetails;
-            try {
-                const json = await response.json();
-                message = json.error.message;
-                if (json.error.details) {
-                    message += ` ${JSON.stringify(json.error.details)}`;
-                    errorDetails = json.error.details;
-                }
-            }
-            catch (e) {
-                // ignored
-            }
-            if (response.status === 403 &&
-                errorDetails &&
-                errorDetails.some((detail) => detail.reason === 'SERVICE_DISABLED') &&
-                errorDetails.some((detail) => detail.links?.[0]?.description.includes('Google developers console API activation'))) {
-                throw new AIError(AIErrorCode.API_NOT_ENABLED, `The Firebase AI SDK requires the Firebase AI ` +
-                    `API ('firebasevertexai.googleapis.com') to be enabled in your ` +
-                    `Firebase project. Enable this API by visiting the Firebase Console ` +
-                    `at https://console.firebase.google.com/project/${url.params.apiSettings.project}/ailogic/ ` +
-                    `and clicking "Get started". If you enabled this API recently, ` +
-                    `wait a few minutes for the action to propagate to our systems and ` +
-                    `then retry.`, {
-                    status: response.status,
-                    statusText: response.statusText,
-                    errorDetails
-                });
-            }
-            throw new AIError(AIErrorCode.FETCH_ERROR, `Error fetching from ${url}: [${response.status} ${response.statusText}] ${message}`, {
-                status: response.status,
-                statusText: response.statusText,
-                errorDetails
-            });
-        }
-    }
-    catch (e) {
-        let err = e;
-        if (e.code !== AIErrorCode.FETCH_ERROR &&
-            e.code !== AIErrorCode.API_NOT_ENABLED &&
-            e instanceof Error &&
-            e.name !== ABORT_ERROR_NAME) {
-            err = new AIError(AIErrorCode.ERROR, `Error fetching from ${url.toString()}: ${e.message}`);
-            err.stack = e.stack;
-        }
-        throw err;
-    }
-    finally {
-        // When doing streaming requests, this will clear the timeout once the stream begins.
-        // If a timeout it 3000ms, and the stream starts after 300ms and ends after 5000ms, the
-        // timeout will be cleared after 300ms, so it won't abort the request.
-        clearTimeout(fetchTimeoutId);
-    }
-    return response;
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Check that at least one candidate exists and does not have a bad
- * finish reason. Warns if multiple candidates exist.
- */
-function hasValidCandidates(response) {
-    if (response.candidates && response.candidates.length > 0) {
-        if (response.candidates.length > 1) {
-            logger.warn(`This response had ${response.candidates.length} ` +
-                `candidates. Returning text from the first candidate only. ` +
-                `Access response.candidates directly to use the other candidates.`);
-        }
-        if (hadBadFinishReason(response.candidates[0])) {
-            throw new AIError(AIErrorCode.RESPONSE_ERROR, `Response error: ${formatBlockErrorMessage(response)}. Response body stored in error.response`, {
-                response
-            });
-        }
-        return true;
+function validateReference(documentRef, firestore) {
+    documentRef = getModularInstance(documentRef);
+    if (documentRef.firestore !== firestore) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Provided document reference is from a different Firestore instance.');
     }
     else {
+        return documentRef;
+    }
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// TODO(mrschmidt) Consider using `BaseTransaction` as the base class in the
+// legacy SDK.
+/**
+ * A reference to a transaction.
+ *
+ * The `Transaction` object passed to a transaction's `updateFunction` provides
+ * the methods to read and write data within the transaction context. See
+ * {@link runTransaction}.
+ */
+class Transaction$1 {
+    /** @hideconstructor */
+    constructor(_firestore, _transaction) {
+        this._firestore = _firestore;
+        this._transaction = _transaction;
+        this._dataReader = newUserDataReader(_firestore);
+    }
+    /**
+     * Reads the document referenced by the provided {@link DocumentReference}.
+     *
+     * @param documentRef - A reference to the document to be read.
+     * @returns A `DocumentSnapshot` with the read data.
+     */
+    get(documentRef) {
+        const ref = validateReference(documentRef, this._firestore);
+        const userDataWriter = new LiteUserDataWriter(this._firestore);
+        return this._transaction.lookup([ref._key]).then(docs => {
+            if (!docs || docs.length !== 1) {
+                return fail(0x5de9);
+            }
+            const doc = docs[0];
+            if (doc.isFoundDocument()) {
+                return new DocumentSnapshot$1(this._firestore, userDataWriter, doc.key, doc, ref.converter);
+            }
+            else if (doc.isNoDocument()) {
+                return new DocumentSnapshot$1(this._firestore, userDataWriter, ref._key, null, ref.converter);
+            }
+            else {
+                throw fail(0x4801, {
+                    doc
+                });
+            }
+        });
+    }
+    set(documentRef, value, options) {
+        const ref = validateReference(documentRef, this._firestore);
+        const convertedValue = applyFirestoreDataConverter(ref.converter, value, options);
+        const parsed = parseSetData(this._dataReader, 'Transaction.set', ref._key, convertedValue, ref.converter !== null, options);
+        this._transaction.set(ref._key, parsed);
+        return this;
+    }
+    update(documentRef, fieldOrUpdateData, value, ...moreFieldsAndValues) {
+        const ref = validateReference(documentRef, this._firestore);
+        // For Compat types, we have to "extract" the underlying types before
+        // performing validation.
+        fieldOrUpdateData = getModularInstance(fieldOrUpdateData);
+        let parsed;
+        if (typeof fieldOrUpdateData === 'string' ||
+            fieldOrUpdateData instanceof FieldPath) {
+            parsed = parseUpdateVarargs(this._dataReader, 'Transaction.update', ref._key, fieldOrUpdateData, value, moreFieldsAndValues);
+        }
+        else {
+            parsed = parseUpdateData(this._dataReader, 'Transaction.update', ref._key, fieldOrUpdateData);
+        }
+        this._transaction.update(ref._key, parsed);
+        return this;
+    }
+    /**
+     * Deletes the document referred to by the provided {@link DocumentReference}.
+     *
+     * @param documentRef - A reference to the document to be deleted.
+     * @returns This `Transaction` instance. Used for chaining method calls.
+     */
+    delete(documentRef) {
+        const ref = validateReference(documentRef, this._firestore);
+        this._transaction.delete(ref._key);
+        return this;
+    }
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * A reference to a transaction.
+ *
+ * The `Transaction` object passed to a transaction's `updateFunction` provides
+ * the methods to read and write data within the transaction context. See
+ * {@link runTransaction}.
+ */
+class Transaction extends Transaction$1 {
+    // This class implements the same logic as the Transaction API in the Lite SDK
+    // but is subclassed in order to return its own DocumentSnapshot types.
+    /** @hideconstructor */
+    constructor(_firestore, _transaction) {
+        super(_firestore, _transaction);
+        this._firestore = _firestore;
+    }
+    /**
+     * Reads the document referenced by the provided {@link DocumentReference}.
+     *
+     * @param documentRef - A reference to the document to be read.
+     * @returns A `DocumentSnapshot` with the read data.
+     */
+    get(documentRef) {
+        const ref = validateReference(documentRef, this._firestore);
+        const userDataWriter = new ExpUserDataWriter(this._firestore);
+        return super
+            .get(documentRef)
+            .then(liteDocumentSnapshot => new DocumentSnapshot(this._firestore, userDataWriter, ref._key, liteDocumentSnapshot._document, new SnapshotMetadata(
+        /* hasPendingWrites= */ false, 
+        /* fromCache= */ false), ref.converter));
+    }
+}
+/**
+ * Executes the given `updateFunction` and then attempts to commit the changes
+ * applied within the transaction. If any document read within the transaction
+ * has changed, Cloud Firestore retries the `updateFunction`. If it fails to
+ * commit after 5 attempts, the transaction fails.
+ *
+ * The maximum number of writes allowed in a single transaction is 500.
+ *
+ * @param firestore - A reference to the Firestore database to run this
+ * transaction against.
+ * @param updateFunction - The function to execute within the transaction
+ * context.
+ * @param options - An options object to configure maximum number of attempts to
+ * commit.
+ * @returns If the transaction completed successfully or was explicitly aborted
+ * (the `updateFunction` returned a failed promise), the promise returned by the
+ * `updateFunction `is returned here. Otherwise, if the transaction failed, a
+ * rejected promise with the corresponding failure error is returned.
+ */
+function runTransaction(firestore, updateFunction, options) {
+    firestore = cast(firestore, Firestore);
+    const optionsWithDefaults = {
+        ...DEFAULT_TRANSACTION_OPTIONS,
+        ...options
+    };
+    validateTransactionOptions(optionsWithDefaults);
+    const client = ensureFirestoreConfigured(firestore);
+    return firestoreClientTransaction(client, internalTransaction => updateFunction(new Transaction(firestore, internalTransaction)), optionsWithDefaults);
+}
+
+/**
+ * @license
+ * Copyright 2017 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function isPartialObserver(obj) {
+    return implementsAnyMethods(obj, ['next', 'error', 'complete']);
+}
+/**
+ * Returns true if obj is an object and contains at least one of the specified
+ * methods.
+ */
+function implementsAnyMethods(obj, methods) {
+    if (typeof obj !== 'object' || obj === null) {
         return false;
     }
-}
-/**
- * Creates an EnhancedGenerateContentResponse object that has helper functions and
- * other modifications that improve usability.
- */
-function createEnhancedContentResponse(response, inferenceSource = InferenceSource.IN_CLOUD) {
-    /**
-     * The Vertex AI backend omits default values.
-     * This causes the `index` property to be omitted from the first candidate in the
-     * response, since it has index 0, and 0 is a default value.
-     * See: https://github.com/firebase/firebase-js-sdk/issues/8566
-     */
-    if (response.candidates && !response.candidates[0].hasOwnProperty('index')) {
-        response.candidates[0].index = 0;
-    }
-    const responseWithHelpers = addHelpers(response);
-    responseWithHelpers.inferenceSource = inferenceSource;
-    return responseWithHelpers;
-}
-/**
- * Adds convenience helper methods to a response object, including stream
- * chunks (as long as each chunk is a complete GenerateContentResponse JSON).
- */
-function addHelpers(response) {
-    response.text = () => {
-        if (hasValidCandidates(response)) {
-            return getText(response, part => !part.thought);
-        }
-        else if (response.promptFeedback) {
-            throw new AIError(AIErrorCode.RESPONSE_ERROR, `Text not available. ${formatBlockErrorMessage(response)}`, {
-                response
-            });
-        }
-        return '';
-    };
-    response.thoughtSummary = () => {
-        if (hasValidCandidates(response)) {
-            const result = getText(response, part => !!part.thought);
-            return result === '' ? undefined : result;
-        }
-        else if (response.promptFeedback) {
-            throw new AIError(AIErrorCode.RESPONSE_ERROR, `Thought summary not available. ${formatBlockErrorMessage(response)}`, {
-                response
-            });
-        }
-        return undefined;
-    };
-    response.inlineDataParts = () => {
-        if (hasValidCandidates(response)) {
-            return getInlineDataParts(response);
-        }
-        else if (response.promptFeedback) {
-            throw new AIError(AIErrorCode.RESPONSE_ERROR, `Data not available. ${formatBlockErrorMessage(response)}`, {
-                response
-            });
-        }
-        return undefined;
-    };
-    response.functionCalls = () => {
-        if (hasValidCandidates(response)) {
-            return getFunctionCalls(response);
-        }
-        else if (response.promptFeedback) {
-            throw new AIError(AIErrorCode.RESPONSE_ERROR, `Function call not available. ${formatBlockErrorMessage(response)}`, {
-                response
-            });
-        }
-        return undefined;
-    };
-    return response;
-}
-/**
- * Returns all text from the first candidate's parts, filtering by whether
- * `partFilter()` returns true.
- *
- * @param response - The `GenerateContentResponse` from which to extract text.
- * @param partFilter - Only return `Part`s for which this returns true
- */
-function getText(response, partFilter) {
-    const textStrings = [];
-    if (response.candidates?.[0].content?.parts) {
-        for (const part of response.candidates?.[0].content?.parts) {
-            if (part.text && partFilter(part)) {
-                textStrings.push(part.text);
-            }
+    const object = obj;
+    for (const method of methods) {
+        if (method in object && typeof object[method] === 'function') {
+            return true;
         }
     }
-    if (textStrings.length > 0) {
-        return textStrings.join('');
-    }
-    else {
-        return '';
-    }
-}
-/**
- * Returns every {@link FunctionCall} associated with first candidate.
- */
-function getFunctionCalls(response) {
-    if (!response) {
-        return undefined;
-    }
-    const functionCalls = [];
-    if (response.candidates?.[0].content?.parts) {
-        for (const part of response.candidates?.[0].content?.parts) {
-            if (part.functionCall) {
-                functionCalls.push(part.functionCall);
-            }
-        }
-    }
-    if (functionCalls.length > 0) {
-        return functionCalls;
-    }
-    else {
-        return undefined;
-    }
-}
-/**
- * Returns every {@link InlineDataPart} in the first candidate if present.
- *
- * @internal
- */
-function getInlineDataParts(response) {
-    const data = [];
-    if (response.candidates?.[0].content?.parts) {
-        for (const part of response.candidates?.[0].content?.parts) {
-            if (part.inlineData) {
-                data.push(part);
-            }
-        }
-    }
-    if (data.length > 0) {
-        return data;
-    }
-    else {
-        return undefined;
-    }
-}
-const badFinishReasons = [FinishReason.RECITATION, FinishReason.SAFETY];
-function hadBadFinishReason(candidate) {
-    return (!!candidate.finishReason &&
-        badFinishReasons.some(reason => reason === candidate.finishReason));
-}
-function formatBlockErrorMessage(response) {
-    let message = '';
-    if ((!response.candidates || response.candidates.length === 0) &&
-        response.promptFeedback) {
-        message += 'Response was blocked';
-        if (response.promptFeedback?.blockReason) {
-            message += ` due to ${response.promptFeedback.blockReason}`;
-        }
-        if (response.promptFeedback?.blockReasonMessage) {
-            message += `: ${response.promptFeedback.blockReasonMessage}`;
-        }
-    }
-    else if (response.candidates?.[0]) {
-        const firstCandidate = response.candidates[0];
-        if (hadBadFinishReason(firstCandidate)) {
-            message += `Candidate was blocked due to ${firstCandidate.finishReason}`;
-            if (firstCandidate.finishMessage) {
-                message += `: ${firstCandidate.finishMessage}`;
-            }
-        }
-    }
-    return message;
-}
-/**
- * Convert a generic successful fetch response body to an Imagen response object
- * that can be returned to the user. This converts the REST APIs response format to our
- * APIs representation of a response.
- *
- * @internal
- */
-async function handlePredictResponse(response) {
-    const responseJson = await response.json();
-    const images = [];
-    let filteredReason = undefined;
-    // The backend should always send a non-empty array of predictions if the response was successful.
-    if (!responseJson.predictions || responseJson.predictions?.length === 0) {
-        throw new AIError(AIErrorCode.RESPONSE_ERROR, 'No predictions or filtered reason received from Vertex AI. Please report this issue with the full error details at https://github.com/firebase/firebase-js-sdk/issues.');
-    }
-    for (const prediction of responseJson.predictions) {
-        if (prediction.raiFilteredReason) {
-            filteredReason = prediction.raiFilteredReason;
-        }
-        else if (prediction.mimeType && prediction.bytesBase64Encoded) {
-            images.push({
-                mimeType: prediction.mimeType,
-                bytesBase64Encoded: prediction.bytesBase64Encoded
-            });
-        }
-        else if (prediction.mimeType && prediction.gcsUri) {
-            images.push({
-                mimeType: prediction.mimeType,
-                gcsURI: prediction.gcsUri
-            });
-        }
-        else if (prediction.safetyAttributes) ;
-        else {
-            throw new AIError(AIErrorCode.RESPONSE_ERROR, `Unexpected element in 'predictions' array in response: '${JSON.stringify(prediction)}'`);
-        }
-    }
-    return { images, filteredReason };
+    return false;
 }
 
 /**
  * @license
- * Copyright 2025 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1591,771 +2359,463 @@ async function handlePredictResponse(response) {
  * limitations under the License.
  */
 /**
- * This SDK supports both the Vertex AI Gemini API and the Gemini Developer API (using Google AI).
- * The public API prioritizes the format used by the Vertex AI Gemini API.
- * We avoid having two sets of types by translating requests and responses between the two API formats.
- * This translation allows developers to switch between the Vertex AI Gemini API and the Gemini Developer API
- * with minimal code changes.
+ * Reads the document referred to by this `DocumentReference`.
  *
- * In here are functions that map requests and responses between the two API formats.
- * Requests in the Vertex AI format are mapped to the Google AI format before being sent.
- * Responses from the Google AI backend are mapped back to the Vertex AI format before being returned to the user.
+ * Note: `getDoc()` attempts to provide up-to-date data when possible by waiting
+ * for data from the server, but it may return cached data or fail if you are
+ * offline and the server cannot be reached. To specify this behavior, invoke
+ * {@link getDocFromCache} or {@link getDocFromServer}.
+ *
+ * @param reference - The reference of the document to fetch.
+ * @returns A `Promise` that resolves with a `DocumentSnapshot` containing the
+ * document contents.
  */
+function getDoc(reference) {
+    reference = cast(reference, DocumentReference);
+    const firestore = cast(reference.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    return firestoreClientGetDocumentViaSnapshotListener(client, reference._key).then(snapshot => convertToDocSnapshot(firestore, reference, snapshot));
+}
 /**
- * Maps a Vertex AI {@link GenerateContentRequest} to a format that can be sent to Google AI.
+ * Reads the document referred to by this `DocumentReference` from cache.
+ * Returns an error if the document is not currently cached.
  *
- * @param generateContentRequest The {@link GenerateContentRequest} to map.
- * @returns A {@link GenerateContentResponse} that conforms to the Google AI format.
- *
- * @throws If the request contains properties that are unsupported by Google AI.
- *
- * @internal
+ * @returns A `Promise` that resolves with a `DocumentSnapshot` containing the
+ * document contents.
  */
-function mapGenerateContentRequest(generateContentRequest) {
-    generateContentRequest.safetySettings?.forEach(safetySetting => {
-        if (safetySetting.method) {
-            throw new AIError(AIErrorCode.UNSUPPORTED, 'SafetySetting.method is not supported in the the Gemini Developer API. Please remove this property.');
-        }
-    });
-    if (generateContentRequest.generationConfig?.topK) {
-        const roundedTopK = Math.round(generateContentRequest.generationConfig.topK);
-        if (roundedTopK !== generateContentRequest.generationConfig.topK) {
-            logger.warn('topK in GenerationConfig has been rounded to the nearest integer to match the format for requests to the Gemini Developer API.');
-            generateContentRequest.generationConfig.topK = roundedTopK;
-        }
+function getDocFromCache(reference) {
+    reference = cast(reference, DocumentReference);
+    const firestore = cast(reference.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    const userDataWriter = new ExpUserDataWriter(firestore);
+    return firestoreClientGetDocumentFromLocalCache(client, reference._key).then(doc => new DocumentSnapshot(firestore, userDataWriter, reference._key, doc, new SnapshotMetadata(doc !== null && doc.hasLocalMutations, 
+    /* fromCache= */ true), reference.converter));
+}
+/**
+ * Reads the document referred to by this `DocumentReference` from the server.
+ * Returns an error if the network is not available.
+ *
+ * @returns A `Promise` that resolves with a `DocumentSnapshot` containing the
+ * document contents.
+ */
+function getDocFromServer(reference) {
+    reference = cast(reference, DocumentReference);
+    const firestore = cast(reference.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    return firestoreClientGetDocumentViaSnapshotListener(client, reference._key, {
+        source: 'server'
+    }).then(snapshot => convertToDocSnapshot(firestore, reference, snapshot));
+}
+/**
+ * Executes the query and returns the results as a `QuerySnapshot`.
+ *
+ * Note: `getDocs()` attempts to provide up-to-date data when possible by
+ * waiting for data from the server, but it may return cached data or fail if
+ * you are offline and the server cannot be reached. To specify this behavior,
+ * invoke {@link getDocsFromCache} or {@link getDocsFromServer}.
+ *
+ * @returns A `Promise` that resolves with the results of the query.
+ */
+function getDocs(query) {
+    query = cast(query, Query);
+    const firestore = cast(query.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    const userDataWriter = new ExpUserDataWriter(firestore);
+    validateHasExplicitOrderByForLimitToLast(query._query);
+    return firestoreClientGetDocumentsViaSnapshotListener(client, query._query).then(snapshot => new QuerySnapshot(firestore, userDataWriter, query, snapshot));
+}
+/**
+ * Executes the query and returns the results as a `QuerySnapshot` from cache.
+ * Returns an empty result set if no documents matching the query are currently
+ * cached.
+ *
+ * @returns A `Promise` that resolves with the results of the query.
+ */
+function getDocsFromCache(query) {
+    query = cast(query, Query);
+    const firestore = cast(query.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    const userDataWriter = new ExpUserDataWriter(firestore);
+    return firestoreClientGetDocumentsFromLocalCache(client, query._query).then(snapshot => new QuerySnapshot(firestore, userDataWriter, query, snapshot));
+}
+/**
+ * Executes the query and returns the results as a `QuerySnapshot` from the
+ * server. Returns an error if the network is not available.
+ *
+ * @returns A `Promise` that resolves with the results of the query.
+ */
+function getDocsFromServer(query) {
+    query = cast(query, Query);
+    const firestore = cast(query.firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    const userDataWriter = new ExpUserDataWriter(firestore);
+    return firestoreClientGetDocumentsViaSnapshotListener(client, query._query, {
+        source: 'server'
+    }).then(snapshot => new QuerySnapshot(firestore, userDataWriter, query, snapshot));
+}
+function setDoc(reference, data, options) {
+    reference = cast(reference, DocumentReference);
+    const firestore = cast(reference.firestore, Firestore);
+    const convertedValue = applyFirestoreDataConverter(reference.converter, data, options);
+    const dataReader = newUserDataReader(firestore);
+    const parsed = parseSetData(dataReader, 'setDoc', reference._key, convertedValue, reference.converter !== null, options);
+    const mutation = parsed.toMutation(reference._key, Precondition.none());
+    return executeWrite(firestore, [mutation]);
+}
+function updateDoc(reference, fieldOrUpdateData, value, ...moreFieldsAndValues) {
+    reference = cast(reference, DocumentReference);
+    const firestore = cast(reference.firestore, Firestore);
+    const dataReader = newUserDataReader(firestore);
+    // For Compat types, we have to "extract" the underlying types before
+    // performing validation.
+    fieldOrUpdateData = getModularInstance(fieldOrUpdateData);
+    let parsed;
+    if (typeof fieldOrUpdateData === 'string' ||
+        fieldOrUpdateData instanceof FieldPath) {
+        parsed = parseUpdateVarargs(dataReader, 'updateDoc', reference._key, fieldOrUpdateData, value, moreFieldsAndValues);
     }
-    return generateContentRequest;
+    else {
+        parsed = parseUpdateData(dataReader, 'updateDoc', reference._key, fieldOrUpdateData);
+    }
+    const mutation = parsed.toMutation(reference._key, Precondition.exists(true));
+    return executeWrite(firestore, [mutation]);
 }
 /**
- * Maps a {@link GenerateContentResponse} from Google AI to the format of the
- * {@link GenerateContentResponse} that we get from VertexAI that is exposed in the public API.
+ * Deletes the document referred to by the specified `DocumentReference`.
  *
- * @param googleAIResponse The {@link GenerateContentResponse} from Google AI.
- * @returns A {@link GenerateContentResponse} that conforms to the public API's format.
+ * Note that the returned `Promise` does _not_ resolve until the document is
+ * successfully deleted from the remote Firestore backend and, similarly, is not
+ * rejected until the remote Firestore backend reports an error deleting the given
+ * document. So if the client cannot reach the backend (for example, due to being
+ * offline) then the returned `Promise` will not resolve for a potentially-long
+ * time (for example, until the client has gone back online). That being said,
+ * the given data _will_ be immediately deleted from the local cache and will be
+ * reflected in future "get" operations as if it had been successfully
+ * deleted from the remote Firestore server, a feature of Firestore called
+ * "latency compensation". The document will _eventually_ be deleted from the remote
+ * Firestore backend once a connection can be established. Therefore, it is
+ * usually undesirable to `await` the `Promise` returned from this function
+ * because the indefinite amount of time before which the promise resolves or
+ * rejects can block application logic unnecessarily.
  *
- * @internal
+ * @param reference - A reference to the document to delete.
+ * @returns A `Promise` that resolves once the document has been successfully
+ * deleted from the backend or rejects once the backend reports an error
+ * deleting the document.
  */
-function mapGenerateContentResponse(googleAIResponse) {
-    const generateContentResponse = {
-        candidates: googleAIResponse.candidates
-            ? mapGenerateContentCandidates(googleAIResponse.candidates)
-            : undefined,
-        prompt: googleAIResponse.promptFeedback
-            ? mapPromptFeedback(googleAIResponse.promptFeedback)
-            : undefined,
-        usageMetadata: googleAIResponse.usageMetadata
+function deleteDoc(reference) {
+    const firestore = cast(reference.firestore, Firestore);
+    const mutations = [new DeleteMutation(reference._key, Precondition.none())];
+    return executeWrite(firestore, mutations);
+}
+/**
+ * Add a new document to specified `CollectionReference` with the given data,
+ * assigning it a document ID automatically.
+ *
+ * Note that the returned `Promise` does _not_ resolve until the document is
+ * successfully created to the remote Firestore backend and, similarly, is not
+ * rejected until the remote Firestore backend reports an error creating the given
+ * document. So if the client cannot reach the backend (for example, due to being
+ * offline) then the returned `Promise` will not resolve for a potentially-long
+ * time (for example, until the client has gone back online). That being said,
+ * the given document _will_ be immediately created in the local cache and will be
+ * incorporated into future "get" operations as if it had been successfully
+ * created in the remote Firestore server, a feature of Firestore called
+ * "latency compensation". The document will _eventually_ be created in the remote
+ * Firestore backend once a connection can be established. Therefore, it is
+ * usually undesirable to `await` the `Promise` returned from this function
+ * because the indefinite amount of time before which the promise resolves or
+ * rejects can block application logic unnecessarily.
+ *
+ * @param reference - A reference to the collection to add this document to.
+ * @param data - An Object containing the data for the new document.
+ * @returns A `Promise` that resolves once the docoument has been successfully
+ * created in the backend or rejects once the backend reports an error creating
+ * the document.
+ */
+function addDoc(reference, data) {
+    const firestore = cast(reference.firestore, Firestore);
+    const docRef = doc(reference);
+    const convertedValue = applyFirestoreDataConverter(reference.converter, data);
+    const dataReader = newUserDataReader(reference.firestore);
+    const parsed = parseSetData(dataReader, 'addDoc', docRef._key, convertedValue, reference.converter !== null, {});
+    const mutation = parsed.toMutation(docRef._key, Precondition.exists(false));
+    return executeWrite(firestore, [mutation]).then(() => docRef);
+}
+function onSnapshot(reference, ...args) {
+    // onSnapshot for Query or Document.
+    reference = getModularInstance(reference);
+    let options = {
+        includeMetadataChanges: false,
+        source: 'default'
     };
-    return generateContentResponse;
-}
-/**
- * Maps a Vertex AI {@link CountTokensRequest} to a format that can be sent to Google AI.
- *
- * @param countTokensRequest The {@link CountTokensRequest} to map.
- * @param model The model to count tokens with.
- * @returns A {@link CountTokensRequest} that conforms to the Google AI format.
- *
- * @internal
- */
-function mapCountTokensRequest(countTokensRequest, model) {
-    const mappedCountTokensRequest = {
-        generateContentRequest: {
-            model,
-            ...countTokensRequest
-        }
+    let currArg = 0;
+    if (typeof args[currArg] === 'object' && !isPartialObserver(args[currArg])) {
+        options = args[currArg++];
+    }
+    const internalOptions = {
+        includeMetadataChanges: options.includeMetadataChanges,
+        source: options.source
     };
-    return mappedCountTokensRequest;
+    if (isPartialObserver(args[currArg])) {
+        const userObserver = args[currArg];
+        args[currArg] = userObserver.next?.bind(userObserver);
+        args[currArg + 1] = userObserver.error?.bind(userObserver);
+        args[currArg + 2] = userObserver.complete?.bind(userObserver);
+    }
+    let observer;
+    let firestore;
+    let internalQuery;
+    if (reference instanceof DocumentReference) {
+        firestore = cast(reference.firestore, Firestore);
+        internalQuery = newQueryForPath(reference._key.path);
+        observer = {
+            next: snapshot => {
+                if (args[currArg]) {
+                    args[currArg](convertToDocSnapshot(firestore, reference, snapshot));
+                }
+            },
+            error: args[currArg + 1],
+            complete: args[currArg + 2]
+        };
+    }
+    else {
+        const query = cast(reference, Query);
+        firestore = cast(query.firestore, Firestore);
+        internalQuery = query._query;
+        const userDataWriter = new ExpUserDataWriter(firestore);
+        observer = {
+            next: snapshot => {
+                if (args[currArg]) {
+                    args[currArg](new QuerySnapshot(firestore, userDataWriter, query, snapshot));
+                }
+            },
+            error: args[currArg + 1],
+            complete: args[currArg + 2]
+        };
+        validateHasExplicitOrderByForLimitToLast(reference._query);
+    }
+    const client = ensureFirestoreConfigured(firestore);
+    return firestoreClientListen(client, internalQuery, internalOptions, observer);
 }
-/**
- * Maps a Google AI {@link GoogleAIGenerateContentCandidate} to a format that conforms
- * to the Vertex AI API format.
- *
- * @param candidates The {@link GoogleAIGenerateContentCandidate} to map.
- * @returns A {@link GenerateContentCandidate} that conforms to the Vertex AI format.
- *
- * @throws If any {@link Part} in the candidates has a `videoMetadata` property.
- *
- * @internal
- */
-function mapGenerateContentCandidates(candidates) {
-    const mappedCandidates = [];
-    let mappedSafetyRatings;
-    if (mappedCandidates) {
-        candidates.forEach(candidate => {
-            // Map citationSources to citations.
-            let citationMetadata;
-            if (candidate.citationMetadata) {
-                citationMetadata = {
-                    citations: candidate.citationMetadata.citationSources
-                };
-            }
-            // Assign missing candidate SafetyRatings properties to their defaults if undefined.
-            if (candidate.safetyRatings) {
-                mappedSafetyRatings = candidate.safetyRatings.map(safetyRating => {
-                    return {
-                        ...safetyRating,
-                        severity: safetyRating.severity ?? HarmSeverity.HARM_SEVERITY_UNSUPPORTED,
-                        probabilityScore: safetyRating.probabilityScore ?? 0,
-                        severityScore: safetyRating.severityScore ?? 0
-                    };
-                });
-            }
-            // videoMetadata is not supported.
-            // Throw early since developers may send a long video as input and only expect to pay
-            // for inference on a small portion of the video.
-            if (candidate.content?.parts?.some(part => part?.videoMetadata)) {
-                throw new AIError(AIErrorCode.UNSUPPORTED, 'Part.videoMetadata is not supported in the Gemini Developer API. Please remove this property.');
-            }
-            const mappedCandidate = {
-                index: candidate.index,
-                content: candidate.content,
-                finishReason: candidate.finishReason,
-                finishMessage: candidate.finishMessage,
-                safetyRatings: mappedSafetyRatings,
-                citationMetadata,
-                groundingMetadata: candidate.groundingMetadata,
-                urlContextMetadata: candidate.urlContextMetadata
+function onSnapshotResume(reference, snapshotJson, ...args) {
+    const db = getModularInstance(reference);
+    const json = normalizeSnapshotJsonFields(snapshotJson);
+    if (json.error) {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, json.error);
+    }
+    let curArg = 0;
+    let options = undefined;
+    if (typeof args[curArg] === 'object' && !isPartialObserver(args[curArg])) {
+        options = args[curArg++];
+    }
+    if (json.bundleSource === 'QuerySnapshot') {
+        let observer = null;
+        if (typeof args[curArg] === 'object' && isPartialObserver(args[curArg])) {
+            const userObserver = args[curArg++];
+            observer = {
+                next: userObserver.next,
+                error: userObserver.error,
+                complete: userObserver.complete
             };
-            mappedCandidates.push(mappedCandidate);
-        });
-    }
-    return mappedCandidates;
-}
-function mapPromptFeedback(promptFeedback) {
-    // Assign missing SafetyRating properties to their defaults if undefined.
-    const mappedSafetyRatings = [];
-    promptFeedback.safetyRatings.forEach(safetyRating => {
-        mappedSafetyRatings.push({
-            category: safetyRating.category,
-            probability: safetyRating.probability,
-            severity: safetyRating.severity ?? HarmSeverity.HARM_SEVERITY_UNSUPPORTED,
-            probabilityScore: safetyRating.probabilityScore ?? 0,
-            severityScore: safetyRating.severityScore ?? 0,
-            blocked: safetyRating.blocked
-        });
-    });
-    const mappedPromptFeedback = {
-        blockReason: promptFeedback.blockReason,
-        safetyRatings: mappedSafetyRatings,
-        blockReasonMessage: promptFeedback.blockReasonMessage
-    };
-    return mappedPromptFeedback;
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const responseLineRE = /^data\: (.*)(?:\n\n|\r\r|\r\n\r\n)/;
-/**
- * Process a response.body stream from the backend and return an
- * iterator that provides one complete GenerateContentResponse at a time
- * and a promise that resolves with a single aggregated
- * GenerateContentResponse.
- *
- * @param response - Response from a fetch call
- */
-async function processStream(response, apiSettings, inferenceSource) {
-    const inputStream = response.body.pipeThrough(new TextDecoderStream('utf8', { fatal: true }));
-    const responseStream = getResponseStream(inputStream);
-    // We split the stream so the user can iterate over partial results (stream1)
-    // while we aggregate the full result for history/final response (stream2).
-    const [stream1, stream2] = responseStream.tee();
-    const { response: internalResponse, firstValue } = await processStreamInternal(stream2, apiSettings, inferenceSource);
-    return {
-        stream: generateResponseSequence(stream1, apiSettings, inferenceSource),
-        response: internalResponse,
-        firstValue
-    };
-}
-/**
- * Consumes streams teed from the input stream for internal needs.
- * The streams need to be teed because each stream can only be consumed
- * by one reader.
- *
- * "streamForPeek"
- * This tee is used to peek at the first value for relevant information
- * that we need to evaluate before returning the stream handle to the
- * client. For example, we need to check if the response is a function
- * call that may need to be handled by automatic function calling before
- * returning a response to the client.
- *
- * "streamForAggregation"
- * We iterate through this tee independently from the user and aggregate
- * it into a single response when the stream is complete. We need this
- * aggregate object to add to chat history when using ChatSession. It's
- * also provided to the user if they want it.
- */
-async function processStreamInternal(stream, apiSettings, inferenceSource) {
-    const [streamForPeek, streamForAggregation] = stream.tee();
-    const reader = streamForPeek.getReader();
-    const { value } = await reader.read();
-    return {
-        firstValue: value,
-        response: getResponsePromise(streamForAggregation, apiSettings, inferenceSource)
-    };
-}
-async function getResponsePromise(stream, apiSettings, inferenceSource) {
-    const allResponses = [];
-    const reader = stream.getReader();
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-            let generateContentResponse = aggregateResponses(allResponses);
-            if (apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-                generateContentResponse = mapGenerateContentResponse(generateContentResponse);
-            }
-            return createEnhancedContentResponse(generateContentResponse, inferenceSource);
         }
-        allResponses.push(value);
+        else {
+            observer = {
+                next: args[curArg++],
+                error: args[curArg++],
+                complete: args[curArg++]
+            };
+        }
+        return onSnapshotQuerySnapshotBundle(db, json, options, observer, args[curArg]);
+    }
+    else if (json.bundleSource === 'DocumentSnapshot') {
+        let observer = null;
+        if (typeof args[curArg] === 'object' && isPartialObserver(args[curArg])) {
+            const userObserver = args[curArg++];
+            observer = {
+                next: userObserver.next,
+                error: userObserver.error,
+                complete: userObserver.complete
+            };
+        }
+        else {
+            observer = {
+                next: args[curArg++],
+                error: args[curArg++],
+                complete: args[curArg++]
+            };
+        }
+        return onSnapshotDocumentSnapshotBundle(db, json, options, observer, args[curArg]);
+    }
+    else {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, `unsupported bundle source: ${json.bundleSource}`);
     }
 }
-async function* generateResponseSequence(stream, apiSettings, inferenceSource) {
-    const reader = stream.getReader();
-    while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
+function onSnapshotsInSync(firestore, arg) {
+    firestore = cast(firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    const observer = isPartialObserver(arg)
+        ? arg
+        : {
+            next: arg
+        };
+    return firestoreClientAddSnapshotsInSyncListener(client, observer);
+}
+/**
+ * Locally writes `mutations` on the async queue.
+ * @internal
+ */
+function executeWrite(firestore, mutations) {
+    const client = ensureFirestoreConfigured(firestore);
+    return firestoreClientWrite(client, mutations);
+}
+/**
+ * Converts a {@link ViewSnapshot} that contains the single document specified by `ref`
+ * to a {@link DocumentSnapshot}.
+ */
+function convertToDocSnapshot(firestore, ref, snapshot) {
+    const doc = snapshot.docs.get(ref._key);
+    const userDataWriter = new ExpUserDataWriter(firestore);
+    return new DocumentSnapshot(firestore, userDataWriter, ref._key, doc, new SnapshotMetadata(snapshot.hasPendingWrites, snapshot.fromCache), ref.converter);
+}
+/**
+ * Ensures the data required to construct an {@link onSnapshot} listener exist in a `snapshotJson`
+ * object that originates from {@link DocumentSnapshot.toJSON} or {@link Querysnapshot.toJSON}. The
+ * data is normalized into a typed object.
+ *
+ * @param snapshotJson - The JSON object that the app provided to {@link onSnapshot}.
+ * @returns A normalized object that contains all of the required bundle JSON fields. If
+ * {@link snapshotJson} doesn't contain the required fields, or if the fields exist as empty
+ * strings, then the {@link snapshotJson.error} field will be a non empty string.
+ *
+ * @internal
+ */
+function normalizeSnapshotJsonFields(snapshotJson) {
+    const result = {
+        bundle: '',
+        bundleName: '',
+        bundleSource: ''
+    };
+    const requiredKeys = ['bundle', 'bundleName', 'bundleSource'];
+    for (const key of requiredKeys) {
+        if (!(key in snapshotJson)) {
+            result.error = `snapshotJson missing required field: ${key}`;
             break;
         }
-        let enhancedResponse;
-        if (apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-            enhancedResponse = createEnhancedContentResponse(mapGenerateContentResponse(value), inferenceSource);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value = snapshotJson[key];
+        if (typeof value !== 'string') {
+            result.error = `snapshotJson field '${key}' must be a string.`;
+            break;
         }
-        else {
-            enhancedResponse = createEnhancedContentResponse(value, inferenceSource);
+        if (value.length === 0) {
+            result.error = `snapshotJson field '${key}' cannot be an empty string.`;
+            break;
         }
-        const firstCandidate = enhancedResponse.candidates?.[0];
-        if (!firstCandidate?.content?.parts &&
-            !firstCandidate?.finishReason &&
-            !firstCandidate?.citationMetadata &&
-            !firstCandidate?.urlContextMetadata) {
-            continue;
+        if (key === 'bundle') {
+            result.bundle = value;
         }
-        yield enhancedResponse;
+        else if (key === 'bundleName') {
+            result.bundleName = value;
+        }
+        else if (key === 'bundleSource') {
+            result.bundleSource = value;
+        }
     }
+    return result;
 }
 /**
- * Reads a raw string stream, buffers incomplete chunks, and yields parsed JSON objects.
+ * Loads the bundle in a separate task and then invokes {@link onSnapshot} with a
+ * {@link DocumentReference} for the document in the bundle.
+ *
+ * @param firestore - The {@link Firestore} instance for the {@link onSnapshot} operation request.
+ * @param json - The JSON bundle to load, produced by {@link DocumentSnapshot.toJSON}.
+ * @param options - Options controlling the listen behavior.
+ * @param observer - A single object containing `next` and `error` callbacks.
+ * @param converter - An optional object that converts objects from Firestore before the onNext
+ * listener is invoked.
+ * @returns An unsubscribe function that can be called to cancel the snapshot
+ * listener.
+ *
+ * @internal
  */
-function getResponseStream(inputStream) {
-    const reader = inputStream.getReader();
-    const stream = new ReadableStream({
-        start(controller) {
-            let currentText = '';
-            return pump();
-            function pump() {
-                return reader.read().then(({ value, done }) => {
-                    if (done) {
-                        if (currentText.trim()) {
-                            controller.error(new AIError(AIErrorCode.PARSE_FAILED, 'Failed to parse stream'));
-                            return;
-                        }
-                        controller.close();
-                        return;
-                    }
-                    currentText += value;
-                    // SSE events may span chunk boundaries, so we buffer until we match
-                    // the full "data: {json}\n\n" pattern.
-                    let match = currentText.match(responseLineRE);
-                    let parsedResponse;
-                    while (match) {
-                        try {
-                            parsedResponse = JSON.parse(match[1]);
-                        }
-                        catch (e) {
-                            controller.error(new AIError(AIErrorCode.PARSE_FAILED, `Error parsing JSON response: "${match[1]}`));
-                            return;
-                        }
-                        controller.enqueue(parsedResponse);
-                        currentText = currentText.substring(match[0].length);
-                        match = currentText.match(responseLineRE);
-                    }
-                    return pump();
-                });
-            }
+function onSnapshotDocumentSnapshotBundle(db, json, options, observer, converter) {
+    let unsubscribed = false;
+    let internalUnsubscribe;
+    const loadTask = loadBundle(db, json.bundle);
+    loadTask
+        .then(() => {
+        if (!unsubscribed) {
+            const docReference = new DocumentReference(db, converter ? converter : null, DocumentKey.fromPath(json.bundleName));
+            internalUnsubscribe = onSnapshot(docReference, options ? options : {}, observer);
         }
+    })
+        .catch(e => {
+        if (observer.error) {
+            observer.error(e);
+        }
+        return () => { };
     });
-    return stream;
-}
-/**
- * Aggregates an array of `GenerateContentResponse`s into a single
- * GenerateContentResponse.
- */
-function aggregateResponses(responses) {
-    const lastResponse = responses[responses.length - 1];
-    const aggregatedResponse = {
-        promptFeedback: lastResponse?.promptFeedback
-    };
-    for (const response of responses) {
-        if (response.candidates) {
-            for (const candidate of response.candidates) {
-                // Use 0 if index is undefined (protobuf default value omission).
-                const i = candidate.index || 0;
-                if (!aggregatedResponse.candidates) {
-                    aggregatedResponse.candidates = [];
-                }
-                if (!aggregatedResponse.candidates[i]) {
-                    aggregatedResponse.candidates[i] = {
-                        index: candidate.index
-                    };
-                }
-                // Overwrite with the latest metadata
-                aggregatedResponse.candidates[i].citationMetadata =
-                    candidate.citationMetadata;
-                aggregatedResponse.candidates[i].finishReason = candidate.finishReason;
-                aggregatedResponse.candidates[i].finishMessage =
-                    candidate.finishMessage;
-                aggregatedResponse.candidates[i].safetyRatings =
-                    candidate.safetyRatings;
-                aggregatedResponse.candidates[i].groundingMetadata =
-                    candidate.groundingMetadata;
-                // The urlContextMetadata object is defined in the first chunk of the response stream.
-                // In all subsequent chunks, the urlContextMetadata object will be undefined. We need to
-                // make sure that we don't overwrite the first value urlContextMetadata object with undefined.
-                // FIXME: What happens if we receive a second, valid urlContextMetadata object?
-                const urlContextMetadata = candidate.urlContextMetadata;
-                if (typeof urlContextMetadata === 'object' &&
-                    urlContextMetadata !== null &&
-                    Object.keys(urlContextMetadata).length > 0) {
-                    aggregatedResponse.candidates[i].urlContextMetadata =
-                        urlContextMetadata;
-                }
-                if (candidate.content) {
-                    if (!candidate.content.parts) {
-                        continue;
-                    }
-                    if (!aggregatedResponse.candidates[i].content) {
-                        aggregatedResponse.candidates[i].content = {
-                            role: candidate.content.role || 'user',
-                            parts: []
-                        };
-                    }
-                    for (const part of candidate.content.parts) {
-                        const newPart = { ...part };
-                        // The backend can send empty text parts. If these are sent back
-                        // (e.g. in chat history), the backend will respond with an error.
-                        // To prevent this, ignore empty text parts.
-                        if (part.text === '') {
-                            continue;
-                        }
-                        if (Object.keys(newPart).length > 0) {
-                            aggregatedResponse.candidates[i].content.parts.push(newPart);
-                        }
-                    }
-                }
-            }
+    return () => {
+        if (unsubscribed) {
+            return;
         }
-    }
-    return aggregatedResponse;
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const errorsCausingFallback = [
-    // most network errors
-    AIErrorCode.FETCH_ERROR,
-    // fallback code for all other errors in makeRequest
-    AIErrorCode.ERROR,
-    // error due to API not being enabled in project
-    AIErrorCode.API_NOT_ENABLED
-];
-/**
- * Dispatches a request to the appropriate backend (on-device or in-cloud)
- * based on the inference mode.
- *
- * @param request - The request to be sent.
- * @param chromeAdapter - The on-device model adapter.
- * @param onDeviceCall - The function to call for on-device inference.
- * @param inCloudCall - The function to call for in-cloud inference.
- * @returns The response from the backend.
- */
-async function callCloudOrDevice(request, chromeAdapter, onDeviceCall, inCloudCall) {
-    if (!chromeAdapter) {
-        return {
-            response: await inCloudCall(),
-            inferenceSource: InferenceSource.IN_CLOUD
-        };
-    }
-    switch (chromeAdapter.mode) {
-        case InferenceMode.ONLY_ON_DEVICE:
-            if (await chromeAdapter.isAvailable(request)) {
-                return {
-                    response: await onDeviceCall(),
-                    inferenceSource: InferenceSource.ON_DEVICE
-                };
-            }
-            throw new AIError(AIErrorCode.UNSUPPORTED, 'Inference mode is ONLY_ON_DEVICE, but an on-device model is not available.');
-        case InferenceMode.ONLY_IN_CLOUD:
-            return {
-                response: await inCloudCall(),
-                inferenceSource: InferenceSource.IN_CLOUD
-            };
-        case InferenceMode.PREFER_IN_CLOUD:
-            try {
-                return {
-                    response: await inCloudCall(),
-                    inferenceSource: InferenceSource.IN_CLOUD
-                };
-            }
-            catch (e) {
-                if (e instanceof AIError && errorsCausingFallback.includes(e.code)) {
-                    return {
-                        response: await onDeviceCall(),
-                        inferenceSource: InferenceSource.ON_DEVICE
-                    };
-                }
-                throw e;
-            }
-        case InferenceMode.PREFER_ON_DEVICE:
-            if (await chromeAdapter.isAvailable(request)) {
-                return {
-                    response: await onDeviceCall(),
-                    inferenceSource: InferenceSource.ON_DEVICE
-                };
-            }
-            return {
-                response: await inCloudCall(),
-                inferenceSource: InferenceSource.IN_CLOUD
-            };
-        default:
-            throw new AIError(AIErrorCode.ERROR, `Unexpected infererence mode: ${chromeAdapter.mode}`);
-    }
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-async function generateContentStreamOnCloud(apiSettings, model, params, singleRequestOptions) {
-    if (apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-        params = mapGenerateContentRequest(params);
-    }
-    return makeRequest({
-        task: "streamGenerateContent" /* Task.STREAM_GENERATE_CONTENT */,
-        model,
-        apiSettings,
-        stream: true,
-        singleRequestOptions
-    }, JSON.stringify(params));
-}
-async function generateContentStream(apiSettings, model, params, chromeAdapter, singleRequestOptions) {
-    const callResult = await callCloudOrDevice(params, chromeAdapter, () => chromeAdapter.generateContentStream(params), () => generateContentStreamOnCloud(apiSettings, model, params, singleRequestOptions));
-    return processStream(callResult.response, apiSettings, callResult.inferenceSource);
-}
-async function generateContentOnCloud(apiSettings, model, params, singleRequestOptions) {
-    if (apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-        params = mapGenerateContentRequest(params);
-    }
-    return makeRequest({
-        model,
-        task: "generateContent" /* Task.GENERATE_CONTENT */,
-        apiSettings,
-        stream: false,
-        singleRequestOptions
-    }, JSON.stringify(params));
-}
-async function templateGenerateContent(apiSettings, templateId, templateParams, singleRequestOptions) {
-    const response = await makeRequest({
-        task: "templateGenerateContent" /* ServerPromptTemplateTask.TEMPLATE_GENERATE_CONTENT */,
-        templateId,
-        apiSettings,
-        stream: false,
-        singleRequestOptions
-    }, JSON.stringify(templateParams));
-    const generateContentResponse = await processGenerateContentResponse(response, apiSettings);
-    const enhancedResponse = createEnhancedContentResponse(generateContentResponse);
-    return {
-        response: enhancedResponse
+        unsubscribed = true;
+        if (internalUnsubscribe) {
+            internalUnsubscribe();
+        }
     };
 }
-async function templateGenerateContentStream(apiSettings, templateId, templateParams, singleRequestOptions) {
-    const response = await makeRequest({
-        task: "templateStreamGenerateContent" /* ServerPromptTemplateTask.TEMPLATE_STREAM_GENERATE_CONTENT */,
-        templateId,
-        apiSettings,
-        stream: true,
-        singleRequestOptions
-    }, JSON.stringify(templateParams));
-    return processStream(response, apiSettings);
-}
-async function generateContent(apiSettings, model, params, chromeAdapter, singleRequestOptions) {
-    const callResult = await callCloudOrDevice(params, chromeAdapter, () => chromeAdapter.generateContent(params), () => generateContentOnCloud(apiSettings, model, params, singleRequestOptions));
-    const generateContentResponse = await processGenerateContentResponse(callResult.response, apiSettings);
-    const enhancedResponse = createEnhancedContentResponse(generateContentResponse, callResult.inferenceSource);
-    return {
-        response: enhancedResponse
-    };
-}
-async function processGenerateContentResponse(response, apiSettings) {
-    const responseJson = await response.json();
-    if (apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-        return mapGenerateContentResponse(responseJson);
-    }
-    else {
-        return responseJson;
-    }
-}
-
 /**
- * @license
- * Copyright 2024 Google LLC
+ * Loads the bundle in a separate task and then invokes {@link onSnapshot} with a
+ * {@link Query} that represents the Query in the bundle.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-function formatSystemInstruction(input) {
-    // null or undefined
-    if (input == null) {
-        return undefined;
-    }
-    else if (typeof input === 'string') {
-        return { role: 'system', parts: [{ text: input }] };
-    }
-    else if (input.text) {
-        return { role: 'system', parts: [input] };
-    }
-    else if (input.parts) {
-        if (!input.role) {
-            return { role: 'system', parts: input.parts };
-        }
-        else {
-            return input;
-        }
-    }
-}
-function formatNewContent(request) {
-    let newParts = [];
-    if (typeof request === 'string') {
-        newParts = [{ text: request }];
-    }
-    else {
-        for (const partOrString of request) {
-            if (typeof partOrString === 'string') {
-                newParts.push({ text: partOrString });
-            }
-            else {
-                newParts.push(partOrString);
-            }
-        }
-    }
-    return assignRoleToPartsAndValidateSendMessageRequest(newParts);
-}
-/**
- * When multiple Part types (i.e. FunctionResponsePart and TextPart) are
- * passed in a single Part array, we may need to assign different roles to each
- * part. Currently only FunctionResponsePart requires a role other than 'user'.
- * @private
- * @param parts Array of parts to pass to the model
- * @returns Array of content items
- */
-function assignRoleToPartsAndValidateSendMessageRequest(parts) {
-    const userContent = { role: 'user', parts: [] };
-    const functionContent = { role: 'function', parts: [] };
-    let hasUserContent = false;
-    let hasFunctionContent = false;
-    for (const part of parts) {
-        if ('functionResponse' in part) {
-            functionContent.parts.push(part);
-            hasFunctionContent = true;
-        }
-        else {
-            userContent.parts.push(part);
-            hasUserContent = true;
-        }
-    }
-    if (hasUserContent && hasFunctionContent) {
-        throw new AIError(AIErrorCode.INVALID_CONTENT, 'Within a single message, FunctionResponse cannot be mixed with other type of Part in the request for sending chat message.');
-    }
-    if (!hasUserContent && !hasFunctionContent) {
-        throw new AIError(AIErrorCode.INVALID_CONTENT, 'No Content is provided for sending chat message.');
-    }
-    if (hasUserContent) {
-        return userContent;
-    }
-    return functionContent;
-}
-function formatGenerateContentInput(params) {
-    let formattedRequest;
-    if (params.contents) {
-        formattedRequest = params;
-    }
-    else {
-        // Array or string
-        const content = formatNewContent(params);
-        formattedRequest = { contents: [content] };
-    }
-    if (params.systemInstruction) {
-        formattedRequest.systemInstruction = formatSystemInstruction(params.systemInstruction);
-    }
-    return formattedRequest;
-}
-/**
- * Convert the user-defined parameters in {@link ImagenGenerationParams} to the format
- * that is expected from the REST API.
+ * @param firestore - The {@link Firestore} instance for the {@link onSnapshot} operation request.
+ * @param json - The JSON bundle to load, produced by {@link QuerySnapshot.toJSON}.
+ * @param options - Options controlling the listen behavior.
+ * @param observer - A single object containing `next` and `error` callbacks.
+ * @param converter - An optional object that converts objects from Firestore before the onNext
+ * listener is invoked.
+ * @returns An unsubscribe function that can be called to cancel the snapshot
+ * listener.
  *
  * @internal
  */
-function createPredictRequestBody(prompt, { gcsURI, imageFormat, addWatermark, numberOfImages = 1, negativePrompt, aspectRatio, safetyFilterLevel, personFilterLevel }) {
-    // Properties that are undefined will be omitted from the JSON string that is sent in the request.
-    const body = {
-        instances: [
-            {
-                prompt
+function onSnapshotQuerySnapshotBundle(db, json, options, observer, converter) {
+    let unsubscribed = false;
+    let internalUnsubscribe;
+    const loadTask = loadBundle(db, json.bundle);
+    loadTask
+        .then(() => namedQuery(db, json.bundleName))
+        .then(query => {
+        if (query && !unsubscribed) {
+            const realQuery = query;
+            if (converter) {
+                realQuery.withConverter(converter);
             }
-        ],
-        parameters: {
-            storageUri: gcsURI,
-            negativePrompt,
-            sampleCount: numberOfImages,
-            aspectRatio,
-            outputOptions: imageFormat,
-            addWatermark,
-            safetyFilterLevel,
-            personGeneration: personFilterLevel,
-            includeRaiReason: true,
-            includeSafetyAttributes: true
+            internalUnsubscribe = onSnapshot(query, options ? options : {}, observer);
+        }
+    })
+        .catch(e => {
+        if (observer.error) {
+            observer.error(e);
+        }
+        return () => { };
+    });
+    return () => {
+        if (unsubscribed) {
+            return;
+        }
+        unsubscribed = true;
+        if (internalUnsubscribe) {
+            internalUnsubscribe();
         }
     };
-    return body;
 }
 
 /**
  * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-// https://ai.google.dev/api/rest/v1beta/Content#part
-const VALID_PART_FIELDS = [
-    'text',
-    'inlineData',
-    'functionCall',
-    'functionResponse',
-    'thought',
-    'thoughtSignature'
-];
-const VALID_PARTS_PER_ROLE = {
-    user: ['text', 'inlineData'],
-    function: ['functionResponse'],
-    model: ['text', 'functionCall', 'thought', 'thoughtSignature'],
-    // System instructions shouldn't be in history anyway.
-    system: ['text']
-};
-const VALID_PREVIOUS_CONTENT_ROLES = {
-    user: ['model'],
-    function: ['model'],
-    model: ['user', 'function'],
-    // System instructions shouldn't be in history.
-    system: []
-};
-function validateChatHistory(history) {
-    let prevContent = null;
-    for (const currContent of history) {
-        const { role, parts } = currContent;
-        if (!prevContent && role !== 'user') {
-            throw new AIError(AIErrorCode.INVALID_CONTENT, `First Content should be with role 'user', got ${role}`);
-        }
-        if (!POSSIBLE_ROLES.includes(role)) {
-            throw new AIError(AIErrorCode.INVALID_CONTENT, `Each item should include role field. Got ${role} but valid roles are: ${JSON.stringify(POSSIBLE_ROLES)}`);
-        }
-        if (!Array.isArray(parts)) {
-            throw new AIError(AIErrorCode.INVALID_CONTENT, `Content should have 'parts' property with an array of Parts`);
-        }
-        if (parts.length === 0) {
-            throw new AIError(AIErrorCode.INVALID_CONTENT, `Each Content should have at least one part`);
-        }
-        const countFields = {
-            text: 0,
-            inlineData: 0,
-            functionCall: 0,
-            functionResponse: 0,
-            thought: 0,
-            thoughtSignature: 0,
-            executableCode: 0,
-            codeExecutionResult: 0
-        };
-        for (const part of parts) {
-            for (const key of VALID_PART_FIELDS) {
-                if (key in part) {
-                    countFields[key] += 1;
-                }
-            }
-        }
-        const validParts = VALID_PARTS_PER_ROLE[role];
-        for (const key of VALID_PART_FIELDS) {
-            if (!validParts.includes(key) && countFields[key] > 0) {
-                throw new AIError(AIErrorCode.INVALID_CONTENT, `Content with role '${role}' can't contain '${key}' part`);
-            }
-        }
-        if (prevContent) {
-            const validPreviousContentRoles = VALID_PREVIOUS_CONTENT_ROLES[role];
-            if (!validPreviousContentRoles.includes(prevContent.role)) {
-                throw new AIError(AIErrorCode.INVALID_CONTENT, `Content with role '${role}' can't follow '${prevContent.role}'. Valid previous roles: ${JSON.stringify(VALID_PREVIOUS_CONTENT_ROLES)}`);
-            }
-        }
-        prevContent = currContent;
-    }
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2370,1937 +2830,98 @@ function validateChatHistory(history) {
  * limitations under the License.
  */
 /**
- * Used to break the internal promise chain when an error is already handled
- * by the user, preventing duplicate console logs.
- */
-const SILENT_ERROR = 'SILENT_ERROR';
-/**
- * Prevent infinite loop if the model continues to request sequential
- * function calls during automatic function calling.
- */
-const DEFAULT_MAX_SEQUENTIAL_FUNCTION_CALLS = 10;
-/**
- * ChatSession class that enables sending chat messages and stores
- * history of sent and received messages so far.
+ * Creates a write batch, used for performing multiple writes as a single
+ * atomic operation. The maximum number of writes allowed in a single {@link WriteBatch}
+ * is 500.
  *
- * @public
+ * Unlike transactions, write batches are persisted offline and therefore are
+ * preferable when you don't need to condition your writes on read data.
+ *
+ * @returns A {@link WriteBatch} that can be used to atomically execute multiple
+ * writes.
  */
-class ChatSession {
-    constructor(apiSettings, model, chromeAdapter, params, requestOptions) {
-        this.model = model;
-        this.chromeAdapter = chromeAdapter;
-        this.params = params;
-        this.requestOptions = requestOptions;
-        this._history = [];
-        /**
-         * Ensures sequential execution of chat messages to maintain history order.
-         * Each call waits for the previous one to settle before proceeding.
-         */
-        this._sendPromise = Promise.resolve();
-        this._apiSettings = apiSettings;
-        if (params?.history) {
-            validateChatHistory(params.history);
-            this._history = params.history;
-        }
+function writeBatch(firestore) {
+    firestore = cast(firestore, Firestore);
+    ensureFirestoreConfigured(firestore);
+    return new WriteBatch(firestore, mutations => executeWrite(firestore, mutations));
+}
+
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function setIndexConfiguration(firestore, jsonOrConfiguration) {
+    firestore = cast(firestore, Firestore);
+    const client = ensureFirestoreConfigured(firestore);
+    if (!client._uninitializedComponentsProvider ||
+        client._uninitializedComponentsProvider._offline.kind === 'memory') {
+        // PORTING NOTE: We don't return an error if the user has not enabled
+        // persistence since `enableIndexeddbPersistence()` can fail on the Web.
+        logWarn('Cannot enable indexes when persistence is disabled');
+        return Promise.resolve();
     }
-    /**
-     * Gets the chat history so far. Blocked prompts are not added to history.
-     * Neither blocked candidates nor the prompts that generated them are added
-     * to history.
-     */
-    async getHistory() {
-        await this._sendPromise;
-        return this._history;
-    }
-    /**
-     * Format Content into a request for generateContent or
-     * generateContentStream.
-     * @internal
-     */
-    _formatRequest(incomingContent, tempHistory) {
-        return {
-            safetySettings: this.params?.safetySettings,
-            generationConfig: this.params?.generationConfig,
-            tools: this.params?.tools,
-            toolConfig: this.params?.toolConfig,
-            systemInstruction: this.params?.systemInstruction,
-            contents: [...this._history, ...tempHistory, incomingContent]
-        };
-    }
-    /**
-     * Sends a chat message and receives a non-streaming
-     * {@link GenerateContentResult}
-     */
-    async sendMessage(request, singleRequestOptions) {
-        let finalResult = {};
-        await this._sendPromise;
-        /**
-         * Temporarily store multiple turns for cases like automatic function
-         * calling, only writing them to official history when the entire
-         * sequence has completed successfully.
-         */
-        const tempHistory = [];
-        this._sendPromise = this._sendPromise.then(async () => {
-            let functionCalls;
-            let functionCallTurnCount = 0;
-            const functionCallMaxTurns = this.requestOptions?.maxSequentalFunctionCalls ??
-                DEFAULT_MAX_SEQUENTIAL_FUNCTION_CALLS;
-            // Repeats until model returns a response with no function calls
-            // or until `functionCallMaxTurns` is met or exceeded.
-            do {
-                let formattedContent;
-                if (functionCalls) {
-                    functionCallTurnCount++;
-                    const functionResponseParts = await this._callFunctionsAsNeeded(functionCalls);
-                    formattedContent = formatNewContent(functionResponseParts);
-                }
-                else {
-                    formattedContent = formatNewContent(request);
-                }
-                const formattedRequest = this._formatRequest(formattedContent, tempHistory);
-                tempHistory.push(formattedContent);
-                const result = await generateContent(this._apiSettings, this.model, formattedRequest, this.chromeAdapter, {
-                    ...this.requestOptions,
-                    ...singleRequestOptions
-                });
-                if (result) {
-                    finalResult = result;
-                    functionCalls = this._getCallableFunctionCalls(result.response);
-                    if (result.response.candidates &&
-                        result.response.candidates.length > 0) {
-                        // TODO: Make this update atomic. If creating `responseContent` throws,
-                        // history will contain the user message but not the response, causing
-                        // validation errors on the next request.
-                        const responseContent = {
-                            parts: result.response.candidates?.[0].content.parts || [],
-                            // Response seems to come back without a role set.
-                            role: result.response.candidates?.[0].content.role || 'model'
-                        };
-                        tempHistory.push(responseContent);
+    const parsedIndexes = parseIndexes(jsonOrConfiguration);
+    return firestoreClientSetIndexConfiguration(client, parsedIndexes);
+}
+function parseIndexes(jsonOrConfiguration) {
+    const indexConfiguration = typeof jsonOrConfiguration === 'string'
+        ? tryParseJson(jsonOrConfiguration)
+        : jsonOrConfiguration;
+    const parsedIndexes = [];
+    if (Array.isArray(indexConfiguration.indexes)) {
+        for (const index of indexConfiguration.indexes) {
+            const collectionGroup = tryGetString(index, 'collectionGroup');
+            const segments = [];
+            if (Array.isArray(index.fields)) {
+                for (const field of index.fields) {
+                    const fieldPathString = tryGetString(field, 'fieldPath');
+                    const fieldPath = fieldPathFromDotSeparatedString('setIndexConfiguration', fieldPathString);
+                    if (field.arrayConfig === 'CONTAINS') {
+                        segments.push(new IndexSegment(fieldPath, 2 /* IndexKind.CONTAINS */));
                     }
-                    else {
-                        const blockErrorMessage = formatBlockErrorMessage(result.response);
-                        if (blockErrorMessage) {
-                            logger.warn(`sendMessage() was unsuccessful. ${blockErrorMessage}. Inspect response object for details.`);
-                        }
+                    else if (field.order === 'ASCENDING') {
+                        segments.push(new IndexSegment(fieldPath, 0 /* IndexKind.ASCENDING */));
                     }
-                }
-                else {
-                    functionCalls = undefined;
-                }
-            } while (functionCalls && functionCallTurnCount < functionCallMaxTurns);
-            if (functionCalls && functionCallTurnCount >= functionCallMaxTurns) {
-                logger.warn(`Automatic function calling exceeded the limit of` +
-                    ` ${functionCallMaxTurns} function calls. Returning last model response.`);
-            }
-        });
-        await this._sendPromise;
-        this._history = this._history.concat(tempHistory);
-        return finalResult;
-    }
-    /**
-     * Sends a chat message and receives the response as a
-     * {@link GenerateContentStreamResult} containing an iterable stream
-     * and a response promise.
-     */
-    async sendMessageStream(request, singleRequestOptions) {
-        await this._sendPromise;
-        /**
-         * Temporarily store multiple turns for cases like automatic function
-         * calling, only writing them to official history when the entire
-         * sequence has completed successfully.
-         */
-        const tempHistory = [];
-        const callGenerateContentStream = async () => {
-            let functionCalls;
-            let functionCallTurnCount = 0;
-            const functionCallMaxTurns = this.requestOptions?.maxSequentalFunctionCalls ??
-                DEFAULT_MAX_SEQUENTIAL_FUNCTION_CALLS;
-            let result;
-            // Repeats until model returns a response with no function calls
-            // or until `functionCallMaxTurns` is met or exceeded.
-            do {
-                let formattedContent;
-                if (functionCalls) {
-                    functionCallTurnCount++;
-                    const functionResponseParts = await this._callFunctionsAsNeeded(functionCalls);
-                    formattedContent = formatNewContent(functionResponseParts);
-                }
-                else {
-                    formattedContent = formatNewContent(request);
-                }
-                tempHistory.push(formattedContent);
-                const formattedRequest = this._formatRequest(formattedContent, tempHistory);
-                result = await generateContentStream(this._apiSettings, this.model, formattedRequest, this.chromeAdapter, {
-                    ...this.requestOptions,
-                    ...singleRequestOptions
-                });
-                functionCalls = this._getCallableFunctionCalls(result.firstValue);
-                if (functionCalls &&
-                    result.firstValue &&
-                    result.firstValue.candidates &&
-                    result.firstValue.candidates.length > 0) {
-                    const responseContent = {
-                        ...result.firstValue.candidates[0].content
-                    };
-                    if (!responseContent.role) {
-                        responseContent.role = 'model';
-                    }
-                    tempHistory.push(responseContent);
-                }
-            } while (functionCalls && functionCallTurnCount < functionCallMaxTurns);
-            if (functionCalls && functionCallTurnCount >= functionCallMaxTurns) {
-                logger.warn(`Automatic function calling exceeded the limit of` +
-                    ` ${functionCallMaxTurns} function calls. Returning last model response.`);
-            }
-            return { stream: result.stream, response: result.response };
-        };
-        const streamPromise = callGenerateContentStream();
-        // Add onto the chain.
-        this._sendPromise = this._sendPromise
-            .then(async () => streamPromise)
-            // This must be handled to avoid unhandled rejection, but jump
-            // to the final catch block with a label to not log this error.
-            .catch(_ignored => {
-            // If the initial fetch fails, the user's `streamPromise` rejects.
-            // We swallow the error here to prevent double logging in the final catch.
-            throw new Error(SILENT_ERROR);
-        })
-            .then(streamResult => streamResult.response)
-            .then(response => {
-            // This runs after the stream completes. Runtime errors here cannot be
-            // caught by the user because their promise has likely already resolved.
-            // TODO: Move response validation logic upstream to `stream-reader` so
-            // errors propagate to the user's `result.response` promise.
-            if (response.candidates && response.candidates.length > 0) {
-                this._history = this._history.concat(tempHistory);
-                // TODO: Validate that `response.candidates[0].content` is not null.
-                const responseContent = { ...response.candidates[0].content };
-                if (!responseContent.role) {
-                    responseContent.role = 'model';
-                }
-                this._history.push(responseContent);
-            }
-            else {
-                const blockErrorMessage = formatBlockErrorMessage(response);
-                if (blockErrorMessage) {
-                    logger.warn(`sendMessageStream() was unsuccessful. ${blockErrorMessage}. Inspect response object for details.`);
-                }
-            }
-        })
-            .catch(e => {
-            // Filter out errors already handled by the user or initiated by them.
-            if (e.message !== SILENT_ERROR && e.name !== 'AbortError') {
-                logger.error(e);
-            }
-        });
-        return streamPromise;
-    }
-    /**
-     * Get function calls that the SDK has references to actually call.
-     * This is all-or-nothing. If the model is requesting multiple
-     * function calls, all of them must have references in order for
-     * automatic function calling to work.
-     *
-     * @internal
-     */
-    _getCallableFunctionCalls(response) {
-        const functionDeclarationsTool = this.params?.tools?.find(tool => tool.functionDeclarations);
-        if (!functionDeclarationsTool?.functionDeclarations) {
-            return;
-        }
-        const functionCalls = getFunctionCalls(response);
-        if (!functionCalls) {
-            return;
-        }
-        for (const functionCall of functionCalls) {
-            const hasFunctionReference = functionDeclarationsTool.functionDeclarations?.some(declaration => declaration.name === functionCall.name &&
-                typeof declaration.functionReference === 'function');
-            if (!hasFunctionReference) {
-                return;
-            }
-        }
-        return functionCalls;
-    }
-    /**
-     * Call user-defined functions if requested by the model, and return
-     * the response that should be sent to the model.
-     * @internal
-     */
-    async _callFunctionsAsNeeded(functionCalls) {
-        const activeCallList = new Map();
-        const promiseList = [];
-        const functionDeclarationsTool = this.params?.tools?.find(tool => tool.functionDeclarations);
-        if (functionDeclarationsTool &&
-            functionDeclarationsTool.functionDeclarations) {
-            for (const functionCall of functionCalls) {
-                const functionDeclaration = functionDeclarationsTool.functionDeclarations.find(declaration => declaration.name === functionCall.name);
-                if (functionDeclaration?.functionReference) {
-                    const results = Promise.resolve(functionDeclaration.functionReference(functionCall.args)).catch(e => {
-                        const wrappedError = new AIError(AIErrorCode.ERROR, `Error in user-defined function "${functionDeclaration.name}": ${e.message}`);
-                        wrappedError.stack = e.stack;
-                        throw wrappedError;
-                    });
-                    activeCallList.set(functionCall.name, {
-                        id: functionCall.id,
-                        results
-                    });
-                    promiseList.push(results);
-                }
-            }
-            // Wait for promises to finish.
-            await Promise.all(promiseList);
-            const functionResponseParts = [];
-            for (const [name, callData] of activeCallList) {
-                functionResponseParts.push({
-                    functionResponse: {
-                        name,
-                        response: await callData.results
-                    }
-                });
-            }
-            return functionResponseParts;
-        }
-        else {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, `No function declarations were provided in "tools".`);
-        }
-    }
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-async function countTokensOnCloud(apiSettings, model, params, singleRequestOptions) {
-    let body = '';
-    if (apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-        const mappedParams = mapCountTokensRequest(params, model);
-        body = JSON.stringify(mappedParams);
-    }
-    else {
-        body = JSON.stringify(params);
-    }
-    const response = await makeRequest({
-        model,
-        task: "countTokens" /* Task.COUNT_TOKENS */,
-        apiSettings,
-        stream: false,
-        singleRequestOptions
-    }, body);
-    return response.json();
-}
-async function countTokens(apiSettings, model, params, chromeAdapter, requestOptions) {
-    if (chromeAdapter?.mode === InferenceMode.ONLY_ON_DEVICE) {
-        throw new AIError(AIErrorCode.UNSUPPORTED, 'countTokens() is not supported for on-device models.');
-    }
-    return countTokensOnCloud(apiSettings, model, params, requestOptions);
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Class for generative model APIs.
- * @public
- */
-class GenerativeModel extends AIModel {
-    constructor(ai, modelParams, requestOptions, chromeAdapter) {
-        super(ai, modelParams.model);
-        this.chromeAdapter = chromeAdapter;
-        this.generationConfig = modelParams.generationConfig || {};
-        validateGenerationConfig(this.generationConfig);
-        this.safetySettings = modelParams.safetySettings || [];
-        this.tools = modelParams.tools;
-        this.toolConfig = modelParams.toolConfig;
-        this.systemInstruction = formatSystemInstruction(modelParams.systemInstruction);
-        this.requestOptions = requestOptions || {};
-    }
-    /**
-     * Makes a single non-streaming call to the model
-     * and returns an object containing a single {@link GenerateContentResponse}.
-     */
-    async generateContent(request, singleRequestOptions) {
-        const formattedParams = formatGenerateContentInput(request);
-        return generateContent(this._apiSettings, this.model, {
-            generationConfig: this.generationConfig,
-            safetySettings: this.safetySettings,
-            tools: this.tools,
-            toolConfig: this.toolConfig,
-            systemInstruction: this.systemInstruction,
-            ...formattedParams
-        }, this.chromeAdapter, 
-        // Merge request options
-        {
-            ...this.requestOptions,
-            ...singleRequestOptions
-        });
-    }
-    /**
-     * Makes a single streaming call to the model
-     * and returns an object containing an iterable stream that iterates
-     * over all chunks in the streaming response as well as
-     * a promise that returns the final aggregated response.
-     */
-    async generateContentStream(request, singleRequestOptions) {
-        const formattedParams = formatGenerateContentInput(request);
-        const { stream, response } = await generateContentStream(this._apiSettings, this.model, {
-            generationConfig: this.generationConfig,
-            safetySettings: this.safetySettings,
-            tools: this.tools,
-            toolConfig: this.toolConfig,
-            systemInstruction: this.systemInstruction,
-            ...formattedParams
-        }, this.chromeAdapter, 
-        // Merge request options
-        {
-            ...this.requestOptions,
-            ...singleRequestOptions
-        });
-        return { stream, response };
-    }
-    /**
-     * Gets a new {@link ChatSession} instance which can be used for
-     * multi-turn chats.
-     */
-    startChat(startChatParams) {
-        return new ChatSession(this._apiSettings, this.model, this.chromeAdapter, {
-            tools: this.tools,
-            toolConfig: this.toolConfig,
-            systemInstruction: this.systemInstruction,
-            generationConfig: this.generationConfig,
-            safetySettings: this.safetySettings,
-            /**
-             * Overrides params inherited from GenerativeModel with those explicitly set in the
-             * StartChatParams. For example, if startChatParams.generationConfig is set, it'll override
-             * this.generationConfig.
-             */
-            ...startChatParams
-        }, this.requestOptions);
-    }
-    /**
-     * Counts the tokens in the provided request.
-     */
-    async countTokens(request, singleRequestOptions) {
-        const formattedParams = formatGenerateContentInput(request);
-        return countTokens(this._apiSettings, this.model, formattedParams, this.chromeAdapter, 
-        // Merge request options
-        {
-            ...this.requestOptions,
-            ...singleRequestOptions
-        });
-    }
-}
-/**
- * Client-side validation of some common `GenerationConfig` pitfalls, in order
- * to save the developer a wasted request.
- */
-function validateGenerationConfig(generationConfig) {
-    if (
-    // != allows for null and undefined. 0 is considered "set" by the model
-    generationConfig.thinkingConfig?.thinkingBudget != null &&
-        generationConfig.thinkingConfig?.thinkingLevel) {
-        throw new AIError(AIErrorCode.UNSUPPORTED, `Cannot set both thinkingBudget and thinkingLevel in a config.`);
-    }
-    if (
-    // != allows for null and undefined.
-    generationConfig.responseSchema != null &&
-        generationConfig.responseJsonSchema != null) {
-        throw new AIError(AIErrorCode.UNSUPPORTED, `Cannot set both responseSchema and responseJsonSchema in a config.`);
-    }
-    if ((generationConfig.responseSchema != null ||
-        generationConfig.responseJsonSchema != null) &&
-        generationConfig.responseMimeType) {
-        throw new AIError(AIErrorCode.UNSUPPORTED, `responseMimeType must be set if responseSchema or responseJsonSchema are set.`);
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Represents an active, real-time, bidirectional conversation with the model.
- *
- * This class should only be instantiated by calling {@link LiveGenerativeModel.connect}.
- *
- * @beta
- */
-class LiveSession {
-    /**
-     * @internal
-     */
-    constructor(webSocketHandler, serverMessages) {
-        this.webSocketHandler = webSocketHandler;
-        this.serverMessages = serverMessages;
-        /**
-         * Indicates whether this Live session is closed.
-         *
-         * @beta
-         */
-        this.isClosed = false;
-        /**
-         * Indicates whether this Live session is being controlled by an `AudioConversationController`.
-         *
-         * @beta
-         */
-        this.inConversation = false;
-    }
-    /**
-     * Sends content to the server.
-     *
-     * @param request - The message to send to the model.
-     * @param turnComplete - Indicates if the turn is complete. Defaults to false.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async send(request, turnComplete = true) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        const newContent = formatNewContent(request);
-        const message = {
-            clientContent: {
-                turns: [newContent],
-                turnComplete
-            }
-        };
-        this.webSocketHandler.send(JSON.stringify(message));
-    }
-    /**
-     * Sends text to the server in realtime.
-     *
-     * @example
-     * ```javascript
-     * liveSession.sendTextRealtime("Hello, how are you?");
-     * ```
-     *
-     * @param text - The text data to send.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async sendTextRealtime(text) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        const message = {
-            realtimeInput: {
-                text
-            }
-        };
-        this.webSocketHandler.send(JSON.stringify(message));
-    }
-    /**
-     * Sends audio data to the server in realtime.
-     *
-     * @remarks The server requires that the audio data is base64-encoded 16-bit PCM at 16kHz
-     * little-endian.
-     *
-     * @example
-     * ```javascript
-     * // const pcmData = ... base64-encoded 16-bit PCM at 16kHz little-endian.
-     * const blob = { mimeType: "audio/pcm", data: pcmData };
-     * liveSession.sendAudioRealtime(blob);
-     * ```
-     *
-     * @param blob - The base64-encoded PCM data to send to the server in realtime.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async sendAudioRealtime(blob) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        const message = {
-            realtimeInput: {
-                audio: blob
-            }
-        };
-        this.webSocketHandler.send(JSON.stringify(message));
-    }
-    /**
-     * Sends video data to the server in realtime.
-     *
-     * @remarks The server requires that the video is sent as individual video frames at 1 FPS. It
-     * is recommended to set `mimeType` to `image/jpeg`.
-     *
-     * @example
-     * ```javascript
-     * // const videoFrame = ... base64-encoded JPEG data
-     * const blob = { mimeType: "image/jpeg", data: videoFrame };
-     * liveSession.sendVideoRealtime(blob);
-     * ```
-     * @param blob - The base64-encoded video data to send to the server in realtime.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async sendVideoRealtime(blob) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        const message = {
-            realtimeInput: {
-                video: blob
-            }
-        };
-        this.webSocketHandler.send(JSON.stringify(message));
-    }
-    /**
-     * Sends function responses to the server.
-     *
-     * @param functionResponses - The function responses to send.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async sendFunctionResponses(functionResponses) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        const message = {
-            toolResponse: {
-                functionResponses
-            }
-        };
-        this.webSocketHandler.send(JSON.stringify(message));
-    }
-    /**
-     * Yields messages received from the server.
-     * This can only be used by one consumer at a time.
-     *
-     * @returns An `AsyncGenerator` that yields server messages as they arrive.
-     * @throws If the session is already closed, or if we receive a response that we don't support.
-     *
-     * @beta
-     */
-    async *receive() {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.SESSION_CLOSED, 'Cannot read from a Live session that is closed. Try starting a new Live session.');
-        }
-        for await (const message of this.serverMessages) {
-            if (message && typeof message === 'object') {
-                if (LiveResponseType.SERVER_CONTENT in message) {
-                    yield {
-                        type: 'serverContent',
-                        ...message
-                            .serverContent
-                    };
-                }
-                else if (LiveResponseType.TOOL_CALL in message) {
-                    yield {
-                        type: 'toolCall',
-                        ...message
-                            .toolCall
-                    };
-                }
-                else if (LiveResponseType.TOOL_CALL_CANCELLATION in message) {
-                    yield {
-                        type: 'toolCallCancellation',
-                        ...message.toolCallCancellation
-                    };
-                }
-                else if ('goAway' in message) {
-                    const notice = message.goAway;
-                    yield {
-                        type: LiveResponseType.GOING_AWAY_NOTICE,
-                        timeLeft: parseDuration(notice.timeLeft)
-                    };
-                }
-                else {
-                    logger.warn(`Received an unknown message type from the server: ${JSON.stringify(message)}`);
-                }
-            }
-            else {
-                logger.warn(`Received an invalid message from the server: ${JSON.stringify(message)}`);
-            }
-        }
-    }
-    /**
-     * Closes this session.
-     * All methods on this session will throw an error once this resolves.
-     *
-     * @beta
-     */
-    async close() {
-        if (!this.isClosed) {
-            this.isClosed = true;
-            await this.webSocketHandler.close(1000, 'Client closed session.');
-        }
-    }
-    /**
-     * Sends realtime input to the server.
-     *
-     * @deprecated Use `sendTextRealtime()`, `sendAudioRealtime()`, and `sendVideoRealtime()` instead.
-     *
-     * @param mediaChunks - The media chunks to send.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async sendMediaChunks(mediaChunks) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        // The backend does not support sending more than one mediaChunk in one message.
-        // Work around this limitation by sending mediaChunks in separate messages.
-        mediaChunks.forEach(mediaChunk => {
-            const message = {
-                realtimeInput: { mediaChunks: [mediaChunk] }
-            };
-            this.webSocketHandler.send(JSON.stringify(message));
-        });
-    }
-    /**
-     * @deprecated Use `sendTextRealtime()`, `sendAudioRealtime()`, and `sendVideoRealtime()` instead.
-     *
-     * Sends a stream of {@link GenerativeContentBlob}.
-     *
-     * @param mediaChunkStream - The stream of {@link GenerativeContentBlob} to send.
-     * @throws If this session has been closed.
-     *
-     * @beta
-     */
-    async sendMediaStream(mediaChunkStream) {
-        if (this.isClosed) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'This LiveSession has been closed and cannot be used.');
-        }
-        const reader = mediaChunkStream.getReader();
-        while (true) {
-            try {
-                const { done, value } = await reader.read();
-                if (done) {
-                    break;
-                }
-                else if (!value) {
-                    throw new Error('Missing chunk in reader, but reader is not done.');
-                }
-                await this.sendMediaChunks([value]);
-            }
-            catch (e) {
-                // Re-throw any errors that occur during stream consumption or sending.
-                const message = e instanceof Error ? e.message : 'Error processing media stream.';
-                throw new AIError(AIErrorCode.REQUEST_ERROR, message);
-            }
-        }
-    }
-}
-/**
- * Parses a duration string (e.g. "3.000000001s") into a number of seconds.
- *
- * @param duration - The duration string to parse.
- * @returns The duration in seconds.
- */
-function parseDuration(duration) {
-    if (!duration || !duration.endsWith('s')) {
-        return 0;
-    }
-    return Number(duration.slice(0, -1)); // slice removes the trailing 's'.
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Class for Live generative model APIs. The Live API enables low-latency, two-way multimodal
- * interactions with Gemini.
- *
- * This class should only be instantiated with {@link getLiveGenerativeModel}.
- *
- * @beta
- */
-class LiveGenerativeModel extends AIModel {
-    /**
-     * @internal
-     */
-    constructor(ai, modelParams, 
-    /**
-     * @internal
-     */
-    _webSocketHandler) {
-        super(ai, modelParams.model);
-        this._webSocketHandler = _webSocketHandler;
-        this.generationConfig = modelParams.generationConfig || {};
-        this.tools = modelParams.tools;
-        this.toolConfig = modelParams.toolConfig;
-        this.systemInstruction = formatSystemInstruction(modelParams.systemInstruction);
-    }
-    /**
-     * Starts a {@link LiveSession}.
-     *
-     * @returns A {@link LiveSession}.
-     * @throws If the connection failed to be established with the server.
-     *
-     * @beta
-     */
-    async connect() {
-        const url = new WebSocketUrl(this._apiSettings);
-        await this._webSocketHandler.connect(url.toString());
-        let fullModelPath;
-        if (this._apiSettings.backend.backendType === BackendType.GOOGLE_AI) {
-            fullModelPath = `projects/${this._apiSettings.project}/${this.model}`;
-        }
-        else {
-            fullModelPath = `projects/${this._apiSettings.project}/locations/${this._apiSettings.location}/${this.model}`;
-        }
-        // inputAudioTranscription and outputAudioTranscription are on the generation config in the public API,
-        // but the backend expects them to be in the `setup` message.
-        const { inputAudioTranscription, outputAudioTranscription, ...generationConfig } = this.generationConfig;
-        const setupMessage = {
-            setup: {
-                model: fullModelPath,
-                generationConfig,
-                tools: this.tools,
-                toolConfig: this.toolConfig,
-                systemInstruction: this.systemInstruction,
-                inputAudioTranscription,
-                outputAudioTranscription
-            }
-        };
-        try {
-            // Begin listening for server messages, and begin the handshake by sending the 'setupMessage'
-            const serverMessages = this._webSocketHandler.listen();
-            this._webSocketHandler.send(JSON.stringify(setupMessage));
-            // Verify we received the handshake response 'setupComplete'
-            const firstMessage = (await serverMessages.next()).value;
-            if (!firstMessage ||
-                !(typeof firstMessage === 'object') ||
-                !('setupComplete' in firstMessage)) {
-                await this._webSocketHandler.close(1011, 'Handshake failure');
-                throw new AIError(AIErrorCode.RESPONSE_ERROR, 'Server connection handshake failed. The server did not respond with a setupComplete message.');
-            }
-            return new LiveSession(this._webSocketHandler, serverMessages);
-        }
-        catch (e) {
-            // Ensure connection is closed on any setup error
-            await this._webSocketHandler.close();
-            throw e;
-        }
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Class for Imagen model APIs.
- *
- * This class provides methods for generating images using the Imagen model.
- *
- * @example
- * ```javascript
- * const imagen = new ImagenModel(
- *   ai,
- *   {
- *     model: 'imagen-3.0-generate-002'
- *   }
- * );
- *
- * const response = await imagen.generateImages('A photo of a cat');
- * if (response.images.length > 0) {
- *   console.log(response.images[0].bytesBase64Encoded);
- * }
- * ```
- *
- * @public
- */
-class ImagenModel extends AIModel {
-    /**
-     * Constructs a new instance of the {@link ImagenModel} class.
-     *
-     * @param ai - an {@link AI} instance.
-     * @param modelParams - Parameters to use when making requests to Imagen.
-     * @param requestOptions - Additional options to use when making requests.
-     *
-     * @throws If the `apiKey` or `projectId` fields are missing in your
-     * Firebase config.
-     */
-    constructor(ai, modelParams, requestOptions) {
-        const { model, generationConfig, safetySettings } = modelParams;
-        super(ai, model);
-        this.requestOptions = requestOptions;
-        this.generationConfig = generationConfig;
-        this.safetySettings = safetySettings;
-    }
-    /**
-     * Generates images using the Imagen model and returns them as
-     * base64-encoded strings.
-     *
-     * @param prompt - A text prompt describing the image(s) to generate.
-     * @returns A promise that resolves to an {@link ImagenGenerationResponse}
-     * object containing the generated images.
-     *
-     * @throws If the request to generate images fails. This happens if the
-     * prompt is blocked.
-     *
-     * @remarks
-     * If the prompt was not blocked, but one or more of the generated images were filtered, the
-     * returned object will have a `filteredReason` property.
-     * If all images are filtered, the `images` array will be empty.
-     *
-     * @public
-     */
-    async generateImages(prompt, singleRequestOptions) {
-        const body = createPredictRequestBody(prompt, {
-            ...this.generationConfig,
-            ...this.safetySettings
-        });
-        const response = await makeRequest({
-            task: "predict" /* Task.PREDICT */,
-            model: this.model,
-            apiSettings: this._apiSettings,
-            stream: false,
-            // Merge request options. Single request options overwrite the model's request options.
-            singleRequestOptions: {
-                ...this.requestOptions,
-                ...singleRequestOptions
-            }
-        }, JSON.stringify(body));
-        return handlePredictResponse(response);
-    }
-    /**
-     * Generates images to Cloud Storage for Firebase using the Imagen model.
-     *
-     * @internal This method is temporarily internal.
-     *
-     * @param prompt - A text prompt describing the image(s) to generate.
-     * @param gcsURI - The URI of file stored in a Cloud Storage for Firebase bucket.
-     * This should be a directory. For example, `gs://my-bucket/my-directory/`.
-     * @returns A promise that resolves to an {@link ImagenGenerationResponse}
-     * object containing the URLs of the generated images.
-     *
-     * @throws If the request fails to generate images fails. This happens if
-     * the prompt is blocked.
-     *
-     * @remarks
-     * If the prompt was not blocked, but one or more of the generated images were filtered, the
-     * returned object will have a `filteredReason` property.
-     * If all images are filtered, the `images` array will be empty.
-     */
-    async generateImagesGCS(prompt, gcsURI, singleRequestOptions) {
-        const body = createPredictRequestBody(prompt, {
-            gcsURI,
-            ...this.generationConfig,
-            ...this.safetySettings
-        });
-        const response = await makeRequest({
-            task: "predict" /* Task.PREDICT */,
-            model: this.model,
-            apiSettings: this._apiSettings,
-            stream: false,
-            // Merge request options. Single request options overwrite the model's request options.
-            singleRequestOptions: {
-                ...this.requestOptions,
-                ...singleRequestOptions
-            }
-        }, JSON.stringify(body));
-        return handlePredictResponse(response);
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * A wrapper for the native `WebSocket` available in both Browsers and Node >= 22.
- *
- * @internal
- */
-class WebSocketHandlerImpl {
-    constructor() {
-        if (typeof WebSocket === 'undefined') {
-            throw new AIError(AIErrorCode.UNSUPPORTED, 'The WebSocket API is not available in this environment. ' +
-                'The "Live" feature is not supported here. It is supported in ' +
-                'modern browser windows, Web Workers with WebSocket support, and Node >= 22.');
-        }
-    }
-    connect(url) {
-        return new Promise((resolve, reject) => {
-            this.ws = new WebSocket(url);
-            this.ws.binaryType = 'blob'; // Only important to set in Node
-            this.ws.addEventListener('open', () => resolve(), { once: true });
-            this.ws.addEventListener('error', () => reject(new AIError(AIErrorCode.FETCH_ERROR, `Error event raised on WebSocket`)), { once: true });
-            this.ws.addEventListener('close', (closeEvent) => {
-                if (closeEvent.reason) {
-                    logger.warn(`WebSocket connection closed by server. Reason: '${closeEvent.reason}'`);
-                }
-            });
-        });
-    }
-    send(data) {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'WebSocket is not open.');
-        }
-        this.ws.send(data);
-    }
-    async *listen() {
-        if (!this.ws) {
-            throw new AIError(AIErrorCode.REQUEST_ERROR, 'WebSocket is not connected.');
-        }
-        const messageQueue = [];
-        const errorQueue = [];
-        let resolvePromise = null;
-        let isClosed = false;
-        const messageListener = async (event) => {
-            let data;
-            if (event.data instanceof Blob) {
-                data = await event.data.text();
-            }
-            else if (typeof event.data === 'string') {
-                data = event.data;
-            }
-            else {
-                errorQueue.push(new AIError(AIErrorCode.PARSE_FAILED, `Failed to parse WebSocket response. Expected data to be a Blob or string, but was ${typeof event.data}.`));
-                if (resolvePromise) {
-                    resolvePromise();
-                    resolvePromise = null;
-                }
-                return;
-            }
-            try {
-                const obj = JSON.parse(data);
-                messageQueue.push(obj);
-            }
-            catch (e) {
-                const err = e;
-                errorQueue.push(new AIError(AIErrorCode.PARSE_FAILED, `Error parsing WebSocket message to JSON: ${err.message}`));
-            }
-            if (resolvePromise) {
-                resolvePromise();
-                resolvePromise = null;
-            }
-        };
-        const errorListener = () => {
-            errorQueue.push(new AIError(AIErrorCode.FETCH_ERROR, 'WebSocket connection error.'));
-            if (resolvePromise) {
-                resolvePromise();
-                resolvePromise = null;
-            }
-        };
-        const closeListener = (event) => {
-            if (event.reason) {
-                logger.warn(`WebSocket connection closed by the server with reason: ${event.reason}`);
-            }
-            isClosed = true;
-            if (resolvePromise) {
-                resolvePromise();
-                resolvePromise = null;
-            }
-            // Clean up listeners to prevent memory leaks
-            this.ws?.removeEventListener('message', messageListener);
-            this.ws?.removeEventListener('close', closeListener);
-            this.ws?.removeEventListener('error', errorListener);
-        };
-        this.ws.addEventListener('message', messageListener);
-        this.ws.addEventListener('close', closeListener);
-        this.ws.addEventListener('error', errorListener);
-        while (!isClosed) {
-            if (errorQueue.length > 0) {
-                const error = errorQueue.shift();
-                throw error;
-            }
-            if (messageQueue.length > 0) {
-                yield messageQueue.shift();
-            }
-            else {
-                await new Promise(resolve => {
-                    resolvePromise = resolve;
-                });
-            }
-        }
-        // If the loop terminated because isClosed is true, check for any final errors
-        if (errorQueue.length > 0) {
-            const error = errorQueue.shift();
-            throw error;
-        }
-    }
-    close(code, reason) {
-        return new Promise(resolve => {
-            if (!this.ws) {
-                return resolve();
-            }
-            this.ws.addEventListener('close', () => resolve(), { once: true });
-            // Calling 'close' during these states results in an error.
-            if (this.ws.readyState === WebSocket.CLOSED ||
-                this.ws.readyState === WebSocket.CONNECTING) {
-                return resolve();
-            }
-            if (this.ws.readyState !== WebSocket.CLOSING) {
-                this.ws.close(code, reason);
-            }
-        });
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * {@link GenerativeModel} APIs that execute on a server-side template.
- *
- * This class should only be instantiated with {@link getTemplateGenerativeModel}.
- *
- * @beta
- */
-class TemplateGenerativeModel {
-    /**
-     * @hideconstructor
-     */
-    constructor(ai, requestOptions) {
-        this.requestOptions = requestOptions || {};
-        this._apiSettings = initApiSettings(ai);
-    }
-    /**
-     * Makes a single non-streaming call to the model and returns an object
-     * containing a single {@link GenerateContentResponse}.
-     *
-     * @param templateId - The ID of the server-side template to execute.
-     * @param templateVariables - A key-value map of variables to populate the
-     * template with.
-     *
-     * @beta
-     */
-    async generateContent(templateId, templateVariables, singleRequestOptions) {
-        return templateGenerateContent(this._apiSettings, templateId, { inputs: templateVariables }, {
-            ...this.requestOptions,
-            ...singleRequestOptions
-        });
-    }
-    /**
-     * Makes a single streaming call to the model and returns an object
-     * containing an iterable stream that iterates over all chunks in the
-     * streaming response as well as a promise that returns the final aggregated
-     * response.
-     *
-     * @param templateId - The ID of the server-side template to execute.
-     * @param templateVariables - A key-value map of variables to populate the
-     * template with.
-     *
-     * @beta
-     */
-    async generateContentStream(templateId, templateVariables, singleRequestOptions) {
-        return templateGenerateContentStream(this._apiSettings, templateId, { inputs: templateVariables }, {
-            ...this.requestOptions,
-            ...singleRequestOptions
-        });
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Class for Imagen model APIs that execute on a server-side template.
- *
- * This class should only be instantiated with {@link getTemplateImagenModel}.
- *
- * @beta
- */
-class TemplateImagenModel {
-    /**
-     * @hideconstructor
-     */
-    constructor(ai, requestOptions) {
-        this.requestOptions = requestOptions || {};
-        this._apiSettings = initApiSettings(ai);
-    }
-    /**
-     * Makes a single call to the model and returns an object containing a single
-     * {@link ImagenGenerationResponse}.
-     *
-     * @param templateId - The ID of the server-side template to execute.
-     * @param templateVariables - A key-value map of variables to populate the
-     * template with.
-     *
-     * @beta
-     */
-    async generateImages(templateId, templateVariables, singleRequestOptions) {
-        const response = await makeRequest({
-            task: "templatePredict" /* ServerPromptTemplateTask.TEMPLATE_PREDICT */,
-            templateId,
-            apiSettings: this._apiSettings,
-            stream: false,
-            singleRequestOptions: {
-                ...this.requestOptions,
-                ...singleRequestOptions
-            }
-        }, JSON.stringify({ inputs: templateVariables }));
-        return handlePredictResponse(response);
-    }
-}
-
-/**
- * @license
- * Copyright 2024 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Parent class encompassing all Schema types, with static methods that
- * allow building specific Schema types. This class can be converted with
- * `JSON.stringify()` into a JSON string accepted by Vertex AI REST endpoints.
- * (This string conversion is automatically done when calling SDK methods.)
- * @public
- */
-class Schema {
-    constructor(schemaParams) {
-        // TODO(dlarocque): Enforce this with union types
-        if (!schemaParams.type && !schemaParams.anyOf) {
-            throw new AIError(AIErrorCode.INVALID_SCHEMA, "A schema must have either a 'type' or an 'anyOf' array of sub-schemas.");
-        }
-        // eslint-disable-next-line guard-for-in
-        for (const paramKey in schemaParams) {
-            this[paramKey] = schemaParams[paramKey];
-        }
-        // Ensure these are explicitly set to avoid TS errors.
-        this.type = schemaParams.type;
-        this.format = schemaParams.hasOwnProperty('format')
-            ? schemaParams.format
-            : undefined;
-        this.nullable = schemaParams.hasOwnProperty('nullable')
-            ? !!schemaParams.nullable
-            : false;
-    }
-    /**
-     * Defines how this Schema should be serialized as JSON.
-     * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior
-     * @internal
-     */
-    toJSON() {
-        const obj = {
-            type: this.type
-        };
-        for (const prop in this) {
-            if (this.hasOwnProperty(prop) && this[prop] !== undefined) {
-                if (prop !== 'required' || this.type === SchemaType.OBJECT) {
-                    obj[prop] = this[prop];
-                }
-            }
-        }
-        return obj;
-    }
-    static array(arrayParams) {
-        return new ArraySchema(arrayParams, arrayParams.items);
-    }
-    static object(objectParams) {
-        return new ObjectSchema(objectParams, objectParams.properties, objectParams.optionalProperties);
-    }
-    // eslint-disable-next-line id-blacklist
-    static string(stringParams) {
-        return new StringSchema(stringParams);
-    }
-    static enumString(stringParams) {
-        return new StringSchema(stringParams, stringParams.enum);
-    }
-    static integer(integerParams) {
-        return new IntegerSchema(integerParams);
-    }
-    // eslint-disable-next-line id-blacklist
-    static number(numberParams) {
-        return new NumberSchema(numberParams);
-    }
-    // eslint-disable-next-line id-blacklist
-    static boolean(booleanParams) {
-        return new BooleanSchema(booleanParams);
-    }
-    static anyOf(anyOfParams) {
-        return new AnyOfSchema(anyOfParams);
-    }
-}
-/**
- * Schema class for "integer" types.
- * @public
- */
-class IntegerSchema extends Schema {
-    constructor(schemaParams) {
-        super({
-            type: SchemaType.INTEGER,
-            ...schemaParams
-        });
-    }
-}
-/**
- * Schema class for "number" types.
- * @public
- */
-class NumberSchema extends Schema {
-    constructor(schemaParams) {
-        super({
-            type: SchemaType.NUMBER,
-            ...schemaParams
-        });
-    }
-}
-/**
- * Schema class for "boolean" types.
- * @public
- */
-class BooleanSchema extends Schema {
-    constructor(schemaParams) {
-        super({
-            type: SchemaType.BOOLEAN,
-            ...schemaParams
-        });
-    }
-}
-/**
- * Schema class for "string" types. Can be used with or without
- * enum values.
- * @public
- */
-class StringSchema extends Schema {
-    constructor(schemaParams, enumValues) {
-        super({
-            type: SchemaType.STRING,
-            ...schemaParams
-        });
-        this.enum = enumValues;
-    }
-    /**
-     * @internal
-     */
-    toJSON() {
-        const obj = super.toJSON();
-        if (this.enum) {
-            obj['enum'] = this.enum;
-        }
-        return obj;
-    }
-}
-/**
- * Schema class for "array" types.
- * The `items` param should refer to the type of item that can be a member
- * of the array.
- * @public
- */
-class ArraySchema extends Schema {
-    constructor(schemaParams, items) {
-        super({
-            type: SchemaType.ARRAY,
-            ...schemaParams
-        });
-        this.items = items;
-    }
-    /**
-     * @internal
-     */
-    toJSON() {
-        const obj = super.toJSON();
-        obj.items = this.items.toJSON();
-        return obj;
-    }
-}
-/**
- * Schema class for "object" types.
- * The `properties` param must be a map of `Schema` objects.
- * @public
- */
-class ObjectSchema extends Schema {
-    constructor(schemaParams, properties, optionalProperties = []) {
-        super({
-            type: SchemaType.OBJECT,
-            ...schemaParams
-        });
-        this.properties = properties;
-        this.optionalProperties = optionalProperties;
-    }
-    /**
-     * @internal
-     */
-    toJSON() {
-        const obj = super.toJSON();
-        obj.properties = { ...this.properties };
-        const required = [];
-        if (this.optionalProperties) {
-            for (const propertyKey of this.optionalProperties) {
-                if (!this.properties.hasOwnProperty(propertyKey)) {
-                    throw new AIError(AIErrorCode.INVALID_SCHEMA, `Property "${propertyKey}" specified in "optionalProperties" does not exist.`);
-                }
-            }
-        }
-        for (const propertyKey in this.properties) {
-            if (this.properties.hasOwnProperty(propertyKey)) {
-                obj.properties[propertyKey] = this.properties[propertyKey].toJSON();
-                if (!this.optionalProperties.includes(propertyKey)) {
-                    required.push(propertyKey);
-                }
-            }
-        }
-        if (required.length > 0) {
-            obj.required = required;
-        }
-        delete obj.optionalProperties;
-        return obj;
-    }
-}
-/**
- * Schema class representing a value that can conform to any of the provided sub-schemas. This is
- * useful when a field can accept multiple distinct types or structures.
- * @public
- */
-class AnyOfSchema extends Schema {
-    constructor(schemaParams) {
-        if (schemaParams.anyOf.length === 0) {
-            throw new AIError(AIErrorCode.INVALID_SCHEMA, "The 'anyOf' array must not be empty.");
-        }
-        super({
-            ...schemaParams,
-            type: undefined // anyOf schemas do not have an explicit type
-        });
-        this.anyOf = schemaParams.anyOf;
-    }
-    /**
-     * @internal
-     */
-    toJSON() {
-        const obj = super.toJSON();
-        // Ensure the 'anyOf' property contains serialized SchemaRequest objects.
-        if (this.anyOf && Array.isArray(this.anyOf)) {
-            obj.anyOf = this.anyOf.map(s => s.toJSON());
-        }
-        return obj;
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Defines the image format for images generated by Imagen.
- *
- * Use this class to specify the desired format (JPEG or PNG) and compression quality
- * for images generated by Imagen. This is typically included as part of
- * {@link ImagenModelParams}.
- *
- * @example
- * ```javascript
- * const imagenModelParams = {
- *   // ... other ImagenModelParams
- *   imageFormat: ImagenImageFormat.jpeg(75) // JPEG with a compression level of 75.
- * }
- * ```
- *
- * @public
- */
-class ImagenImageFormat {
-    constructor() {
-        this.mimeType = 'image/png';
-    }
-    /**
-     * Creates an {@link ImagenImageFormat} for a JPEG image.
-     *
-     * @param compressionQuality - The level of compression (a number between 0 and 100).
-     * @returns An {@link ImagenImageFormat} object for a JPEG image.
-     *
-     * @public
-     */
-    static jpeg(compressionQuality) {
-        if (compressionQuality &&
-            (compressionQuality < 0 || compressionQuality > 100)) {
-            logger.warn(`Invalid JPEG compression quality of ${compressionQuality} specified; the supported range is [0, 100].`);
-        }
-        return { mimeType: 'image/jpeg', compressionQuality };
-    }
-    /**
-     * Creates an {@link ImagenImageFormat} for a PNG image.
-     *
-     * @returns An {@link ImagenImageFormat} object for a PNG image.
-     *
-     * @public
-     */
-    static png() {
-        return { mimeType: 'image/png' };
-    }
-}
-
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const SERVER_INPUT_SAMPLE_RATE = 16000;
-const SERVER_OUTPUT_SAMPLE_RATE = 24000;
-const AUDIO_PROCESSOR_NAME = 'audio-processor';
-/**
- * The JS for an `AudioWorkletProcessor`.
- * This processor is responsible for taking raw audio from the microphone,
- * converting it to the required 16-bit 16kHz PCM, and posting it back to the main thread.
- *
- * See: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorkletProcessor
- *
- * It is defined as a string here so that it can be converted into a `Blob`
- * and loaded at runtime.
- */
-const audioProcessorWorkletString = `
-  class AudioProcessor extends AudioWorkletProcessor {
-    constructor(options) {
-      super();
-      this.targetSampleRate = options.processorOptions.targetSampleRate;
-      // 'sampleRate' is a global variable available inside the AudioWorkletGlobalScope,
-      // representing the native sample rate of the AudioContext.
-      this.inputSampleRate = sampleRate;
-    }
-
-    /**
-     * This method is called by the browser's audio engine for each block of audio data.
-     * Input is a single input, with a single channel (input[0][0]).
-     */
-    process(inputs) {
-      const input = inputs[0];
-      if (input && input.length > 0 && input[0].length > 0) {
-        const pcmData = input[0]; // Float32Array of raw audio samples.
-        
-        // Simple linear interpolation for resampling.
-        const resampled = new Float32Array(Math.round(pcmData.length * this.targetSampleRate / this.inputSampleRate));
-        const ratio = pcmData.length / resampled.length;
-        for (let i = 0; i < resampled.length; i++) {
-          resampled[i] = pcmData[Math.floor(i * ratio)];
-        }
-
-        // Convert Float32 (-1, 1) samples to Int16 (-32768, 32767)
-        const resampledInt16 = new Int16Array(resampled.length);
-        for (let i = 0; i < resampled.length; i++) {
-          const sample = Math.max(-1, Math.min(1, resampled[i]));
-          if (sample < 0) {
-            resampledInt16[i] = sample * 32768;
-          } else {
-            resampledInt16[i] = sample * 32767;
-          }
-        }
-        
-        this.port.postMessage(resampledInt16);
-      }
-      // Return true to keep the processor alive and processing the next audio block.
-      return true;
-    }
-  }
-
-  // Register the processor with a name that can be used to instantiate it from the main thread.
-  registerProcessor('${AUDIO_PROCESSOR_NAME}', AudioProcessor);
-`;
-/**
- * Encapsulates the core logic of an audio conversation.
- *
- * @internal
- */
-class AudioConversationRunner {
-    constructor(liveSession, options, deps) {
-        this.liveSession = liveSession;
-        this.options = options;
-        this.deps = deps;
-        /** A flag to indicate if the conversation has been stopped. */
-        this.isStopped = false;
-        /** A deferred that contains a promise that is resolved when stop() is called, to unblock the receive loop. */
-        this.stopDeferred = new Deferred();
-        /** A FIFO queue of 24kHz, 16-bit PCM audio chunks received from the server. */
-        this.playbackQueue = [];
-        /** Tracks scheduled audio sources. Used to cancel scheduled audio when the model is interrupted. */
-        this.scheduledSources = [];
-        /** A high-precision timeline pointer for scheduling gapless audio playback. */
-        this.nextStartTime = 0;
-        /** A mutex to prevent the playback processing loop from running multiple times concurrently. */
-        this.isPlaybackLoopRunning = false;
-        this.liveSession.inConversation = true;
-        // Start listening for messages from the server.
-        this.receiveLoopPromise = this.runReceiveLoop().finally(() => this.cleanup());
-        // Set up the handler for receiving processed audio data from the worklet.
-        // Message data has been resampled to 16kHz 16-bit PCM.
-        this.deps.workletNode.port.onmessage = event => {
-            if (this.isStopped) {
-                return;
-            }
-            const pcm16 = event.data;
-            const base64 = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(pcm16.buffer))));
-            const chunk = {
-                mimeType: 'audio/pcm',
-                data: base64
-            };
-            void this.liveSession.sendAudioRealtime(chunk);
-        };
-    }
-    /**
-     * Stops the conversation and unblocks the main receive loop.
-     */
-    async stop() {
-        if (this.isStopped) {
-            return;
-        }
-        this.isStopped = true;
-        this.stopDeferred.resolve(); // Unblock the receive loop
-        await this.receiveLoopPromise; // Wait for the loop and cleanup to finish
-    }
-    /**
-     * Cleans up all audio resources (nodes, stream tracks, context) and marks the
-     * session as no longer in a conversation.
-     */
-    cleanup() {
-        this.interruptPlayback(); // Ensure all audio is stopped on final cleanup.
-        this.deps.workletNode.port.onmessage = null;
-        this.deps.workletNode.disconnect();
-        this.deps.sourceNode.disconnect();
-        this.deps.mediaStream.getTracks().forEach(track => track.stop());
-        if (this.deps.audioContext.state !== 'closed') {
-            void this.deps.audioContext.close();
-        }
-        this.liveSession.inConversation = false;
-    }
-    /**
-     * Adds audio data to the queue and ensures the playback loop is running.
-     */
-    enqueueAndPlay(audioData) {
-        this.playbackQueue.push(audioData);
-        // Will no-op if it's already running.
-        void this.processPlaybackQueue();
-    }
-    /**
-     * Stops all current and pending audio playback and clears the queue. This is
-     * called when the server indicates the model's speech was interrupted with
-     * `LiveServerContent.modelTurn.interrupted`.
-     */
-    interruptPlayback() {
-        // Stop all sources that have been scheduled. The onended event will fire for each,
-        // which will clean up the scheduledSources array.
-        [...this.scheduledSources].forEach(source => source.stop(0));
-        // Clear the internal buffer of unprocessed audio chunks.
-        this.playbackQueue.length = 0;
-        // Reset the playback clock to start fresh.
-        this.nextStartTime = this.deps.audioContext.currentTime;
-    }
-    /**
-     * Processes the playback queue in a loop, scheduling each chunk in a gapless sequence.
-     */
-    async processPlaybackQueue() {
-        if (this.isPlaybackLoopRunning) {
-            return;
-        }
-        this.isPlaybackLoopRunning = true;
-        while (this.playbackQueue.length > 0 && !this.isStopped) {
-            const pcmRawBuffer = this.playbackQueue.shift();
-            try {
-                const pcm16 = new Int16Array(pcmRawBuffer);
-                const frameCount = pcm16.length;
-                const audioBuffer = this.deps.audioContext.createBuffer(1, frameCount, SERVER_OUTPUT_SAMPLE_RATE);
-                // Convert 16-bit PCM to 32-bit PCM, required by the Web Audio API.
-                const channelData = audioBuffer.getChannelData(0);
-                for (let i = 0; i < frameCount; i++) {
-                    channelData[i] = pcm16[i] / 32768; // Normalize to Float32 range [-1.0, 1.0]
-                }
-                const source = this.deps.audioContext.createBufferSource();
-                source.buffer = audioBuffer;
-                source.connect(this.deps.audioContext.destination);
-                // Track the source and set up a handler to remove it from tracking when it finishes.
-                this.scheduledSources.push(source);
-                source.onended = () => {
-                    this.scheduledSources = this.scheduledSources.filter(s => s !== source);
-                };
-                // To prevent gaps, schedule the next chunk to start either now (if we're catching up)
-                // or exactly when the previous chunk is scheduled to end.
-                this.nextStartTime = Math.max(this.deps.audioContext.currentTime, this.nextStartTime);
-                source.start(this.nextStartTime);
-                // Update the schedule for the *next* chunk.
-                this.nextStartTime += audioBuffer.duration;
-            }
-            catch (e) {
-                logger.error('Error playing audio:', e);
-            }
-        }
-        this.isPlaybackLoopRunning = false;
-    }
-    /**
-     * The main loop that listens for and processes messages from the server.
-     */
-    async runReceiveLoop() {
-        const messageGenerator = this.liveSession.receive();
-        while (!this.isStopped) {
-            const result = await Promise.race([
-                messageGenerator.next(),
-                this.stopDeferred.promise
-            ]);
-            if (this.isStopped || !result || result.done) {
-                break;
-            }
-            const message = result.value;
-            if (message.type === 'serverContent') {
-                const serverContent = message;
-                if (serverContent.interrupted) {
-                    this.interruptPlayback();
-                }
-                const audioPart = serverContent.modelTurn?.parts.find(part => part.inlineData?.mimeType.startsWith('audio/'));
-                if (audioPart?.inlineData) {
-                    const audioData = Uint8Array.from(atob(audioPart.inlineData.data), c => c.charCodeAt(0)).buffer;
-                    this.enqueueAndPlay(audioData);
-                }
-            }
-            else if (message.type === 'toolCall') {
-                if (!this.options.functionCallingHandler) {
-                    logger.warn('Received tool call message, but StartAudioConversationOptions.functionCallingHandler is undefined. Ignoring tool call.');
-                }
-                else {
-                    try {
-                        const functionResponse = await this.options.functionCallingHandler(message.functionCalls);
-                        if (!this.isStopped) {
-                            void this.liveSession.sendFunctionResponses([functionResponse]);
-                        }
-                    }
-                    catch (e) {
-                        throw new AIError(AIErrorCode.ERROR, `Function calling handler failed: ${e.message}`);
+                    else if (field.order === 'DESCENDING') {
+                        segments.push(new IndexSegment(fieldPath, 1 /* IndexKind.DESCENDING */));
                     }
                 }
             }
+            parsedIndexes.push(new FieldIndex(FieldIndex.UNKNOWN_ID, collectionGroup, segments, IndexState.empty()));
         }
     }
+    return parsedIndexes;
 }
-/**
- * Starts a real-time, bidirectional audio conversation with the model. This helper function manages
- * the complexities of microphone access, audio recording, playback, and interruptions.
- *
- * @remarks Important: This function must be called in response to a user gesture
- * (for example, a button click) to comply with {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy | browser autoplay policies}.
- *
- * @example
- * ```javascript
- * const liveSession = await model.connect();
- * let conversationController;
- *
- * // This function must be called from within a click handler.
- * async function startConversation() {
- *   try {
- *     conversationController = await startAudioConversation(liveSession);
- *   } catch (e) {
- *     // Handle AI-specific errors
- *     if (e instanceof AIError) {
- *       console.error("AI Error:", e.message);
- *     }
- *     // Handle microphone permission and hardware errors
- *     else if (e instanceof DOMException) {
- *       console.error("Microphone Error:", e.message);
- *     }
- *     // Handle other unexpected errors
- *     else {
- *       console.error("An unexpected error occurred:", e);
- *     }
- *   }
- * }
- *
- * // Later, to stop the conversation:
- * // if (conversationController) {
- * //   await conversationController.stop();
- * // }
- * ```
- *
- * @param liveSession - An active {@link LiveSession} instance.
- * @param options - Configuration options for the audio conversation.
- * @returns A `Promise` that resolves with an {@link AudioConversationController}.
- * @throws `AIError` if the environment does not support required Web APIs (`UNSUPPORTED`), if a conversation is already active (`REQUEST_ERROR`), the session is closed (`SESSION_CLOSED`), or if an unexpected initialization error occurs (`ERROR`).
- * @throws `DOMException` Thrown by `navigator.mediaDevices.getUserMedia()` if issues occur with microphone access, such as permissions being denied (`NotAllowedError`) or no compatible hardware being found (`NotFoundError`). See the {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#exceptions | MDN documentation} for a full list of exceptions.
- *
- * @beta
- */
-async function startAudioConversation(liveSession, options = {}) {
-    if (liveSession.isClosed) {
-        throw new AIError(AIErrorCode.SESSION_CLOSED, 'Cannot start audio conversation on a closed LiveSession.');
-    }
-    if (liveSession.inConversation) {
-        throw new AIError(AIErrorCode.REQUEST_ERROR, 'An audio conversation is already in progress for this session.');
-    }
-    // Check for necessary Web API support.
-    if (typeof AudioWorkletNode === 'undefined' ||
-        typeof AudioContext === 'undefined' ||
-        typeof navigator === 'undefined' ||
-        !navigator.mediaDevices) {
-        throw new AIError(AIErrorCode.UNSUPPORTED, 'Audio conversation is not supported in this environment. It requires the Web Audio API and AudioWorklet support.');
-    }
-    let audioContext;
+function tryParseJson(json) {
     try {
-        // 1. Set up the audio context. This must be in response to a user gesture.
-        // See: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices#autoplay_policy
-        audioContext = new AudioContext();
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
-        // 2. Prompt for microphone access and get the media stream.
-        // This can throw a variety of permission or hardware-related errors.
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-            audio: true
-        });
-        // 3. Load the AudioWorklet processor.
-        // See: https://developer.mozilla.org/en-US/docs/Web/API/AudioWorklet
-        const workletBlob = new Blob([audioProcessorWorkletString], {
-            type: 'application/javascript'
-        });
-        const workletURL = URL.createObjectURL(workletBlob);
-        await audioContext.audioWorklet.addModule(workletURL);
-        // 4. Create the audio graph: Microphone -> Source Node -> Worklet Node
-        const sourceNode = audioContext.createMediaStreamSource(mediaStream);
-        const workletNode = new AudioWorkletNode(audioContext, AUDIO_PROCESSOR_NAME, {
-            processorOptions: { targetSampleRate: SERVER_INPUT_SAMPLE_RATE }
-        });
-        sourceNode.connect(workletNode);
-        // 5. Instantiate and return the runner which manages the conversation.
-        const runner = new AudioConversationRunner(liveSession, options, {
-            audioContext,
-            mediaStream,
-            sourceNode,
-            workletNode
-        });
-        return { stop: () => runner.stop() };
+        return JSON.parse(json);
     }
     catch (e) {
-        // Ensure the audio context is closed on any setup error.
-        if (audioContext && audioContext.state !== 'closed') {
-            void audioContext.close();
-        }
-        // Re-throw specific, known error types directly. The user may want to handle `DOMException`
-        // errors differently (for example, if permission to access audio device was denied).
-        if (e instanceof AIError || e instanceof DOMException) {
-            throw e;
-        }
-        // Wrap any other unexpected errors in a standard AIError.
-        throw new AIError(AIErrorCode.ERROR, `Failed to initialize audio recording: ${e.message}`);
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Failed to parse JSON: ' + e?.message);
     }
+}
+function tryGetString(data, property) {
+    if (typeof data[property] !== 'string') {
+        throw new FirestoreError(Code.INVALID_ARGUMENT, 'Missing string value for: ' + property);
+    }
+    return data[property];
 }
 
 /**
  * @license
- * Copyright 2024 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -4315,169 +2936,178 @@ async function startAudioConversation(liveSession, options = {}) {
  * limitations under the License.
  */
 /**
- * Returns the default {@link AI} instance that is associated with the provided
- * {@link @firebase/app#FirebaseApp}. If no instance exists, initializes a new instance with the
- * default settings.
+ * A `PersistentCacheIndexManager` for configuring persistent cache indexes used
+ * for local query execution.
  *
- * @example
- * ```javascript
- * const ai = getAI(app);
- * ```
- *
- * @example
- * ```javascript
- * // Get an AI instance configured to use the Gemini Developer API (via Google AI).
- * const ai = getAI(app, { backend: new GoogleAIBackend() });
- * ```
- *
- * @example
- * ```javascript
- * // Get an AI instance configured to use the Vertex AI Gemini API.
- * const ai = getAI(app, { backend: new VertexAIBackend() });
- * ```
- *
- * @param app - The {@link @firebase/app#FirebaseApp} to use.
- * @param options - {@link AIOptions} that configure the AI instance.
- * @returns The default {@link AI} instance for the given {@link @firebase/app#FirebaseApp}.
- *
- * @public
+ * To use, call `getPersistentCacheIndexManager()` to get an instance.
  */
-function getAI(app = getApp(), options) {
-    app = getModularInstance(app);
-    // Dependencies
-    const AIProvider = _getProvider(app, AI_TYPE);
-    const backend = options?.backend ?? new GoogleAIBackend();
-    const finalOptions = {
-        useLimitedUseAppCheckTokens: options?.useLimitedUseAppCheckTokens ?? false
-    };
-    const identifier = encodeInstanceIdentifier(backend);
-    const aiInstance = AIProvider.getImmediate({
-        identifier
-    });
-    aiInstance.options = finalOptions;
-    return aiInstance;
+class PersistentCacheIndexManager {
+    /** @hideconstructor */
+    constructor(_firestore) {
+        this._firestore = _firestore;
+        /** A type string to uniquely identify instances of this class. */
+        this.type = 'PersistentCacheIndexManager';
+    }
 }
-const hybridParamKeys = [
-    'mode',
-    'onDeviceParams',
-    'inCloudParams'
-];
 /**
- * Returns a {@link GenerativeModel} class with methods for inference
- * and other functionality.
+ * Returns the PersistentCache Index Manager used by the given `Firestore`
+ * object.
  *
- * @public
+ * @returns The `PersistentCacheIndexManager` instance, or `null` if local
+ * persistent storage is not in use.
  */
-function getGenerativeModel(ai, modelParams, requestOptions) {
-    // Uses the existence of HybridParams.mode to clarify the type of the modelParams input.
-    const hybridParams = modelParams;
-    let inCloudParams;
-    if (hybridParams.mode) {
-        for (const param of Object.keys(modelParams)) {
-            if (!hybridParamKeys.includes(param)) {
-                logger.warn(`When a hybrid inference mode is specified (mode is currently set` +
-                    ` to ${hybridParams.mode}), "${param}" cannot be ` +
-                    `configured at the top level. Configuration for in-cloud and ` +
-                    `on-device must be done separately in inCloudParams and onDeviceParams. ` +
-                    `Configuration values set outside of inCloudParams and onDeviceParams will` +
-                    ` be ignored.`);
-            }
-        }
-        inCloudParams = hybridParams.inCloudParams || {
-            model: DEFAULT_HYBRID_IN_CLOUD_MODEL
-        };
+function getPersistentCacheIndexManager(firestore) {
+    firestore = cast(firestore, Firestore);
+    const cachedInstance = persistentCacheIndexManagerByFirestore.get(firestore);
+    if (cachedInstance) {
+        return cachedInstance;
     }
-    else {
-        inCloudParams = modelParams;
+    const client = ensureFirestoreConfigured(firestore);
+    if (client._uninitializedComponentsProvider?._offline.kind !== 'persistent') {
+        return null;
     }
-    if (!inCloudParams.model) {
-        throw new AIError(AIErrorCode.NO_MODEL, `Must provide a model name. Example: getGenerativeModel({ model: 'my-model-name' })`);
+    const instance = new PersistentCacheIndexManager(firestore);
+    persistentCacheIndexManagerByFirestore.set(firestore, instance);
+    return instance;
+}
+/**
+ * Enables the SDK to create persistent cache indexes automatically for local
+ * query execution when the SDK believes cache indexes can help improve
+ * performance.
+ *
+ * This feature is disabled by default.
+ */
+function enablePersistentCacheIndexAutoCreation(indexManager) {
+    setPersistentCacheIndexAutoCreationEnabled(indexManager, true);
+}
+/**
+ * Stops creating persistent cache indexes automatically for local query
+ * execution. The indexes which have been created by calling
+ * `enablePersistentCacheIndexAutoCreation()` still take effect.
+ */
+function disablePersistentCacheIndexAutoCreation(indexManager) {
+    setPersistentCacheIndexAutoCreationEnabled(indexManager, false);
+}
+/**
+ * Removes all persistent cache indexes.
+ *
+ * Please note this function will also deletes indexes generated by
+ * `setIndexConfiguration()`, which is deprecated.
+ */
+function deleteAllPersistentCacheIndexes(indexManager) {
+    const client = ensureFirestoreConfigured(indexManager._firestore);
+    const promise = firestoreClientDeleteAllFieldIndexes(client);
+    promise
+        .then(_ => logDebug('deleting all persistent cache indexes succeeded'))
+        .catch(error => logWarn('deleting all persistent cache indexes failed', error));
+}
+function setPersistentCacheIndexAutoCreationEnabled(indexManager, isEnabled) {
+    const client = ensureFirestoreConfigured(indexManager._firestore);
+    const promise = firestoreClientSetPersistentCacheIndexAutoCreationEnabled(client, isEnabled);
+    promise
+        .then(_ => logDebug(`setting persistent cache index auto creation ` +
+        `isEnabled=${isEnabled} succeeded`))
+        .catch(error => logWarn(`setting persistent cache index auto creation ` +
+        `isEnabled=${isEnabled} failed`, error));
+}
+/**
+ * Maps `Firestore` instances to their corresponding
+ * `PersistentCacheIndexManager` instances.
+ *
+ * Use a `WeakMap` so that the mapping will be automatically dropped when the
+ * `Firestore` instance is garbage collected. This emulates a private member
+ * as described in https://goo.gle/454yvug.
+ */
+const persistentCacheIndexManagerByFirestore = new WeakMap();
+
+/**
+ * @license
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Testing hooks for use by Firestore's integration test suite to reach into the
+ * SDK internals to validate logic and behavior that is not visible from the
+ * public API surface.
+ *
+ * @internal
+ */
+class TestingHooks {
+    constructor() {
+        throw new Error('instances of this class should not be created');
     }
     /**
-     * An AIService registered by index.node.ts will not have a
-     * chromeAdapterFactory() method.
+     * Registers a callback to be notified when an existence filter mismatch
+     * occurs in the Watch listen stream.
+     *
+     * The relative order in which callbacks are notified is unspecified; do not
+     * rely on any particular ordering. If a given callback is registered multiple
+     * times then it will be notified multiple times, once per registration.
+     *
+     * @param callback - the callback to invoke upon existence filter mismatch.
+     *
+     * @returns a function that, when called, unregisters the given callback; only
+     * the first invocation of the returned function does anything; all subsequent
+     * invocations do nothing.
      */
-    const chromeAdapter = ai.chromeAdapterFactory?.(hybridParams.mode, typeof window === 'undefined' ? undefined : window, hybridParams.onDeviceParams);
-    const generativeModel = new GenerativeModel(ai, inCloudParams, requestOptions, chromeAdapter);
-    generativeModel._apiSettings.inferenceMode = hybridParams.mode;
-    return generativeModel;
-}
-/**
- * Returns an {@link ImagenModel} class with methods for using Imagen.
- *
- * Only Imagen 3 models (named `imagen-3.0-*`) are supported.
- *
- * @param ai - An {@link AI} instance.
- * @param modelParams - Parameters to use when making Imagen requests.
- * @param requestOptions - Additional options to use when making requests.
- *
- * @throws If the `apiKey` or `projectId` fields are missing in your
- * Firebase config.
- *
- * @public
- */
-function getImagenModel(ai, modelParams, requestOptions) {
-    if (!modelParams.model) {
-        throw new AIError(AIErrorCode.NO_MODEL, `Must provide a model name. Example: getImagenModel({ model: 'my-model-name' })`);
+    static onExistenceFilterMismatch(callback) {
+        return TestingHooksSpiImpl.instance.onExistenceFilterMismatch(callback);
     }
-    return new ImagenModel(ai, modelParams, requestOptions);
 }
 /**
- * Returns a {@link LiveGenerativeModel} class for real-time, bidirectional communication.
- *
- * The Live API is only supported in modern browser windows and Node >= 22.
- *
- * @param ai - An {@link AI} instance.
- * @param modelParams - Parameters to use when setting up a {@link LiveSession}.
- * @throws If the `apiKey` or `projectId` fields are missing in your
- * Firebase config.
- *
- * @beta
+ * The implementation of `TestingHooksSpi`.
  */
-function getLiveGenerativeModel(ai, modelParams) {
-    if (!modelParams.model) {
-        throw new AIError(AIErrorCode.NO_MODEL, `Must provide a model name for getLiveGenerativeModel. Example: getLiveGenerativeModel(ai, { model: 'my-model-name' })`);
+class TestingHooksSpiImpl {
+    constructor() {
+        this.existenceFilterMismatchCallbacksById = new Map();
     }
-    const webSocketHandler = new WebSocketHandlerImpl();
-    return new LiveGenerativeModel(ai, modelParams, webSocketHandler);
+    static get instance() {
+        if (!testingHooksSpiImplInstance) {
+            testingHooksSpiImplInstance = new TestingHooksSpiImpl();
+            setTestingHooksSpi(testingHooksSpiImplInstance);
+        }
+        return testingHooksSpiImplInstance;
+    }
+    notifyOnExistenceFilterMismatch(info) {
+        this.existenceFilterMismatchCallbacksById.forEach(callback => callback(info));
+    }
+    onExistenceFilterMismatch(callback) {
+        const id = Symbol();
+        const callbacks = this.existenceFilterMismatchCallbacksById;
+        callbacks.set(id, callback);
+        return () => callbacks.delete(id);
+    }
 }
-/**
- * Returns a {@link TemplateGenerativeModel} class for executing server-side
- * templates.
- *
- * @param ai - An {@link AI} instance.
- * @param requestOptions - Additional options to use when making requests.
- *
- * @beta
- */
-function getTemplateGenerativeModel(ai, requestOptions) {
-    return new TemplateGenerativeModel(ai, requestOptions);
-}
-/**
- * Returns a {@link TemplateImagenModel} class for executing server-side
- * Imagen templates.
- *
- * @param ai - An {@link AI} instance.
- * @param requestOptions - Additional options to use when making requests.
- *
- * @beta
- */
-function getTemplateImagenModel(ai, requestOptions) {
-    return new TemplateImagenModel(ai, requestOptions);
-}
+let testingHooksSpiImplInstance = null;
 
 /**
- * The Firebase AI Web SDK.
+ * @license
+ * Copyright 2021 Google LLC
  *
- * @packageDocumentation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-function registerAI() {
-    _registerComponent(new Component(AI_TYPE, factory, "PUBLIC" /* ComponentType.PUBLIC */).setMultipleInstances(true));
-    registerVersion(name, version, 'node');
-    // BUILD_TARGET will be replaced by values like esm, cjs, etc during the compilation
-    registerVersion(name, version, 'esm2020');
-}
-registerAI();
+registerFirestore('node');
 
-export { AIError, AIErrorCode, AIModel, AnyOfSchema, ArraySchema, Backend, BackendType, BlockReason, BooleanSchema, ChatSession, FinishReason, FunctionCallingMode, GenerativeModel, GoogleAIBackend, HarmBlockMethod, HarmBlockThreshold, HarmCategory, HarmProbability, HarmSeverity, ImagenAspectRatio, ImagenImageFormat, ImagenModel, ImagenPersonFilterLevel, ImagenSafetyFilterLevel, InferenceMode, InferenceSource, IntegerSchema, Language, LiveGenerativeModel, LiveResponseType, LiveSession, Modality, NumberSchema, ObjectSchema, Outcome, POSSIBLE_ROLES, ResponseModality, Schema, SchemaType, StringSchema, TemplateGenerativeModel, TemplateImagenModel, ThinkingLevel, URLRetrievalStatus, VertexAIBackend, getAI, getGenerativeModel, getImagenModel, getLiveGenerativeModel, getTemplateGenerativeModel, getTemplateImagenModel, startAudioConversation };
+export { AggregateField, AggregateQuerySnapshot, DocumentSnapshot, PersistentCacheIndexManager, QueryCompositeFilterConstraint, QueryConstraint, QueryDocumentSnapshot, QueryEndAtConstraint, QueryFieldFilterConstraint, QueryLimitConstraint, QueryOrderByConstraint, QuerySnapshot, QueryStartAtConstraint, SnapshotMetadata, Transaction, WriteBatch, TestingHooks as _TestingHooks, addDoc, aggregateFieldEqual, aggregateQuerySnapshotEqual, and, average, count, deleteAllPersistentCacheIndexes, deleteDoc, disablePersistentCacheIndexAutoCreation, documentSnapshotFromJSON, enablePersistentCacheIndexAutoCreation, endAt, endBefore, executeWrite, getAggregateFromServer, getCountFromServer, getDoc, getDocFromCache, getDocFromServer, getDocs, getDocsFromCache, getDocsFromServer, getPersistentCacheIndexManager, limit, limitToLast, memoryEagerGarbageCollector, memoryLocalCache, memoryLruGarbageCollector, onSnapshot, onSnapshotResume, onSnapshotsInSync, or, orderBy, persistentLocalCache, persistentMultipleTabManager, persistentSingleTabManager, query, querySnapshotFromJSON, runTransaction, setDoc, setIndexConfiguration, snapshotEqual, startAfter, startAt, sum, updateDoc, where, writeBatch };
 //# sourceMappingURL=index.node.mjs.map

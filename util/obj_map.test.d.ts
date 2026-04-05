@@ -14,15 +14,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface Resolver<R> {
-    (value: R | Promise<R>): void;
-}
-export interface Rejecter {
-    (reason?: Error): void;
-}
-export declare class Deferred<R> {
-    promise: Promise<R>;
-    resolve: Resolver<R>;
-    reject: Rejecter;
-    constructor();
-}
+export {};

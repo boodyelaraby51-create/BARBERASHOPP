@@ -1,14 +1,18 @@
-'use strict';
+import { _registerComponent as t, registerVersion as e, SDK_VERSION as n } from "@firebase/app";
 
-Object.defineProperty(exports, '__esModule', { value: true });
+import { Component as r } from "@firebase/component";
 
-var app = require('@firebase/app');
-var component = require('@firebase/component');
-var common = require('./common-51e31ebf.cjs.js');
-var util = require('@firebase/util');
-require('@firebase/webchannel-wrapper/bloom-blob');
-require('@firebase/logger');
-require('@firebase/webchannel-wrapper/webchannel-blob');
+import { _ as s, F as a, a as o, b as i, c, O as h, D as d, d as p, Q as f, e as _, f as m, C as g, g as I, h as S, i as T, j as P, k as E, l as b, m as C, n as v, o as R, p as V, q, r as O, s as M, B, t as N, R as L, u as $, v as W, A as k, w as J, x as G, y as j, z as U, E as H, G as Y, H as K, I as Z, J as tt, K as et, L as nt, M as rt, N as st, P as at, S as ot, T as it, U as ut, V as ct, W as lt, X as ht, Y as dt, Z as pt, $ as ft, a0 as _t, a1 as mt, a2 as yt, a3 as gt, a4 as wt, a5 as It, a6 as At, a7 as St, a8 as Tt, a9 as Pt, aa as Et, ab as bt, ac as Ct, ad as vt, ae as Rt, af as Ft, ag as Dt, ah as Vt, ai as Qt, aj as xt, ak as qt, al as Ot, am as Mt, an as Bt, ao as Nt, ap as Lt, aq as $t, ar as Wt, as as kt, at as Jt } from "./common-63fc3a52.rn.js";
+
+export { A as AbstractUserDataWriter, w as Bytes, aV as CACHE_SIZE_UNLIMITED, aI as CollectionReference, D as DocumentReference, a4 as FieldPath, aK as FieldValue, F as Firestore, l as FirestoreError, aT as GeoPoint, aF as LoadBundleTask, Q as Query, aU as Timestamp, aR as VectorValue, X as _AutoId, b1 as _ByteString, aX as _DatabaseId, u as _DocumentKey, b3 as _EmptyAppCheckTokenProvider, b2 as _EmptyAuthCredentialsProvider, b0 as _FieldPath, y as _cast, a$ as _debugAssert, aZ as _internalAggregationQueryToProtoRunAggregationQueryRequest, aY as _internalQueryToProtoQueryTarget, aW as _isBase64Available, ak as _logWarn, a_ as _validateIsNotUsedTogether, aL as arrayRemove, aM as arrayUnion, av as clearIndexedDbPersistence, aG as collection, aH as collectionGroup, aw as connectFirestoreEmulator, aN as deleteField, ax as disableNetwork, ad as doc, au as documentId, ay as enableIndexedDbPersistence, az as enableMultiTabIndexedDbPersistence, aA as enableNetwork, z as ensureFirestoreConfigured, aB as getFirestore, aO as increment, aC as initializeFirestore, ai as loadBundle, aj as namedQuery, x as queryEqual, aJ as refEqual, aP as serverTimestamp, aS as setLogLevel, aD as terminate, aQ as vector, aE as waitForPendingWrites } from "./common-63fc3a52.rn.js";
+
+import { getModularInstance as Gt, deepEqual as jt } from "@firebase/util";
+
+import "@firebase/webchannel-wrapper/bloom-blob";
+
+import "@firebase/logger";
+
+import "@firebase/webchannel-wrapper/webchannel-blob";
 
 const Ut = "@firebase/firestore", Ht = "4.13.0";
 
@@ -122,7 +126,7 @@ class AggregateField {
      * @returns An `Object` containing all fields in the snapshot.
      */    _fieldsProto() {
         // Return the cloned value to prevent manipulation of the Snapshot's data
-        return new common.ObjectValue({
+        return new h({
             mapValue: {
                 fields: this._data
             }
@@ -170,7 +174,7 @@ class AggregateField {
     /**
      * The `DocumentReference` for the document included in the `DocumentSnapshot`.
      */    get ref() {
-        return new common.DocumentReference(this._firestore, this._converter, this._key);
+        return new d(this._firestore, this._converter, this._key);
     }
     /**
      * Signals whether or not the document at the snapshot's location exists.
@@ -223,7 +227,7 @@ class AggregateField {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(t) {
         if (this._document) {
-            const e = this._document.data.field(common.__PRIVATE_fieldPathFromArgument("DocumentSnapshot.get", t));
+            const e = this._document.data.field(p("DocumentSnapshot.get", t));
             if (null !== e) return this._userDataWriter.convertValue(e);
         }
     }
@@ -267,7 +271,7 @@ class AggregateField {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ function __PRIVATE_validateHasExplicitOrderByForLimitToLast(t) {
-    if ("L" /* LimitType.Last */ === t.limitType && 0 === t.explicitOrderBy.length) throw new common.FirestoreError(common.D.UNIMPLEMENTED, "limitToLast() queries require specifying at least one orderBy() clause");
+    if ("L" /* LimitType.Last */ === t.limitType && 0 === t.explicitOrderBy.length) throw new b(C.UNIMPLEMENTED, "limitToLast() queries require specifying at least one orderBy() clause");
 }
 
 /**
@@ -288,7 +292,7 @@ function query(t, e, ...n) {
     let r = [];
     e instanceof AppliableConstraint && r.push(e), r = r.concat(n), function __PRIVATE_validateQueryConstraintArray(t) {
         const e = t.filter((t => t instanceof QueryCompositeFilterConstraint)).length, n = t.filter((t => t instanceof QueryFieldFilterConstraint)).length;
-        if (e > 1 || e > 0 && n > 0) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "InvalidQuery. When using composite filters, you cannot use more than one filter at the top level. Consider nesting the multiple filters within an `and(...)` statement. For example: change `query(query, where(...), or(...))` to `query(query, and(where(...), or(...)))`.");
+        if (e > 1 || e > 0 && n > 0) throw new b(C.INVALID_ARGUMENT, "InvalidQuery. When using composite filters, you cannot use more than one filter at the top level. Consider nesting the multiple filters within an `and(...)` statement. For example: change `query(query, where(...), or(...))` to `query(query, and(where(...), or(...)))`.");
     }
     /**
  * @license
@@ -339,13 +343,13 @@ function query(t, e, ...n) {
     }
     _apply(t) {
         const e = this._parse(t);
-        return __PRIVATE_validateNewFieldFilter(t._query, e), new common.Query(t.firestore, t.converter, common.__PRIVATE_queryWithAddedFilter(t._query, e));
+        return __PRIVATE_validateNewFieldFilter(t._query, e), new f(t.firestore, t.converter, _(t._query, e));
     }
     _parse(t) {
-        const e = common.__PRIVATE_newUserDataReader(t.firestore), n = function __PRIVATE_newQueryFilter(t, e, n, r, s, a, o) {
+        const e = m(t.firestore), n = function __PRIVATE_newQueryFilter(t, e, n, r, s, a, o) {
             let i;
             if (s.isKeyField()) {
-                if ("array-contains" /* Operator.ARRAY_CONTAINS */ === a || "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */ === a) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid Query. You can't perform '${a}' queries on documentId().`);
+                if ("array-contains" /* Operator.ARRAY_CONTAINS */ === a || "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */ === a) throw new b(C.INVALID_ARGUMENT, `Invalid Query. You can't perform '${a}' queries on documentId().`);
                 if ("in" /* Operator.IN */ === a || "not-in" /* Operator.NOT_IN */ === a) {
                     __PRIVATE_validateDisjunctiveFilterElements(o, a);
                     const e = [];
@@ -357,9 +361,9 @@ function query(t, e, ...n) {
                     };
                 } else i = __PRIVATE_parseDocumentIdValue(r, t, o);
             } else "in" /* Operator.IN */ !== a && "not-in" /* Operator.NOT_IN */ !== a && "array-contains-any" /* Operator.ARRAY_CONTAINS_ANY */ !== a || __PRIVATE_validateDisjunctiveFilterElements(o, a), 
-            i = common.__PRIVATE_parseQueryValue(n, e, o, 
+            i = v(n, e, o, 
             /* allowArrays= */ "in" /* Operator.IN */ === a || "not-in" /* Operator.NOT_IN */ === a);
-            const c = common.FieldFilter.create(s, a, i);
+            const c = R.create(s, a, i);
             return c;
         }(t._query, "where", e, t.firestore._databaseId, this._field, this._op, this._value);
         return n;
@@ -377,7 +381,7 @@ function query(t, e, ...n) {
  * @param value - The value for comparison
  * @returns The created {@link QueryFieldFilterConstraint}.
  */ function where(t, e, n) {
-    const r = e, s = common.__PRIVATE_fieldPathFromArgument("where", t);
+    const r = e, s = p("where", t);
     return QueryFieldFilterConstraint._create(s, r, n);
 }
 
@@ -402,18 +406,18 @@ function query(t, e, ...n) {
     }
     _parse(t) {
         const e = this._queryConstraints.map((e => e._parse(t))).filter((t => t.getFilters().length > 0));
-        return 1 === e.length ? e[0] : common.CompositeFilter.create(e, this._getOperator());
+        return 1 === e.length ? e[0] : g.create(e, this._getOperator());
     }
     _apply(t) {
         const e = this._parse(t);
         return 0 === e.getFilters().length ? t : (function __PRIVATE_validateNewFilter(t, e) {
             let n = t;
             const r = e.getFlattenedFilters();
-            for (const t of r) __PRIVATE_validateNewFieldFilter(n, t), n = common.__PRIVATE_queryWithAddedFilter(n, t);
+            for (const t of r) __PRIVATE_validateNewFieldFilter(n, t), n = _(n, t);
         }
         // Checks if any of the provided filter operators are included in the given list of filters and
         // returns the first one that is, or null if none are.
-        (t._query, e), new common.Query(t.firestore, t.converter, common.__PRIVATE_queryWithAddedFilter(t._query, e)));
+        (t._query, e), new f(t.firestore, t.converter, _(t._query, e)));
     }
     _getQueryConstraints() {
         return this._queryConstraints;
@@ -473,9 +477,9 @@ function query(t, e, ...n) {
     }
     _apply(t) {
         const e = function __PRIVATE_newQueryOrderBy(t, e, n) {
-            if (null !== t.startAt) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Invalid query. You must not call startAt() or startAfter() before calling orderBy().");
-            if (null !== t.endAt) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Invalid query. You must not call endAt() or endBefore() before calling orderBy().");
-            const r = new common.OrderBy(e, n);
+            if (null !== t.startAt) throw new b(C.INVALID_ARGUMENT, "Invalid query. You must not call startAt() or startAfter() before calling orderBy().");
+            if (null !== t.endAt) throw new b(C.INVALID_ARGUMENT, "Invalid query. You must not call endAt() or endBefore() before calling orderBy().");
+            const r = new V(e, n);
             return r;
         }
         /**
@@ -489,7 +493,7 @@ function query(t, e, ...n) {
  * of the query or if any of the fields in the order by are an uncommitted
  * server timestamp.
  */ (t._query, this._field, this._direction);
-        return new common.Query(t.firestore, t.converter, common.__PRIVATE_queryWithAddedOrderBy(t._query, e));
+        return new f(t.firestore, t.converter, I(t._query, e));
     }
 }
 
@@ -505,7 +509,7 @@ function query(t, e, ...n) {
  * not specified, order will be ascending.
  * @returns The created {@link QueryOrderByConstraint}.
  */ function orderBy(t, e = "asc") {
-    const n = e, r = common.__PRIVATE_fieldPathFromArgument("orderBy", t);
+    const n = e, r = p("orderBy", t);
     return QueryOrderByConstraint._create(r, n);
 }
 
@@ -528,7 +532,7 @@ function query(t, e, ...n) {
         return new QueryLimitConstraint(t, e, n);
     }
     _apply(t) {
-        return new common.Query(t.firestore, t.converter, common.__PRIVATE_queryWithLimit(t._query, this._limit, this._limitType));
+        return new f(t.firestore, t.converter, S(t._query, this._limit, this._limitType));
     }
 }
 
@@ -539,7 +543,7 @@ function query(t, e, ...n) {
  * @param limit - The maximum number of items to return.
  * @returns The created {@link QueryLimitConstraint}.
  */ function limit(t) {
-    return common.__PRIVATE_validatePositiveNumber("limit", t), QueryLimitConstraint._create("limit", t, "F" /* LimitType.First */);
+    return T("limit", t), QueryLimitConstraint._create("limit", t, "F" /* LimitType.First */);
 }
 
 /**
@@ -552,7 +556,7 @@ function query(t, e, ...n) {
  * @param limit - The maximum number of items to return.
  * @returns The created {@link QueryLimitConstraint}.
  */ function limitToLast(t) {
-    return common.__PRIVATE_validatePositiveNumber("limitToLast", t), QueryLimitConstraint._create("limitToLast", t, "L" /* LimitType.Last */);
+    return T("limitToLast", t), QueryLimitConstraint._create("limitToLast", t, "L" /* LimitType.Last */);
 }
 
 /**
@@ -575,7 +579,7 @@ function query(t, e, ...n) {
     }
     _apply(t) {
         const e = __PRIVATE_newQueryBoundFromDocOrFields(t, this.type, this._docOrFields, this._inclusive);
-        return new common.Query(t.firestore, t.converter, common.__PRIVATE_queryWithStartAt(t._query, e));
+        return new f(t.firestore, t.converter, P(t._query, e));
     }
 }
 
@@ -609,7 +613,7 @@ function startAfter(...t) {
     }
     _apply(t) {
         const e = __PRIVATE_newQueryBoundFromDocOrFields(t, this.type, this._docOrFields, this._inclusive);
-        return new common.Query(t.firestore, t.converter, common.__PRIVATE_queryWithEndAt(t._query, e));
+        return new f(t.firestore, t.converter, E(t._query, e));
     }
 }
 
@@ -624,8 +628,8 @@ function endAt(...t) {
 }
 
 /** Helper function to create a bound from a document or fields */ function __PRIVATE_newQueryBoundFromDocOrFields(t, e, n, r) {
-    if (n[0] = util.getModularInstance(n[0]), n[0] instanceof DocumentSnapshot$1) return function __PRIVATE_newQueryBoundFromDocument(t, e, n, r, s) {
-        if (!r) throw new common.FirestoreError(common.D.NOT_FOUND, `Can't use a DocumentSnapshot that doesn't exist for ${n}().`);
+    if (n[0] = Gt(n[0]), n[0] instanceof DocumentSnapshot$1) return function __PRIVATE_newQueryBoundFromDocument(t, e, n, r, s) {
+        if (!r) throw new b(C.NOT_FOUND, `Can't use a DocumentSnapshot that doesn't exist for ${n}().`);
         const a = [];
         // Because people expect to continue/end a query at the exact document
         // provided, we need to use the implicit sort order rather than the explicit
@@ -634,42 +638,42 @@ function endAt(...t) {
         // the provided document. Without the key (by using the explicit sort
         // orders), multiple documents could match the position, yielding duplicate
         // results.
-                for (const n of common.__PRIVATE_queryNormalizedOrderBy(t)) if (n.field.isKeyField()) a.push(common.__PRIVATE_refValue(e, r.key)); else {
+                for (const n of q(t)) if (n.field.isKeyField()) a.push(O(e, r.key)); else {
             const t = r.data.field(n.field);
-            if (common.__PRIVATE_isServerTimestamp(t)) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, 'Invalid query. You are trying to start or end a query using a document for which the field "' + n.field + '" is an uncommitted server timestamp. (Since the value of this field is unknown, you cannot start/end a query with it.)');
+            if (M(t)) throw new b(C.INVALID_ARGUMENT, 'Invalid query. You are trying to start or end a query using a document for which the field "' + n.field + '" is an uncommitted server timestamp. (Since the value of this field is unknown, you cannot start/end a query with it.)');
             if (null === t) {
                 const t = n.field.canonicalString();
-                throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. You are trying to start or end a query using a document for which the field '${t}' (used as the orderBy) does not exist.`);
+                throw new b(C.INVALID_ARGUMENT, `Invalid query. You are trying to start or end a query using a document for which the field '${t}' (used as the orderBy) does not exist.`);
             }
             a.push(t);
         }
-        return new common.Bound(a, s);
+        return new B(a, s);
     }
     /**
  * Converts a list of field values to a `Bound` for the given query.
  */ (t._query, t.firestore._databaseId, e, n[0]._document, r);
     {
-        const s = common.__PRIVATE_newUserDataReader(t.firestore);
+        const s = m(t.firestore);
         return function __PRIVATE_newQueryBoundFromFields(t, e, n, r, s, a) {
             // Use explicit order by's because it has to match the query the user made
             const o = t.explicitOrderBy;
-            if (s.length > o.length) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Too many arguments provided to ${r}(). The number of arguments must be less than or equal to the number of orderBy() clauses`);
+            if (s.length > o.length) throw new b(C.INVALID_ARGUMENT, `Too many arguments provided to ${r}(). The number of arguments must be less than or equal to the number of orderBy() clauses`);
             const i = [];
             for (let a = 0; a < s.length; a++) {
                 const c = s[a];
                 if (o[a].field.isKeyField()) {
-                    if ("string" != typeof c) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. Expected a string for document ID in ${r}(), but got a ${typeof c}`);
-                    if (!common.__PRIVATE_isCollectionGroupQuery(t) && -1 !== c.indexOf("/")) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. When querying a collection and ordering by documentId(), the value passed to ${r}() must be a plain document ID, but '${c}' contains a slash.`);
-                    const n = t.path.child(common.ResourcePath.fromString(c));
-                    if (!common.DocumentKey.isDocumentKey(n)) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. When querying a collection group and ordering by documentId(), the value passed to ${r}() must result in a valid document path, but '${n}' is not because it contains an odd number of segments.`);
-                    const s = new common.DocumentKey(n);
-                    i.push(common.__PRIVATE_refValue(e, s));
+                    if ("string" != typeof c) throw new b(C.INVALID_ARGUMENT, `Invalid query. Expected a string for document ID in ${r}(), but got a ${typeof c}`);
+                    if (!N(t) && -1 !== c.indexOf("/")) throw new b(C.INVALID_ARGUMENT, `Invalid query. When querying a collection and ordering by documentId(), the value passed to ${r}() must be a plain document ID, but '${c}' contains a slash.`);
+                    const n = t.path.child(L.fromString(c));
+                    if (!$.isDocumentKey(n)) throw new b(C.INVALID_ARGUMENT, `Invalid query. When querying a collection group and ordering by documentId(), the value passed to ${r}() must result in a valid document path, but '${n}' is not because it contains an odd number of segments.`);
+                    const s = new $(n);
+                    i.push(O(e, s));
                 } else {
-                    const t = common.__PRIVATE_parseQueryValue(n, r, c);
+                    const t = v(n, r, c);
                     i.push(t);
                 }
             }
-            return new common.Bound(i, a);
+            return new B(i, a);
         }
         /**
  * Parses the given `documentIdValue` into a `ReferenceValue`, throwing
@@ -680,22 +684,22 @@ function endAt(...t) {
 }
 
 function __PRIVATE_parseDocumentIdValue(t, e, n) {
-    if ("string" == typeof (n = util.getModularInstance(n))) {
-        if ("" === n) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Invalid query. When querying with documentId(), you must provide a valid document ID, but it was an empty string.");
-        if (!common.__PRIVATE_isCollectionGroupQuery(e) && -1 !== n.indexOf("/")) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. When querying a collection by documentId(), you must provide a plain document ID, but '${n}' contains a '/' character.`);
-        const r = e.path.child(common.ResourcePath.fromString(n));
-        if (!common.DocumentKey.isDocumentKey(r)) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. When querying a collection group by documentId(), the value provided must result in a valid document path, but '${r}' is not because it has an odd number of segments (${r.length}).`);
-        return common.__PRIVATE_refValue(t, new common.DocumentKey(r));
+    if ("string" == typeof (n = Gt(n))) {
+        if ("" === n) throw new b(C.INVALID_ARGUMENT, "Invalid query. When querying with documentId(), you must provide a valid document ID, but it was an empty string.");
+        if (!N(e) && -1 !== n.indexOf("/")) throw new b(C.INVALID_ARGUMENT, `Invalid query. When querying a collection by documentId(), you must provide a plain document ID, but '${n}' contains a '/' character.`);
+        const r = e.path.child(L.fromString(n));
+        if (!$.isDocumentKey(r)) throw new b(C.INVALID_ARGUMENT, `Invalid query. When querying a collection group by documentId(), the value provided must result in a valid document path, but '${r}' is not because it has an odd number of segments (${r.length}).`);
+        return O(t, new $(r));
     }
-    if (n instanceof common.DocumentReference) return common.__PRIVATE_refValue(t, n._key);
-    throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. When querying with documentId(), you must provide a valid string or a DocumentReference, but it was: ${common.__PRIVATE_valueDescription(n)}.`);
+    if (n instanceof d) return O(t, n._key);
+    throw new b(C.INVALID_ARGUMENT, `Invalid query. When querying with documentId(), you must provide a valid string or a DocumentReference, but it was: ${W(n)}.`);
 }
 
 /**
  * Validates that the value passed into a disjunctive filter satisfies all
  * array requirements.
  */ function __PRIVATE_validateDisjunctiveFilterElements(t, e) {
-    if (!Array.isArray(t) || 0 === t.length) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid Query. A non-empty array is required for '${e.toString()}' filters.`);
+    if (!Array.isArray(t) || 0 === t.length) throw new b(C.INVALID_ARGUMENT, `Invalid Query. A non-empty array is required for '${e.toString()}' filters.`);
 }
 
 /**
@@ -729,11 +733,11 @@ function __PRIVATE_parseDocumentIdValue(t, e, n) {
     }(e.op));
     if (null !== n) 
     // Special case when it's a duplicate op to give a slightly clearer error message.
-    throw n === e.op ? new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. You cannot use more than one '${e.op.toString()}' filter.`) : new common.FirestoreError(common.D.INVALID_ARGUMENT, `Invalid query. You cannot use '${e.op.toString()}' filters with '${n.toString()}' filters.`);
+    throw n === e.op ? new b(C.INVALID_ARGUMENT, `Invalid query. You cannot use more than one '${e.op.toString()}' filter.`) : new b(C.INVALID_ARGUMENT, `Invalid query. You cannot use '${e.op.toString()}' filters with '${n.toString()}' filters.`);
 }
 
 function __PRIVATE_validateQueryFilterConstraint(t, e) {
-    if (!(e instanceof QueryFieldFilterConstraint || e instanceof QueryCompositeFilterConstraint)) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Function ${t}() requires AppliableConstraints created with a call to 'where(...)', 'or(...)', or 'and(...)'.`);
+    if (!(e instanceof QueryFieldFilterConstraint || e instanceof QueryCompositeFilterConstraint)) throw new b(C.INVALID_ARGUMENT, `Function ${t}() requires AppliableConstraints created with a call to 'where(...)', 'or(...)', or 'and(...)'.`);
 }
 
 function __PRIVATE_applyFirestoreDataConverter(t, e, n) {
@@ -745,16 +749,16 @@ function __PRIVATE_applyFirestoreDataConverter(t, e, n) {
     r;
 }
 
-class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
+class __PRIVATE_LiteUserDataWriter extends k {
     constructor(t) {
         super(), this.firestore = t;
     }
     convertBytes(t) {
-        return new common.Bytes(t);
+        return new J(t);
     }
     convertReference(t) {
         const e = this.convertDocumentKey(t, this.firestore._databaseId);
-        return new common.DocumentReference(this.firestore, /* converter= */ null, e);
+        return new d(this.firestore, /* converter= */ null, e);
     }
 }
 
@@ -779,7 +783,7 @@ class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
  * a specified field over a range of documents in the result set of a query.
  * @param field - Specifies the field to sum across the result set.
  */ function sum(t) {
-    return new AggregateField("sum", common.__PRIVATE_fieldPathFromArgument("sum", t));
+    return new AggregateField("sum", p("sum", t));
 }
 
 /**
@@ -787,7 +791,7 @@ class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
  * a specified field over a range of documents in the result set of a query.
  * @param field - Specifies the field to average across the result set.
  */ function average(t) {
-    return new AggregateField("avg", common.__PRIVATE_fieldPathFromArgument("average", t));
+    return new AggregateField("avg", p("average", t));
 }
 
 /**
@@ -818,7 +822,7 @@ class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
  * @returns `true` if the objects are "equal", as defined above, or `false`
  * otherwise.
  */ function aggregateQuerySnapshotEqual(t, e) {
-    return common.queryEqual(t.query, e.query) && util.deepEqual(t.data(), e.data());
+    return G(t.query, e.query) && jt(t.data(), e.data());
 }
 
 /**
@@ -896,9 +900,9 @@ class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
  * const averageScore: number | null = aggregateSnapshot.data().averageScore;
  * ```
  */ function getAggregateFromServer(t, e) {
-    const n = common.__PRIVATE_cast(t.firestore, common.Firestore), r = common.ensureFirestoreConfigured(n), s = common.__PRIVATE_mapToArray(e, ((t, e) => new common.__PRIVATE_AggregateImpl(e, t.aggregateType, t._internalFieldPath)));
+    const n = j(t.firestore, a), r = U(n), s = H(e, ((t, e) => new Z(e, t.aggregateType, t._internalFieldPath)));
     // Run the aggregation and convert the results
-    return common.__PRIVATE_firestoreClientRunAggregateQuery(r, t._query, s).then((e => 
+    return Y(r, t._query, s).then((e => 
     /**
  * Converts the core aggregation result to an `AggregateQuerySnapshot`
  * that can be returned to the consumer.
@@ -907,7 +911,7 @@ class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
  * @internal
  */
     function __PRIVATE_convertToAggregateQuerySnapshot(t, e, n) {
-        const r = new common.__PRIVATE_ExpUserDataWriter(t), s = new AggregateQuerySnapshot(e, r, n);
+        const r = new K(t), s = new AggregateQuerySnapshot(e, r, n);
         return s;
     }
     /**
@@ -930,8 +934,8 @@ class __PRIVATE_LiteUserDataWriter extends common.AbstractUserDataWriter {
 
 class __PRIVATE_MemoryLocalCacheImpl {
     constructor(t) {
-        this.kind = "memory", this._onlineComponentProvider = common.OnlineComponentProvider.provider, this._offlineComponentProvider = t?.garbageCollector ? t.garbageCollector._offlineComponentProvider : {
-            build: () => new common.__PRIVATE_LruGcMemoryOfflineComponentProvider(void 0)
+        this.kind = "memory", this._onlineComponentProvider = tt.provider, this._offlineComponentProvider = t?.garbageCollector ? t.garbageCollector._offlineComponentProvider : {
+            build: () => new et(void 0)
         };
     }
     toJSON() {
@@ -956,7 +960,7 @@ class __PRIVATE_PersistentLocalCacheImpl {
 
 class __PRIVATE_MemoryEagerGarbageCollectorImpl {
     constructor() {
-        this.kind = "memoryEager", this._offlineComponentProvider = common.__PRIVATE_MemoryOfflineComponentProvider.provider;
+        this.kind = "memoryEager", this._offlineComponentProvider = nt.provider;
     }
     toJSON() {
         return {
@@ -968,7 +972,7 @@ class __PRIVATE_MemoryEagerGarbageCollectorImpl {
 class __PRIVATE_MemoryLruGarbageCollectorImpl {
     constructor(t) {
         this.kind = "memoryLru", this._offlineComponentProvider = {
-            build: () => new common.__PRIVATE_LruGcMemoryOfflineComponentProvider(t)
+            build: () => new et(t)
         };
     }
     toJSON() {
@@ -1023,8 +1027,8 @@ class __PRIVATE_SingleTabManagerImpl {
     /**
      * @internal
      */    _initialize(t) {
-        this._onlineComponentProvider = common.OnlineComponentProvider.provider, this._offlineComponentProvider = {
-            build: e => new common.__PRIVATE_IndexedDbOfflineComponentProvider(e, t?.cacheSizeBytes, this.forceOwnership)
+        this._onlineComponentProvider = tt.provider, this._offlineComponentProvider = {
+            build: e => new rt(e, t?.cacheSizeBytes, this.forceOwnership)
         };
     }
 }
@@ -1041,8 +1045,8 @@ class __PRIVATE_MultiTabManagerImpl {
     /**
      * @internal
      */    _initialize(t) {
-        this._onlineComponentProvider = common.OnlineComponentProvider.provider, this._offlineComponentProvider = {
-            build: e => new common.__PRIVATE_MultiTabOfflineComponentProvider(e, t?.cacheSizeBytes)
+        this._onlineComponentProvider = tt.provider, this._offlineComponentProvider = {
+            build: e => new st(e, t?.cacheSizeBytes)
         };
     }
 }
@@ -1175,7 +1179,7 @@ const zt = "NOT SUPPORTED";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get(t, e = {}) {
         if (this._document) {
-            const n = this._document.data.field(common.__PRIVATE_fieldPathFromArgument("DocumentSnapshot.get", t));
+            const n = this._document.data.field(p("DocumentSnapshot.get", t));
             if (null !== n) return this._userDataWriter.convertValue(n, e.serverTimestamps);
         }
     }
@@ -1185,7 +1189,7 @@ const zt = "NOT SUPPORTED";
      * @returns a JSON representation of this object.  Throws a {@link FirestoreError} if this
      * `DocumentSnapshot` has pending writes.
      */    toJSON() {
-        if (this.metadata.hasPendingWrites) throw new common.FirestoreError(common.D.FAILED_PRECONDITION, "DocumentSnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");
+        if (this.metadata.hasPendingWrites) throw new b(C.FAILED_PRECONDITION, "DocumentSnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");
         const t = this._document, e = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 if (e.type = DocumentSnapshot._jsonSchemaVersion, e.bundle = "", e.bundleSource = "DocumentSnapshot", 
@@ -1196,16 +1200,16 @@ const zt = "NOT SUPPORTED";
 }
 
 function documentSnapshotFromJSON(t, e, n) {
-    if (common.__PRIVATE_validateJSON(e, DocumentSnapshot._jsonSchema)) {
-        if (e.bundle === zt) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "The provided JSON object was created in a client environment, which is not supported.");
+    if (ot(e, DocumentSnapshot._jsonSchema)) {
+        if (e.bundle === zt) throw new b(C.INVALID_ARGUMENT, "The provided JSON object was created in a client environment, which is not supported.");
         // Parse the bundle data.
-                const r = common.__PRIVATE_newSerializer(t._databaseId), s = common.__PRIVATE_createBundleReaderSync(e.bundle, r), a = s.Qu(), o = new common.__PRIVATE_BundleLoader(s.getMetadata(), r);
+                const r = it(t._databaseId), s = ut(e.bundle, r), a = s.Qu(), o = new ct(s.getMetadata(), r);
         for (const t of a) o.Ga(t);
         // Ensure that we have the correct number of documents in the bundle.
                 const i = o.documents;
-        if (1 !== i.length) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Expected bundle data to contain 1 document, but it contains ${i.length} documents.`);
+        if (1 !== i.length) throw new b(C.INVALID_ARGUMENT, `Expected bundle data to contain 1 document, but it contains ${i.length} documents.`);
         // Build out the internal document data.
-                const c = common.__PRIVATE_fromDocument(r, i[0].document), h = new common.DocumentKey(common.ResourcePath.fromString(e.bundleName));
+                const c = lt(r, i[0].document), h = new $(L.fromString(e.bundleName));
         // Return the external facing DocumentSnapshot.
         return new DocumentSnapshot(t, new __PRIVATE_LiteUserDataWriter(t), h, c, new SnapshotMetadata(
         /* hasPendingWrites= */ !1, 
@@ -1224,10 +1228,10 @@ function documentSnapshotFromJSON(t, e, n) {
  * `exists` property will always be true and `data()` will never return
  * 'undefined'.
  */ DocumentSnapshot._jsonSchemaVersion = "firestore/documentSnapshot/1.0", DocumentSnapshot._jsonSchema = {
-    type: common.property("string", DocumentSnapshot._jsonSchemaVersion),
-    bundleSource: common.property("string", "DocumentSnapshot"),
-    bundleName: common.property("string"),
-    bundle: common.property("string")
+    type: at("string", DocumentSnapshot._jsonSchemaVersion),
+    bundleSource: at("string", "DocumentSnapshot"),
+    bundleName: at("string"),
+    bundle: at("string")
 };
 
 class QueryDocumentSnapshot extends DocumentSnapshot {
@@ -1292,7 +1296,7 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
      * snapshot events.
      */    docChanges(t = {}) {
         const e = !!t.includeMetadataChanges;
-        if (e && this._snapshot.excludesMetadataChanges) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "To include metadata changes with your document changes, you must also pass { includeMetadataChanges:true } to onSnapshot().");
+        if (e && this._snapshot.excludesMetadataChanges) throw new b(C.INVALID_ARGUMENT, "To include metadata changes with your document changes, you must also pass { includeMetadataChanges:true } to onSnapshot().");
         return this._cachedChanges && this._cachedChangesIncludeMetadataChanges === e || (this._cachedChanges = 
         /** Calculates the array of `DocumentChange`s for a given `ViewSnapshot`. */
         function __PRIVATE_changesFromSnapshot(t, e) {
@@ -1333,10 +1337,10 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
      * @returns a JSON representation of this object. Throws a {@link FirestoreError} if this
      * `QuerySnapshot` has pending writes.
      */    toJSON() {
-        if (this.metadata.hasPendingWrites) throw new common.FirestoreError(common.D.FAILED_PRECONDITION, "QuerySnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");
+        if (this.metadata.hasPendingWrites) throw new b(C.FAILED_PRECONDITION, "QuerySnapshot.toJSON() attempted to serialize a document with pending writes. Await waitForPendingWrites() before invoking toJSON().");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const t = {};
-        t.type = QuerySnapshot._jsonSchemaVersion, t.bundleSource = "QuerySnapshot", t.bundleName = common.__PRIVATE_AutoId.newId(), 
+        t.type = QuerySnapshot._jsonSchemaVersion, t.bundleSource = "QuerySnapshot", t.bundleName = ht.newId(), 
         this._firestore._databaseId.database, this._firestore._databaseId.projectId;
         const e = [], n = [], r = [];
         return this.docs.forEach((t => {
@@ -1348,24 +1352,24 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
 }
 
 function querySnapshotFromJSON(t, e, n) {
-    if (common.__PRIVATE_validateJSON(e, QuerySnapshot._jsonSchema)) {
-        if (e.bundle === zt) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "The provided JSON object was created in a client environment, which is not supported.");
+    if (ot(e, QuerySnapshot._jsonSchema)) {
+        if (e.bundle === zt) throw new b(C.INVALID_ARGUMENT, "The provided JSON object was created in a client environment, which is not supported.");
         // Parse the bundle data.
-                const r = common.__PRIVATE_newSerializer(t._databaseId), s = common.__PRIVATE_createBundleReaderSync(e.bundle, r), a = s.Qu(), o = new common.__PRIVATE_BundleLoader(s.getMetadata(), r);
+                const r = it(t._databaseId), s = ut(e.bundle, r), a = s.Qu(), o = new ct(s.getMetadata(), r);
         for (const t of a) o.Ga(t);
-        if (1 !== o.queries.length) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `Snapshot data expected 1 query but found ${o.queries.length} queries.`);
+        if (1 !== o.queries.length) throw new b(C.INVALID_ARGUMENT, `Snapshot data expected 1 query but found ${o.queries.length} queries.`);
         // Create an internal Query object from the named query in the bundle.
-                const i = common.__PRIVATE_fromBundledQuery(o.queries[0].bundledQuery), c = o.documents;
+                const i = dt(o.queries[0].bundledQuery), c = o.documents;
         // Construct the arrays of document data for the query.
-                let h = new common.DocumentSet;
+                let h = new pt;
         c.map((t => {
-            const e = common.__PRIVATE_fromDocument(r, t.document);
+            const e = lt(r, t.document);
             h = h.add(e);
         }));
         // Create a view snapshot of the query and documents.
-        const d = common.ViewSnapshot.fromInitialDocuments(i, h, common.__PRIVATE_documentKeySet() /* Zero mutated keys signifies no pending writes. */ , 
+        const d = ft.fromInitialDocuments(i, h, _t() /* Zero mutated keys signifies no pending writes. */ , 
         /* fromCache= */ !1, 
-        /* hasCachedResults= */ !1), p = new common.Query(t, n || null, i);
+        /* hasCachedResults= */ !1), p = new f(t, n || null, i);
         // Create an external Query object, required to construct the QuerySnapshot.
                 // Return a new QuerySnapshot with all of the collected data.
         return new QuerySnapshot(t, new __PRIVATE_LiteUserDataWriter(t), p, d);
@@ -1385,7 +1389,7 @@ function __PRIVATE_resultChangeType(t) {
         return "removed";
 
       default:
-        return common.fail(61501, {
+        return mt(61501, {
             type: t
         });
     }
@@ -1400,7 +1404,7 @@ function __PRIVATE_resultChangeType(t) {
  * @param right - A snapshot to compare.
  * @returns true if the snapshots are equal.
  */ function snapshotEqual(t, e) {
-    return t instanceof DocumentSnapshot && e instanceof DocumentSnapshot ? t._firestore === e._firestore && t._key.isEqual(e._key) && (null === t._document ? null === e._document : t._document.isEqual(e._document)) && t._converter === e._converter : t instanceof QuerySnapshot && e instanceof QuerySnapshot && (t._firestore === e._firestore && common.queryEqual(t.query, e.query) && t.metadata.isEqual(e.metadata) && t._snapshot.isEqual(e._snapshot));
+    return t instanceof DocumentSnapshot && e instanceof DocumentSnapshot ? t._firestore === e._firestore && t._key.isEqual(e._key) && (null === t._document ? null === e._document : t._document.isEqual(e._document)) && t._converter === e._converter : t instanceof QuerySnapshot && e instanceof QuerySnapshot && (t._firestore === e._firestore && G(t.query, e.query) && t.metadata.isEqual(e.metadata) && t._snapshot.isEqual(e._snapshot));
 }
 
 /**
@@ -1419,10 +1423,10 @@ function __PRIVATE_resultChangeType(t) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ QuerySnapshot._jsonSchemaVersion = "firestore/querySnapshot/1.0", QuerySnapshot._jsonSchema = {
-    type: common.property("string", QuerySnapshot._jsonSchemaVersion),
-    bundleSource: common.property("string", "QuerySnapshot"),
-    bundleName: common.property("string"),
-    bundle: common.property("string")
+    type: at("string", QuerySnapshot._jsonSchemaVersion),
+    bundleSource: at("string", "QuerySnapshot"),
+    bundleName: at("string"),
+    bundle: at("string")
 };
 
 const Yt = {
@@ -1457,12 +1461,12 @@ class WriteBatch {
     /** @hideconstructor */
     constructor(t, e) {
         this._firestore = t, this._commitHandler = e, this._mutations = [], this._committed = !1, 
-        this._dataReader = common.__PRIVATE_newUserDataReader(t);
+        this._dataReader = m(t);
     }
     set(t, e, n) {
         this._verifyNotCommitted();
-        const r = __PRIVATE_validateReference(t, this._firestore), s = __PRIVATE_applyFirestoreDataConverter(r.converter, e, n), a = common.__PRIVATE_parseSetData(this._dataReader, "WriteBatch.set", r._key, s, null !== r.converter, n);
-        return this._mutations.push(a.toMutation(r._key, common.Precondition.none())), this;
+        const r = __PRIVATE_validateReference(t, this._firestore), s = __PRIVATE_applyFirestoreDataConverter(r.converter, e, n), a = yt(this._dataReader, "WriteBatch.set", r._key, s, null !== r.converter, n);
+        return this._mutations.push(a.toMutation(r._key, gt.none())), this;
     }
     update(t, e, n, ...r) {
         this._verifyNotCommitted();
@@ -1470,8 +1474,8 @@ class WriteBatch {
         // For Compat types, we have to "extract" the underlying types before
         // performing validation.
                 let a;
-        return a = "string" == typeof (e = util.getModularInstance(e)) || e instanceof common.FieldPath ? common.__PRIVATE_parseUpdateVarargs(this._dataReader, "WriteBatch.update", s._key, e, n, r) : common.__PRIVATE_parseUpdateData(this._dataReader, "WriteBatch.update", s._key, e), 
-        this._mutations.push(a.toMutation(s._key, common.Precondition.exists(!0))), this;
+        return a = "string" == typeof (e = Gt(e)) || e instanceof wt ? It(this._dataReader, "WriteBatch.update", s._key, e, n, r) : At(this._dataReader, "WriteBatch.update", s._key, e), 
+        this._mutations.push(a.toMutation(s._key, gt.exists(!0))), this;
     }
     /**
      * Deletes the document referred to by the provided {@link DocumentReference}.
@@ -1481,7 +1485,7 @@ class WriteBatch {
      */    delete(t) {
         this._verifyNotCommitted();
         const e = __PRIVATE_validateReference(t, this._firestore);
-        return this._mutations = this._mutations.concat(new common.__PRIVATE_DeleteMutation(e._key, common.Precondition.none())), this;
+        return this._mutations = this._mutations.concat(new St(e._key, gt.none())), this;
     }
     /**
      * Commits all of the writes in this write batch as a single atomic unit.
@@ -1498,12 +1502,12 @@ class WriteBatch {
         return this._verifyNotCommitted(), this._committed = !0, this._mutations.length > 0 ? this._commitHandler(this._mutations) : Promise.resolve();
     }
     _verifyNotCommitted() {
-        if (this._committed) throw new common.FirestoreError(common.D.FAILED_PRECONDITION, "A write batch can no longer be used after commit() has been called.");
+        if (this._committed) throw new b(C.FAILED_PRECONDITION, "A write batch can no longer be used after commit() has been called.");
     }
 }
 
 function __PRIVATE_validateReference(t, e) {
-    if ((t = util.getModularInstance(t)).firestore !== e) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Provided document reference is from a different Firestore instance.");
+    if ((t = Gt(t)).firestore !== e) throw new b(C.INVALID_ARGUMENT, "Provided document reference is from a different Firestore instance.");
     return t;
 }
 
@@ -1534,7 +1538,7 @@ function __PRIVATE_validateReference(t, e) {
  */ class Transaction$1 {
     /** @hideconstructor */
     constructor(t, e) {
-        this._firestore = t, this._transaction = e, this._dataReader = common.__PRIVATE_newUserDataReader(t);
+        this._firestore = t, this._transaction = e, this._dataReader = m(t);
     }
     /**
      * Reads the document referenced by the provided {@link DocumentReference}.
@@ -1544,17 +1548,17 @@ function __PRIVATE_validateReference(t, e) {
      */    get(t) {
         const e = __PRIVATE_validateReference(t, this._firestore), n = new __PRIVATE_LiteUserDataWriter(this._firestore);
         return this._transaction.lookup([ e._key ]).then((t => {
-            if (!t || 1 !== t.length) return common.fail(24041);
+            if (!t || 1 !== t.length) return mt(24041);
             const r = t[0];
             if (r.isFoundDocument()) return new DocumentSnapshot$1(this._firestore, n, r.key, r, e.converter);
             if (r.isNoDocument()) return new DocumentSnapshot$1(this._firestore, n, e._key, null, e.converter);
-            throw common.fail(18433, {
+            throw mt(18433, {
                 doc: r
             });
         }));
     }
     set(t, e, n) {
-        const r = __PRIVATE_validateReference(t, this._firestore), s = __PRIVATE_applyFirestoreDataConverter(r.converter, e, n), a = common.__PRIVATE_parseSetData(this._dataReader, "Transaction.set", r._key, s, null !== r.converter, n);
+        const r = __PRIVATE_validateReference(t, this._firestore), s = __PRIVATE_applyFirestoreDataConverter(r.converter, e, n), a = yt(this._dataReader, "Transaction.set", r._key, s, null !== r.converter, n);
         return this._transaction.set(r._key, a), this;
     }
     update(t, e, n, ...r) {
@@ -1562,7 +1566,7 @@ function __PRIVATE_validateReference(t, e) {
         // For Compat types, we have to "extract" the underlying types before
         // performing validation.
                 let a;
-        return a = "string" == typeof (e = util.getModularInstance(e)) || e instanceof common.FieldPath ? common.__PRIVATE_parseUpdateVarargs(this._dataReader, "Transaction.update", s._key, e, n, r) : common.__PRIVATE_parseUpdateData(this._dataReader, "Transaction.update", s._key, e), 
+        return a = "string" == typeof (e = Gt(e)) || e instanceof wt ? It(this._dataReader, "Transaction.update", s._key, e, n, r) : At(this._dataReader, "Transaction.update", s._key, e), 
         this._transaction.update(s._key, a), this;
     }
     /**
@@ -1611,7 +1615,7 @@ function __PRIVATE_validateReference(t, e) {
      * @param documentRef - A reference to the document to be read.
      * @returns A `DocumentSnapshot` with the read data.
      */    get(t) {
-        const e = __PRIVATE_validateReference(t, this._firestore), n = new common.__PRIVATE_ExpUserDataWriter(this._firestore);
+        const e = __PRIVATE_validateReference(t, this._firestore), n = new K(this._firestore);
         return super.get(t).then((t => new DocumentSnapshot(this._firestore, n, e._key, t._document, new SnapshotMetadata(
         /* hasPendingWrites= */ !1, 
         /* fromCache= */ !1), e.converter)));
@@ -1637,16 +1641,16 @@ function __PRIVATE_validateReference(t, e) {
  * `updateFunction `is returned here. Otherwise, if the transaction failed, a
  * rejected promise with the corresponding failure error is returned.
  */ function runTransaction(t, e, n) {
-    t = common.__PRIVATE_cast(t, common.Firestore);
+    t = j(t, a);
     const r = {
         ...Yt,
         ...n
     };
     !function __PRIVATE_validateTransactionOptions(t) {
-        if (t.maxAttempts < 1) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Max attempts must be at least 1");
+        if (t.maxAttempts < 1) throw new b(C.INVALID_ARGUMENT, "Max attempts must be at least 1");
     }(r);
-    const s = common.ensureFirestoreConfigured(t);
-    return common.__PRIVATE_firestoreClientTransaction(s, (n => e(new Transaction(t, n))), r);
+    const s = U(t);
+    return Tt(s, (n => e(new Transaction(t, n))), r);
 }
 
 /**
@@ -1677,9 +1681,9 @@ function __PRIVATE_validateReference(t, e) {
  * @returns A `Promise` that resolves with a `DocumentSnapshot` containing the
  * document contents.
  */ function getDoc(t) {
-    t = common.__PRIVATE_cast(t, common.DocumentReference);
-    const e = common.__PRIVATE_cast(t.firestore, common.Firestore), n = common.ensureFirestoreConfigured(e);
-    return common.__PRIVATE_firestoreClientGetDocumentViaSnapshotListener(n, t._key).then((n => __PRIVATE_convertToDocSnapshot(e, t, n)));
+    t = j(t, d);
+    const e = j(t.firestore, a), n = U(e);
+    return Pt(n, t._key).then((n => __PRIVATE_convertToDocSnapshot(e, t, n)));
 }
 
 /**
@@ -1689,9 +1693,9 @@ function __PRIVATE_validateReference(t, e) {
  * @returns A `Promise` that resolves with a `DocumentSnapshot` containing the
  * document contents.
  */ function getDocFromCache(t) {
-    t = common.__PRIVATE_cast(t, common.DocumentReference);
-    const e = common.__PRIVATE_cast(t.firestore, common.Firestore), n = common.ensureFirestoreConfigured(e), r = new common.__PRIVATE_ExpUserDataWriter(e);
-    return common.__PRIVATE_firestoreClientGetDocumentFromLocalCache(n, t._key).then((n => new DocumentSnapshot(e, r, t._key, n, new SnapshotMetadata(null !== n && n.hasLocalMutations, 
+    t = j(t, d);
+    const e = j(t.firestore, a), n = U(e), r = new K(e);
+    return Et(n, t._key).then((n => new DocumentSnapshot(e, r, t._key, n, new SnapshotMetadata(null !== n && n.hasLocalMutations, 
     /* fromCache= */ !0), t.converter)));
 }
 
@@ -1702,9 +1706,9 @@ function __PRIVATE_validateReference(t, e) {
  * @returns A `Promise` that resolves with a `DocumentSnapshot` containing the
  * document contents.
  */ function getDocFromServer(t) {
-    t = common.__PRIVATE_cast(t, common.DocumentReference);
-    const e = common.__PRIVATE_cast(t.firestore, common.Firestore), n = common.ensureFirestoreConfigured(e);
-    return common.__PRIVATE_firestoreClientGetDocumentViaSnapshotListener(n, t._key, {
+    t = j(t, d);
+    const e = j(t.firestore, a), n = U(e);
+    return Pt(n, t._key, {
         source: "server"
     }).then((n => __PRIVATE_convertToDocSnapshot(e, t, n)));
 }
@@ -1719,9 +1723,9 @@ function __PRIVATE_validateReference(t, e) {
  *
  * @returns A `Promise` that resolves with the results of the query.
  */ function getDocs(t) {
-    t = common.__PRIVATE_cast(t, common.Query);
-    const e = common.__PRIVATE_cast(t.firestore, common.Firestore), n = common.ensureFirestoreConfigured(e), r = new common.__PRIVATE_ExpUserDataWriter(e);
-    return __PRIVATE_validateHasExplicitOrderByForLimitToLast(t._query), common.__PRIVATE_firestoreClientGetDocumentsViaSnapshotListener(n, t._query).then((n => new QuerySnapshot(e, r, t, n)));
+    t = j(t, f);
+    const e = j(t.firestore, a), n = U(e), r = new K(e);
+    return __PRIVATE_validateHasExplicitOrderByForLimitToLast(t._query), bt(n, t._query).then((n => new QuerySnapshot(e, r, t, n)));
 }
 
 /**
@@ -1731,9 +1735,9 @@ function __PRIVATE_validateReference(t, e) {
  *
  * @returns A `Promise` that resolves with the results of the query.
  */ function getDocsFromCache(t) {
-    t = common.__PRIVATE_cast(t, common.Query);
-    const e = common.__PRIVATE_cast(t.firestore, common.Firestore), n = common.ensureFirestoreConfigured(e), r = new common.__PRIVATE_ExpUserDataWriter(e);
-    return common.__PRIVATE_firestoreClientGetDocumentsFromLocalCache(n, t._query).then((n => new QuerySnapshot(e, r, t, n)));
+    t = j(t, f);
+    const e = j(t.firestore, a), n = U(e), r = new K(e);
+    return Ct(n, t._query).then((n => new QuerySnapshot(e, r, t, n)));
 }
 
 /**
@@ -1742,28 +1746,28 @@ function __PRIVATE_validateReference(t, e) {
  *
  * @returns A `Promise` that resolves with the results of the query.
  */ function getDocsFromServer(t) {
-    t = common.__PRIVATE_cast(t, common.Query);
-    const e = common.__PRIVATE_cast(t.firestore, common.Firestore), n = common.ensureFirestoreConfigured(e), r = new common.__PRIVATE_ExpUserDataWriter(e);
-    return common.__PRIVATE_firestoreClientGetDocumentsViaSnapshotListener(n, t._query, {
+    t = j(t, f);
+    const e = j(t.firestore, a), n = U(e), r = new K(e);
+    return bt(n, t._query, {
         source: "server"
     }).then((n => new QuerySnapshot(e, r, t, n)));
 }
 
 function setDoc(t, e, n) {
-    t = common.__PRIVATE_cast(t, common.DocumentReference);
-    const r = common.__PRIVATE_cast(t.firestore, common.Firestore), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e, n), o = common.__PRIVATE_newUserDataReader(r);
-    return executeWrite(r, [ common.__PRIVATE_parseSetData(o, "setDoc", t._key, s, null !== t.converter, n).toMutation(t._key, common.Precondition.none()) ]);
+    t = j(t, d);
+    const r = j(t.firestore, a), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e, n), o = m(r);
+    return executeWrite(r, [ yt(o, "setDoc", t._key, s, null !== t.converter, n).toMutation(t._key, gt.none()) ]);
 }
 
 function updateDoc(t, e, n, ...r) {
-    t = common.__PRIVATE_cast(t, common.DocumentReference);
-    const s = common.__PRIVATE_cast(t.firestore, common.Firestore), o = common.__PRIVATE_newUserDataReader(s);
+    t = j(t, d);
+    const s = j(t.firestore, a), o = m(s);
     let i;
     i = "string" == typeof (
     // For Compat types, we have to "extract" the underlying types before
     // performing validation.
-    e = util.getModularInstance(e)) || e instanceof common.FieldPath ? common.__PRIVATE_parseUpdateVarargs(o, "updateDoc", t._key, e, n, r) : common.__PRIVATE_parseUpdateData(o, "updateDoc", t._key, e);
-    return executeWrite(s, [ i.toMutation(t._key, common.Precondition.exists(!0)) ]);
+    e = Gt(e)) || e instanceof wt ? It(o, "updateDoc", t._key, e, n, r) : At(o, "updateDoc", t._key, e);
+    return executeWrite(s, [ i.toMutation(t._key, gt.exists(!0)) ]);
 }
 
 /**
@@ -1789,7 +1793,7 @@ function updateDoc(t, e, n, ...r) {
  * deleted from the backend or rejects once the backend reports an error
  * deleting the document.
  */ function deleteDoc(t) {
-    return executeWrite(common.__PRIVATE_cast(t.firestore, common.Firestore), [ new common.__PRIVATE_DeleteMutation(t._key, common.Precondition.none()) ]);
+    return executeWrite(j(t.firestore, a), [ new St(t._key, gt.none()) ]);
 }
 
 /**
@@ -1817,13 +1821,13 @@ function updateDoc(t, e, n, ...r) {
  * created in the backend or rejects once the backend reports an error creating
  * the document.
  */ function addDoc(t, e) {
-    const n = common.__PRIVATE_cast(t.firestore, common.Firestore), r = common.doc(t), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e), o = common.__PRIVATE_newUserDataReader(t.firestore);
-    return executeWrite(n, [ common.__PRIVATE_parseSetData(o, "addDoc", r._key, s, null !== t.converter, {}).toMutation(r._key, common.Precondition.exists(!1)) ]).then((() => r));
+    const n = j(t.firestore, a), r = vt(t), s = __PRIVATE_applyFirestoreDataConverter(t.converter, e), o = m(t.firestore);
+    return executeWrite(n, [ yt(o, "addDoc", r._key, s, null !== t.converter, {}).toMutation(r._key, gt.exists(!1)) ]).then((() => r));
 }
 
 function onSnapshot(t, ...e) {
     // onSnapshot for Query or Document.
-    t = util.getModularInstance(t);
+    t = Gt(t);
     let n = {
         includeMetadataChanges: !1,
         source: "default"
@@ -1838,16 +1842,16 @@ function onSnapshot(t, ...e) {
         e[r] = t.next?.bind(t), e[r + 1] = t.error?.bind(t), e[r + 2] = t.complete?.bind(t);
     }
     let o, i, c;
-    if (t instanceof common.DocumentReference) i = common.__PRIVATE_cast(t.firestore, common.Firestore), c = common.__PRIVATE_newQueryForPath(t._key.path), o = {
+    if (t instanceof d) i = j(t.firestore, a), c = Rt(t._key.path), o = {
         next: n => {
             e[r] && e[r](__PRIVATE_convertToDocSnapshot(i, t, n));
         },
         error: e[r + 1],
         complete: e[r + 2]
     }; else {
-        const n = common.__PRIVATE_cast(t, common.Query);
-        i = common.__PRIVATE_cast(n.firestore, common.Firestore), c = n._query;
-        const s = new common.__PRIVATE_ExpUserDataWriter(i);
+        const n = j(t, f);
+        i = j(n.firestore, a), c = n._query;
+        const s = new K(i);
         o = {
             next: t => {
                 e[r] && e[r](new QuerySnapshot(i, s, n, t));
@@ -1856,12 +1860,12 @@ function onSnapshot(t, ...e) {
             complete: e[r + 2]
         }, __PRIVATE_validateHasExplicitOrderByForLimitToLast(t._query);
     }
-    const h = common.ensureFirestoreConfigured(i);
-    return common.__PRIVATE_firestoreClientListen(h, c, s, o);
+    const h = U(i);
+    return Ft(h, c, s, o);
 }
 
 function onSnapshotResume(t, e, ...n) {
-    const r = util.getModularInstance(t), s = 
+    const r = Gt(t), s = 
     /**
  * Ensures the data required to construct an {@link onSnapshot} listener exist in a `snapshotJson`
  * object that originates from {@link DocumentSnapshot.toJSON} or {@link Querysnapshot.toJSON}. The
@@ -1914,7 +1918,7 @@ function onSnapshotResume(t, e, ...n) {
  *
  * @internal
  */ (e);
-    if (s.error) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, s.error);
+    if (s.error) throw new b(C.INVALID_ARGUMENT, s.error);
     let a, o = 0;
     if ("object" != typeof n[o] || __PRIVATE_isPartialObserver(n[o]) || (a = n[o++]), 
     "QuerySnapshot" === s.bundleSource) {
@@ -1948,8 +1952,8 @@ function onSnapshotResume(t, e, ...n) {
  */
         return function __PRIVATE_onSnapshotQuerySnapshotBundle(t, e, n, r, s) {
             let a, o = !1;
-            const i = common.loadBundle(t, e.bundle);
-            return i.then((() => common.namedQuery(t, e.bundleName))).then((t => {
+            const i = Qt(t, e.bundle);
+            return i.then((() => xt(t, e.bundleName))).then((t => {
                 if (t && !o) {
                     s && t.withConverter(s), a = onSnapshot(t, n || {}, r);
                 }
@@ -2001,10 +2005,10 @@ function onSnapshotResume(t, e, ...n) {
         };
         return function __PRIVATE_onSnapshotDocumentSnapshotBundle(t, e, n, r, s) {
             let a, o = !1;
-            const i = common.loadBundle(t, e.bundle);
+            const i = Qt(t, e.bundle);
             return i.then((() => {
                 if (!o) {
-                    const o = new common.DocumentReference(t, s || null, common.DocumentKey.fromPath(e.bundleName));
+                    const o = new d(t, s || null, $.fromPath(e.bundleName));
                     a = onSnapshot(o, n || {}, r);
                 }
             })).catch((t => (r.error && r.error(t), () => {}))), () => {
@@ -2012,35 +2016,35 @@ function onSnapshotResume(t, e, ...n) {
             };
         }(r, s, a, t, n[o]);
     }
-    throw new common.FirestoreError(common.D.INVALID_ARGUMENT, `unsupported bundle source: ${s.bundleSource}`);
+    throw new b(C.INVALID_ARGUMENT, `unsupported bundle source: ${s.bundleSource}`);
 }
 
 function onSnapshotsInSync(t, e) {
-    t = common.__PRIVATE_cast(t, common.Firestore);
-    const n = common.ensureFirestoreConfigured(t), r = __PRIVATE_isPartialObserver(e) ? e : {
+    t = j(t, a);
+    const n = U(t), r = __PRIVATE_isPartialObserver(e) ? e : {
         next: e
     };
-    return common.__PRIVATE_firestoreClientAddSnapshotsInSyncListener(n, r);
+    return Dt(n, r);
 }
 
 /**
  * Locally writes `mutations` on the async queue.
  * @internal
  */ function executeWrite(t, e) {
-    const n = common.ensureFirestoreConfigured(t);
-    return common.__PRIVATE_firestoreClientWrite(n, e);
+    const n = U(t);
+    return Vt(n, e);
 }
 
 /**
  * Converts a {@link ViewSnapshot} that contains the single document specified by `ref`
  * to a {@link DocumentSnapshot}.
  */ function __PRIVATE_convertToDocSnapshot(t, e, n) {
-    const r = n.docs.get(e._key), s = new common.__PRIVATE_ExpUserDataWriter(t);
+    const r = n.docs.get(e._key), s = new K(t);
     return new DocumentSnapshot(t, s, e._key, r, new SnapshotMetadata(n.hasPendingWrites, n.fromCache), e.converter);
 }
 
 function writeBatch(t) {
-    return t = common.__PRIVATE_cast(t, common.Firestore), common.ensureFirestoreConfigured(t), new WriteBatch(t, (e => executeWrite(t, e)));
+    return t = j(t, a), U(t), new WriteBatch(t, (e => executeWrite(t, e)));
 }
 
 /**
@@ -2059,35 +2063,35 @@ function writeBatch(t) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ function setIndexConfiguration(t, e) {
-    t = common.__PRIVATE_cast(t, common.Firestore);
-    const n = common.ensureFirestoreConfigured(t);
+    t = j(t, a);
+    const n = U(t);
     if (!n._uninitializedComponentsProvider || "memory" === n._uninitializedComponentsProvider._offline.kind) 
     // PORTING NOTE: We don't return an error if the user has not enabled
     // persistence since `enableIndexeddbPersistence()` can fail on the Web.
-    return common.__PRIVATE_logWarn("Cannot enable indexes when persistence is disabled"), Promise.resolve();
+    return qt("Cannot enable indexes when persistence is disabled"), Promise.resolve();
     const r = function __PRIVATE_parseIndexes(t) {
         const e = "string" == typeof t ? function __PRIVATE_tryParseJson(t) {
             try {
                 return JSON.parse(t);
             } catch (t) {
-                throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Failed to parse JSON: " + t?.message);
+                throw new b(C.INVALID_ARGUMENT, "Failed to parse JSON: " + t?.message);
             }
         }(t) : t, n = [];
         if (Array.isArray(e.indexes)) for (const t of e.indexes) {
             const e = __PRIVATE_tryGetString(t, "collectionGroup"), r = [];
             if (Array.isArray(t.fields)) for (const e of t.fields) {
-                const t = __PRIVATE_tryGetString(e, "fieldPath"), n = common.__PRIVATE_fieldPathFromDotSeparatedString("setIndexConfiguration", t);
-                "CONTAINS" === e.arrayConfig ? r.push(new common.IndexSegment(n, 2 /* IndexKind.CONTAINS */)) : "ASCENDING" === e.order ? r.push(new common.IndexSegment(n, 0 /* IndexKind.ASCENDING */)) : "DESCENDING" === e.order && r.push(new common.IndexSegment(n, 1 /* IndexKind.DESCENDING */));
+                const t = __PRIVATE_tryGetString(e, "fieldPath"), n = Mt("setIndexConfiguration", t);
+                "CONTAINS" === e.arrayConfig ? r.push(new Bt(n, 2 /* IndexKind.CONTAINS */)) : "ASCENDING" === e.order ? r.push(new Bt(n, 0 /* IndexKind.ASCENDING */)) : "DESCENDING" === e.order && r.push(new Bt(n, 1 /* IndexKind.DESCENDING */));
             }
-            n.push(new common.FieldIndex(common.FieldIndex.UNKNOWN_ID, e, r, common.IndexState.empty()));
+            n.push(new Nt(Nt.UNKNOWN_ID, e, r, Lt.empty()));
         }
         return n;
     }(e);
-    return common.__PRIVATE_firestoreClientSetIndexConfiguration(n, r);
+    return Ot(n, r);
 }
 
 function __PRIVATE_tryGetString(t, e) {
-    if ("string" != typeof t[e]) throw new common.FirestoreError(common.D.INVALID_ARGUMENT, "Missing string value for: " + e);
+    if ("string" != typeof t[e]) throw new b(C.INVALID_ARGUMENT, "Missing string value for: " + e);
     return t[e];
 }
 
@@ -2128,10 +2132,10 @@ function __PRIVATE_tryGetString(t, e) {
  * @returns The `PersistentCacheIndexManager` instance, or `null` if local
  * persistent storage is not in use.
  */ function getPersistentCacheIndexManager(t) {
-    t = common.__PRIVATE_cast(t, common.Firestore);
+    t = j(t, a);
     const e = Kt.get(t);
     if (e) return e;
-    const n = common.ensureFirestoreConfigured(t);
+    const n = U(t);
     if ("persistent" !== n._uninitializedComponentsProvider?._offline.kind) return null;
     const r = new PersistentCacheIndexManager(t);
     return Kt.set(t, r), r;
@@ -2161,13 +2165,13 @@ function __PRIVATE_tryGetString(t, e) {
  * Please note this function will also deletes indexes generated by
  * `setIndexConfiguration()`, which is deprecated.
  */ function deleteAllPersistentCacheIndexes(t) {
-    const e = common.ensureFirestoreConfigured(t._firestore);
-    common.__PRIVATE_firestoreClientDeleteAllFieldIndexes(e).then((t => common.__PRIVATE_logDebug("deleting all persistent cache indexes succeeded"))).catch((t => common.__PRIVATE_logWarn("deleting all persistent cache indexes failed", t)));
+    const e = U(t._firestore);
+    $t(e).then((t => Wt("deleting all persistent cache indexes succeeded"))).catch((t => qt("deleting all persistent cache indexes failed", t)));
 }
 
 function __PRIVATE_setPersistentCacheIndexAutoCreationEnabled(t, e) {
-    const n = common.ensureFirestoreConfigured(t._firestore);
-    common.__PRIVATE_firestoreClientSetPersistentCacheIndexAutoCreationEnabled(n, e).then((t => common.__PRIVATE_logDebug(`setting persistent cache index auto creation isEnabled=${e} succeeded`))).catch((t => common.__PRIVATE_logWarn(`setting persistent cache index auto creation isEnabled=${e} failed`, t)));
+    const n = U(t._firestore);
+    kt(n, e).then((t => Wt(`setting persistent cache index auto creation isEnabled=${e} succeeded`))).catch((t => qt(`setting persistent cache index auto creation isEnabled=${e} failed`, t)));
 }
 
 /**
@@ -2230,7 +2234,7 @@ function __PRIVATE_setPersistentCacheIndexAutoCreationEnabled(t, e) {
         this.t = new Map;
     }
     static get instance() {
-        return Xt || (Xt = new __PRIVATE_TestingHooksSpiImpl, common.__PRIVATE_setTestingHooksSpi(Xt)), Xt;
+        return Xt || (Xt = new __PRIVATE_TestingHooksSpiImpl, Jt(Xt)), Xt;
     }
     o(t) {
         this.t.forEach((e => e(t)));
@@ -2244,138 +2248,31 @@ function __PRIVATE_setPersistentCacheIndexAutoCreationEnabled(t, e) {
 let Xt = null;
 
 /**
- * Cloud Firestore
+ * @license
+ * Copyright 2021 Google LLC
  *
- * @packageDocumentation
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */ !function __PRIVATE_registerFirestore(h, d = !0) {
-    common.__PRIVATE_setSDKVersion(app.SDK_VERSION), app._registerComponent(new component.Component("firestore", ((t, {instanceIdentifier: e, options: n}) => {
-        const r = t.getProvider("app").getImmediate(), s = new common.Firestore(new common.__PRIVATE_FirebaseAuthCredentialsProvider(t.getProvider("auth-internal")), new common.__PRIVATE_FirebaseAppCheckTokenProvider(r, t.getProvider("app-check-internal")), common.__PRIVATE_databaseIdFromApp(r, e), r);
+    s(n), t(new r("firestore", ((t, {instanceIdentifier: e, options: n}) => {
+        const r = t.getProvider("app").getImmediate(), s = new a(new o(t.getProvider("auth-internal")), new i(r, t.getProvider("app-check-internal")), c(r, e), r);
         return n = {
             useFetchStreams: d,
             ...n
         }, s._setSettings(n), s;
-    }), "PUBLIC").setMultipleInstances(!0)), app.registerVersion(Ut, Ht, h), 
+    }), "PUBLIC").setMultipleInstances(!0)), e(Ut, Ht, h), 
     // BUILD_TARGET will be replaced by values like esm, cjs, etc during the compilation
-    app.registerVersion(Ut, Ht, "cjs2020");
-}();
+    e(Ut, Ht, "esm2020");
+}("rn", /* useFetchStreams= */ !1);
 
-exports.AbstractUserDataWriter = common.AbstractUserDataWriter;
-exports.Bytes = common.Bytes;
-exports.CACHE_SIZE_UNLIMITED = common.sn;
-exports.CollectionReference = common.CollectionReference;
-exports.DocumentReference = common.DocumentReference;
-exports.FieldPath = common.FieldPath;
-exports.FieldValue = common.FieldValue;
-exports.Firestore = common.Firestore;
-exports.FirestoreError = common.FirestoreError;
-exports.GeoPoint = common.GeoPoint;
-exports.LoadBundleTask = common.LoadBundleTask;
-exports.Query = common.Query;
-exports.Timestamp = common.Timestamp;
-exports.VectorValue = common.VectorValue;
-exports._AutoId = common.__PRIVATE_AutoId;
-exports._ByteString = common.ByteString;
-exports._DatabaseId = common.DatabaseId;
-exports._DocumentKey = common.DocumentKey;
-exports._EmptyAppCheckTokenProvider = common.__PRIVATE_EmptyAppCheckTokenProvider;
-exports._EmptyAuthCredentialsProvider = common.__PRIVATE_EmptyAuthCredentialsProvider;
-exports._FieldPath = common.FieldPath$1;
-exports._cast = common.__PRIVATE_cast;
-exports._debugAssert = common.__PRIVATE_debugAssert;
-exports._internalAggregationQueryToProtoRunAggregationQueryRequest = common._internalAggregationQueryToProtoRunAggregationQueryRequest;
-exports._internalQueryToProtoQueryTarget = common._internalQueryToProtoQueryTarget;
-exports._isBase64Available = common.__PRIVATE_isBase64Available;
-exports._logWarn = common.__PRIVATE_logWarn;
-exports._validateIsNotUsedTogether = common.__PRIVATE_validateIsNotUsedTogether;
-exports.arrayRemove = common.arrayRemove;
-exports.arrayUnion = common.arrayUnion;
-exports.clearIndexedDbPersistence = common.clearIndexedDbPersistence;
-exports.collection = common.collection;
-exports.collectionGroup = common.collectionGroup;
-exports.connectFirestoreEmulator = common.connectFirestoreEmulator;
-exports.deleteField = common.deleteField;
-exports.disableNetwork = common.disableNetwork;
-exports.doc = common.doc;
-exports.documentId = common.documentId;
-exports.enableIndexedDbPersistence = common.enableIndexedDbPersistence;
-exports.enableMultiTabIndexedDbPersistence = common.enableMultiTabIndexedDbPersistence;
-exports.enableNetwork = common.enableNetwork;
-exports.ensureFirestoreConfigured = common.ensureFirestoreConfigured;
-exports.getFirestore = common.getFirestore;
-exports.increment = common.increment;
-exports.initializeFirestore = common.initializeFirestore;
-exports.loadBundle = common.loadBundle;
-exports.namedQuery = common.namedQuery;
-exports.queryEqual = common.queryEqual;
-exports.refEqual = common.refEqual;
-exports.serverTimestamp = common.serverTimestamp;
-exports.setLogLevel = common.setLogLevel;
-exports.terminate = common.terminate;
-exports.vector = common.vector;
-exports.waitForPendingWrites = common.waitForPendingWrites;
-exports.AggregateField = AggregateField;
-exports.AggregateQuerySnapshot = AggregateQuerySnapshot;
-exports.DocumentSnapshot = DocumentSnapshot;
-exports.PersistentCacheIndexManager = PersistentCacheIndexManager;
-exports.QueryCompositeFilterConstraint = QueryCompositeFilterConstraint;
-exports.QueryConstraint = QueryConstraint;
-exports.QueryDocumentSnapshot = QueryDocumentSnapshot;
-exports.QueryEndAtConstraint = QueryEndAtConstraint;
-exports.QueryFieldFilterConstraint = QueryFieldFilterConstraint;
-exports.QueryLimitConstraint = QueryLimitConstraint;
-exports.QueryOrderByConstraint = QueryOrderByConstraint;
-exports.QuerySnapshot = QuerySnapshot;
-exports.QueryStartAtConstraint = QueryStartAtConstraint;
-exports.SnapshotMetadata = SnapshotMetadata;
-exports.Transaction = Transaction;
-exports.WriteBatch = WriteBatch;
-exports._TestingHooks = TestingHooks;
-exports.addDoc = addDoc;
-exports.aggregateFieldEqual = aggregateFieldEqual;
-exports.aggregateQuerySnapshotEqual = aggregateQuerySnapshotEqual;
-exports.and = and;
-exports.average = average;
-exports.count = count;
-exports.deleteAllPersistentCacheIndexes = deleteAllPersistentCacheIndexes;
-exports.deleteDoc = deleteDoc;
-exports.disablePersistentCacheIndexAutoCreation = disablePersistentCacheIndexAutoCreation;
-exports.documentSnapshotFromJSON = documentSnapshotFromJSON;
-exports.enablePersistentCacheIndexAutoCreation = enablePersistentCacheIndexAutoCreation;
-exports.endAt = endAt;
-exports.endBefore = endBefore;
-exports.executeWrite = executeWrite;
-exports.getAggregateFromServer = getAggregateFromServer;
-exports.getCountFromServer = getCountFromServer;
-exports.getDoc = getDoc;
-exports.getDocFromCache = getDocFromCache;
-exports.getDocFromServer = getDocFromServer;
-exports.getDocs = getDocs;
-exports.getDocsFromCache = getDocsFromCache;
-exports.getDocsFromServer = getDocsFromServer;
-exports.getPersistentCacheIndexManager = getPersistentCacheIndexManager;
-exports.limit = limit;
-exports.limitToLast = limitToLast;
-exports.memoryEagerGarbageCollector = memoryEagerGarbageCollector;
-exports.memoryLocalCache = memoryLocalCache;
-exports.memoryLruGarbageCollector = memoryLruGarbageCollector;
-exports.onSnapshot = onSnapshot;
-exports.onSnapshotResume = onSnapshotResume;
-exports.onSnapshotsInSync = onSnapshotsInSync;
-exports.or = or;
-exports.orderBy = orderBy;
-exports.persistentLocalCache = persistentLocalCache;
-exports.persistentMultipleTabManager = persistentMultipleTabManager;
-exports.persistentSingleTabManager = persistentSingleTabManager;
-exports.query = query;
-exports.querySnapshotFromJSON = querySnapshotFromJSON;
-exports.runTransaction = runTransaction;
-exports.setDoc = setDoc;
-exports.setIndexConfiguration = setIndexConfiguration;
-exports.snapshotEqual = snapshotEqual;
-exports.startAfter = startAfter;
-exports.startAt = startAt;
-exports.sum = sum;
-exports.updateDoc = updateDoc;
-exports.where = where;
-exports.writeBatch = writeBatch;
-//# sourceMappingURL=index.cjs.js.map
+export { AggregateField, AggregateQuerySnapshot, DocumentSnapshot, PersistentCacheIndexManager, QueryCompositeFilterConstraint, QueryConstraint, QueryDocumentSnapshot, QueryEndAtConstraint, QueryFieldFilterConstraint, QueryLimitConstraint, QueryOrderByConstraint, QuerySnapshot, QueryStartAtConstraint, SnapshotMetadata, Transaction, WriteBatch, TestingHooks as _TestingHooks, addDoc, aggregateFieldEqual, aggregateQuerySnapshotEqual, and, average, count, deleteAllPersistentCacheIndexes, deleteDoc, disablePersistentCacheIndexAutoCreation, documentSnapshotFromJSON, enablePersistentCacheIndexAutoCreation, endAt, endBefore, executeWrite, getAggregateFromServer, getCountFromServer, getDoc, getDocFromCache, getDocFromServer, getDocs, getDocsFromCache, getDocsFromServer, getPersistentCacheIndexManager, limit, limitToLast, memoryEagerGarbageCollector, memoryLocalCache, memoryLruGarbageCollector, onSnapshot, onSnapshotResume, onSnapshotsInSync, or, orderBy, persistentLocalCache, persistentMultipleTabManager, persistentSingleTabManager, query, querySnapshotFromJSON, runTransaction, setDoc, setIndexConfiguration, snapshotEqual, startAfter, startAt, sum, updateDoc, where, writeBatch };
+//# sourceMappingURL=index.rn.js.map
