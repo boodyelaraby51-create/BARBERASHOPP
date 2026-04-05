@@ -1,12 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var totp = require('./totp-a5322a96.js');
-var util = require('@firebase/util');
-var app = require('@firebase/app');
-require('@firebase/component');
-require('@firebase/logger');
+import { av as _getInstance, aw as _assert, ax as _signInWithCredential, ay as _reauthenticate, az as _link$1, M as AuthCredential, aA as signInWithIdp, aB as _fail, aC as debugAssert, aD as _persistenceKeyName, aE as _serverAppCurrentUserOperationNotSupportedError, aF as _castAuth, aG as FederatedAuthProvider, aH as BaseOAuthProvider, aI as _emulatorUrl, aJ as _performApiRequest, aK as _isIOS, aL as _isAndroid, aM as _isIOS7Or8, aN as _createError, aO as _isMobileBrowser, aP as _isIE10 } from './totp-ed01b91b.js';
+export { A as ActionCodeOperation, aj as ActionCodeURL, M as AuthCredential, J as AuthErrorCodes, aR as AuthImpl, N as EmailAuthCredential, W as EmailAuthProvider, X as FacebookAuthProvider, F as FactorId, aT as FetchProvider, Z as GithubAuthProvider, Y as GoogleAuthProvider, Q as OAuthCredential, _ as OAuthProvider, O as OperationType, U as PhoneAuthCredential, P as PhoneAuthProvider, n as PhoneMultiFactorGenerator, q as ProviderId, R as RecaptchaVerifier, aU as SAMLAuthCredential, $ as SAMLAuthProvider, S as SignInMethod, T as TotpMultiFactorGenerator, o as TotpSecret, a0 as TwitterAuthProvider, aQ as UserImpl, aw as _assert, aF as _castAuth, aB as _fail, aS as _getClientVersion, av as _getInstance, aD as _persistenceKeyName, a8 as applyActionCode, y as beforeAuthStateChanged, a as browserCookiePersistence, b as browserLocalPersistence, m as browserPopupRedirectResolver, c as browserSessionPersistence, a9 as checkActionCode, a7 as confirmPasswordReset, L as connectAuthEmulator, ab as createUserWithEmailAndPassword, H as debugErrorMap, G as deleteUser, ag as fetchSignInMethodsForEmail, ar as getAdditionalUserInfo, p as getAuth, ao as getIdToken, ap as getIdTokenResult, at as getMultiFactorResolver, k as getRedirectResult, V as inMemoryPersistence, i as indexedDBLocalPersistence, K as initializeAuth, v as initializeRecaptchaConfig, ae as isSignInWithEmailLink, a3 as linkWithCredential, l as linkWithPhoneNumber, e as linkWithPopup, h as linkWithRedirect, au as multiFactor, z as onAuthStateChanged, x as onIdTokenChanged, ak as parseActionCodeURL, I as prodErrorMap, a4 as reauthenticateWithCredential, r as reauthenticateWithPhoneNumber, f as reauthenticateWithPopup, j as reauthenticateWithRedirect, as as reload, E as revokeAccessToken, ah as sendEmailVerification, a6 as sendPasswordResetEmail, ad as sendSignInLinkToEmail, t as setPersistence, a1 as signInAnonymously, a2 as signInWithCredential, a5 as signInWithCustomToken, ac as signInWithEmailAndPassword, af as signInWithEmailLink, s as signInWithPhoneNumber, d as signInWithPopup, g as signInWithRedirect, D as signOut, aq as unlink, C as updateCurrentUser, am as updateEmail, an as updatePassword, u as updatePhoneNumber, al as updateProfile, B as useDeviceLanguage, w as validatePassword, ai as verifyBeforeUpdateEmail, aa as verifyPasswordResetCode } from './totp-ed01b91b.js';
+import { isEmpty, querystring, querystringDecode } from '@firebase/util';
+import { _isFirebaseServerApp, SDK_VERSION } from '@firebase/app';
+import '@firebase/component';
+import '@firebase/logger';
 
 /**
  * @license
@@ -86,9 +83,9 @@ class AuthPopup {
  */
 function _withDefaultResolver(auth, resolverOverride) {
     if (resolverOverride) {
-        return totp._getInstance(resolverOverride);
+        return _getInstance(resolverOverride);
     }
-    totp._assert(auth._popupRedirectResolver, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    _assert(auth._popupRedirectResolver, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
     return auth._popupRedirectResolver;
 }
 
@@ -108,19 +105,19 @@ function _withDefaultResolver(auth, resolverOverride) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class IdpCredential extends totp.AuthCredential {
+class IdpCredential extends AuthCredential {
     constructor(params) {
         super("custom" /* ProviderId.CUSTOM */, "custom" /* ProviderId.CUSTOM */);
         this.params = params;
     }
     _getIdTokenResponse(auth) {
-        return totp.signInWithIdp(auth, this._buildIdpRequest());
+        return signInWithIdp(auth, this._buildIdpRequest());
     }
     _linkToIdToken(auth, idToken) {
-        return totp.signInWithIdp(auth, this._buildIdpRequest(idToken));
+        return signInWithIdp(auth, this._buildIdpRequest(idToken));
     }
     _getReauthenticationResolver(auth) {
-        return totp.signInWithIdp(auth, this._buildIdpRequest());
+        return signInWithIdp(auth, this._buildIdpRequest());
     }
     _buildIdpRequest(idToken) {
         const request = {
@@ -139,17 +136,17 @@ class IdpCredential extends totp.AuthCredential {
     }
 }
 function _signIn(params) {
-    return totp._signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
+    return _signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
 }
 function _reauth(params) {
     const { auth, user } = params;
-    totp._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
-    return totp._reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
+    _assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    return _reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
 }
 async function _link(params) {
     const { auth, user } = params;
-    totp._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
-    return totp._link(user, new IdpCredential(params), params.bypassAuthState);
+    _assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    return _link$1(user, new IdpCredential(params), params.bypassAuthState);
 }
 
 /**
@@ -232,16 +229,16 @@ class AbstractPopupRedirectOperation {
             case "reauthViaRedirect" /* AuthEventType.REAUTH_VIA_REDIRECT */:
                 return _reauth;
             default:
-                totp._fail(this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                _fail(this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         }
     }
     resolve(cred) {
-        totp.debugAssert(this.pendingPromise, 'Pending promise was never set');
+        debugAssert(this.pendingPromise, 'Pending promise was never set');
         this.pendingPromise.resolve(cred);
         this.unregisterAndCleanUp();
     }
     reject(error) {
-        totp.debugAssert(this.pendingPromise, 'Pending promise was never set');
+        debugAssert(this.pendingPromise, 'Pending promise was never set');
         this.pendingPromise.reject(error);
         this.unregisterAndCleanUp();
     }
@@ -348,10 +345,10 @@ function _overrideRedirectResult(auth, result) {
     redirectOutcomeMap.set(auth._key(), result);
 }
 function resolverPersistence(resolver) {
-    return totp._getInstance(resolver._redirectPersistence);
+    return _getInstance(resolver._redirectPersistence);
 }
 function pendingRedirectKey(auth) {
-    return totp._persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
+    return _persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
 }
 
 /**
@@ -371,10 +368,10 @@ function pendingRedirectKey(auth) {
  * limitations under the License.
  */
 async function _getRedirectResult(auth, resolverExtern, bypassAuthState = false) {
-    if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(totp._serverAppCurrentUserOperationNotSupportedError(auth));
+    if (_isFirebaseServerApp(auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
     }
-    const authInternal = totp._castAuth(auth);
+    const authInternal = _castAuth(auth);
     const resolver = _withDefaultResolver(authInternal, resolverExtern);
     const action = new RedirectAction(authInternal, resolver, bypassAuthState);
     const result = await action.execute();
@@ -515,20 +512,20 @@ const EMULATOR_WIDGET_PATH = 'emulator/auth/handler';
  */
 const FIREBASE_APP_CHECK_FRAGMENT_ID = encodeURIComponent('fac');
 async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, additionalParams) {
-    totp._assert(auth.config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
-    totp._assert(auth.config.apiKey, auth, "invalid-api-key" /* AuthErrorCode.INVALID_API_KEY */);
+    _assert(auth.config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
+    _assert(auth.config.apiKey, auth, "invalid-api-key" /* AuthErrorCode.INVALID_API_KEY */);
     const params = {
         apiKey: auth.config.apiKey,
         appName: auth.name,
         authType,
         redirectUrl,
-        v: app.SDK_VERSION,
+        v: SDK_VERSION,
         eventId
     };
-    if (provider instanceof totp.FederatedAuthProvider) {
+    if (provider instanceof FederatedAuthProvider) {
         provider.setDefaultLanguage(auth.languageCode);
         params.providerId = provider.providerId || '';
-        if (!util.isEmpty(provider.getCustomParameters())) {
+        if (!isEmpty(provider.getCustomParameters())) {
             params.customParameters = JSON.stringify(provider.getCustomParameters());
         }
         // TODO set additionalParams from the provider as well?
@@ -536,7 +533,7 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
             params[key] = value;
         }
     }
-    if (provider instanceof totp.BaseOAuthProvider) {
+    if (provider instanceof BaseOAuthProvider) {
         const scopes = provider.getScopes().filter(scope => scope !== '');
         if (scopes.length > 0) {
             params.scopes = scopes.join(',');
@@ -559,13 +556,13 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
         ? `#${FIREBASE_APP_CHECK_FRAGMENT_ID}=${encodeURIComponent(appCheckToken)}`
         : '';
     // Start at index 1 to skip the leading '&' in the query string
-    return `${getHandlerBase(auth)}?${util.querystring(paramsDict).slice(1)}${appCheckTokenFragment}`;
+    return `${getHandlerBase(auth)}?${querystring(paramsDict).slice(1)}${appCheckTokenFragment}`;
 }
 function getHandlerBase({ config }) {
     if (!config.emulator) {
         return `https://${config.authDomain}/${WIDGET_PATH}`;
     }
-    return totp._emulatorUrl(config, EMULATOR_WIDGET_PATH);
+    return _emulatorUrl(config, EMULATOR_WIDGET_PATH);
 }
 
 /**
@@ -605,7 +602,7 @@ function _cordovaWindow() {
  * limitations under the License.
  */
 async function _getProjectConfig(auth, request = {}) {
-    return totp._performApiRequest(auth, "GET" /* HttpMethod.GET */, "/v1/projects" /* Endpoint.GET_PROJECT_CONFIG */, request);
+    return _performApiRequest(auth, "GET" /* HttpMethod.GET */, "/v1/projects" /* Endpoint.GET_PROJECT_CONFIG */, request);
 }
 
 /**
@@ -635,19 +632,19 @@ const REDIRECT_TIMEOUT_MS = 2000;
 async function _generateHandlerUrl(auth, event, provider) {
     // Get the cordova plugins
     const { BuildInfo } = _cordovaWindow();
-    totp.debugAssert(event.sessionId, 'AuthEvent did not contain a session ID');
+    debugAssert(event.sessionId, 'AuthEvent did not contain a session ID');
     const sessionDigest = await computeSha256(event.sessionId);
     const additionalParams = {};
-    if (totp._isIOS()) {
+    if (_isIOS()) {
         // iOS app identifier
         additionalParams['ibi'] = BuildInfo.packageName;
     }
-    else if (totp._isAndroid()) {
+    else if (_isAndroid()) {
         // Android app identifier
         additionalParams['apn'] = BuildInfo.packageName;
     }
     else {
-        totp._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     // Add the display name if available
     if (BuildInfo.displayName) {
@@ -663,14 +660,14 @@ async function _generateHandlerUrl(auth, event, provider) {
 async function _validateOrigin(auth) {
     const { BuildInfo } = _cordovaWindow();
     const request = {};
-    if (totp._isIOS()) {
+    if (_isIOS()) {
         request.iosBundleId = BuildInfo.packageName;
     }
-    else if (totp._isAndroid()) {
+    else if (_isAndroid()) {
         request.androidPackageName = BuildInfo.packageName;
     }
     else {
-        totp._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     // Will fail automatically if package name is not authorized
     await _getProjectConfig(auth, request);
@@ -686,7 +683,7 @@ function _performRedirect(handlerUrl) {
             }
             else {
                 // TODO: Return the inappbrowser ref that's returned from the open call
-                iabRef = cordova.InAppBrowser.open(handlerUrl, totp._isIOS7Or8() ? '_blank' : '_system', 'location=yes');
+                iabRef = cordova.InAppBrowser.open(handlerUrl, _isIOS7Or8() ? '_blank' : '_system', 'location=yes');
             }
             resolve(iabRef);
         });
@@ -727,7 +724,7 @@ async function _waitForAppResume(auth, eventListener, iabRef) {
                 }
                 onCloseTimer = window.setTimeout(() => {
                     // Wait two seconds after resume then reject.
-                    reject(totp._createError(auth, "redirect-cancelled-by-user" /* AuthErrorCode.REDIRECT_CANCELLED_BY_USER */));
+                    reject(_createError(auth, "redirect-cancelled-by-user" /* AuthErrorCode.REDIRECT_CANCELLED_BY_USER */));
                 }, REDIRECT_TIMEOUT_MS);
             }
             function visibilityChanged() {
@@ -740,7 +737,7 @@ async function _waitForAppResume(auth, eventListener, iabRef) {
             eventListener.addPassiveListener(authEventSeen);
             // Listen for resume and visibility events
             document.addEventListener('resume', resumed, false);
-            if (totp._isAndroid()) {
+            if (_isAndroid()) {
                 document.addEventListener('visibilitychange', visibilityChanged, false);
             }
             // SETUP THE CLEANUP FUNCTION =====
@@ -770,22 +767,22 @@ function _checkCordovaConfiguration(auth) {
     // Note that cordova-universal-links-plugin has been abandoned.
     // A fork with latest fixes is available at:
     // https://www.npmjs.com/package/cordova-universal-links-plugin-fix
-    totp._assert(typeof win?.universalLinks?.subscribe === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.universalLinks?.subscribe === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-universal-links-plugin-fix'
     });
     // https://www.npmjs.com/package/cordova-plugin-buildinfo
-    totp._assert(typeof win?.BuildInfo?.packageName !== 'undefined', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.BuildInfo?.packageName !== 'undefined', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-buildInfo'
     });
     // https://github.com/google/cordova-plugin-browsertab
-    totp._assert(typeof win?.cordova?.plugins?.browsertab?.openUrl === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.cordova?.plugins?.browsertab?.openUrl === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-browsertab'
     });
-    totp._assert(typeof win?.cordova?.plugins?.browsertab?.isAvailable === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.cordova?.plugins?.browsertab?.isAvailable === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-browsertab'
     });
     // https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/
-    totp._assert(typeof win?.cordova?.InAppBrowser?.open === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.cordova?.InAppBrowser?.open === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-inappbrowser'
     });
 }
@@ -807,7 +804,7 @@ async function computeSha256(sessionId) {
 function stringToArrayBuffer(str) {
     // This function is only meant to deal with an ASCII charset and makes
     // certain simplifying assumptions.
-    totp.debugAssert(/[0-9a-zA-Z]+/.test(str), 'Can only convert alpha-numeric strings');
+    debugAssert(/[0-9a-zA-Z]+/.test(str), 'Can only convert alpha-numeric strings');
     if (typeof TextEncoder !== 'undefined') {
         return new TextEncoder().encode(str);
     }
@@ -889,7 +886,7 @@ class AuthEventManager {
         if (event.error && !isNullRedirectEvent(event)) {
             const code = event.error.code?.split('auth/')[1] ||
                 "internal-error" /* AuthErrorCode.INTERNAL_ERROR */;
-            consumer.onError(totp._createError(this.auth, code));
+            consumer.onError(_createError(this.auth, code));
         }
         else {
             consumer.onAuthEvent(event);
@@ -962,7 +959,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.pollTimer = null;
         // Whether to use polling instead of depending on window events
-        this.fallbackToPolling = totp._isMobileBrowser();
+        this.fallbackToPolling = _isMobileBrowser();
         this._shouldAllowMigration = true;
     }
     forAllChangedKeys(cb) {
@@ -1011,7 +1008,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
             this.notifyListeners(key, storedValue);
         };
         const storedValue = this.storage.getItem(key);
-        if (totp._isIE10() &&
+        if (_isIE10() &&
             storedValue !== event.newValue &&
             event.newValue !== event.oldValue) {
             // IE 10 has this weird bug where a storage event would trigger with the
@@ -1173,7 +1170,7 @@ function _generateNewEvent(auth, type, eventId = null) {
         sessionId: generateSessionId(),
         postBody: null,
         tenantId: auth.tenantId,
-        error: totp._createError(auth, "no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
+        error: _createError(auth, "no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
     };
 }
 function _savePartialEvent(auth, event) {
@@ -1204,7 +1201,7 @@ function _eventFromPartialAndUrl(partialEvent, url) {
             ? parseJsonOrNull(decodeURIComponent(params['firebaseError']))
             : null;
         const code = errorObject?.['code']?.split('auth/')?.[1];
-        const error = code ? totp._createError(code) : null;
+        const error = code ? _createError(code) : null;
         if (error) {
             return {
                 type: partialEvent.type,
@@ -1239,10 +1236,10 @@ function generateSessionId() {
     return chars.join('');
 }
 function storage() {
-    return totp._getInstance(browserLocalPersistence);
+    return _getInstance(browserLocalPersistence);
 }
 function persistenceKey(auth) {
-    return totp._persistenceKeyName("authEvent" /* KeyName.AUTH_EVENT */, auth.config.apiKey, auth.name);
+    return _persistenceKeyName("authEvent" /* KeyName.AUTH_EVENT */, auth.config.apiKey, auth.name);
 }
 function parseJsonOrNull(json) {
     try {
@@ -1274,7 +1271,7 @@ function searchParamsOrEmpty(url) {
         return {};
     }
     const [_, ...rest] = url.split('?');
-    return util.querystringDecode(rest.join('?'));
+    return querystringDecode(rest.join('?'));
 }
 
 /**
@@ -1318,7 +1315,7 @@ class CordovaPopupRedirectResolver {
         return manager;
     }
     _openPopup(auth) {
-        totp._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     async _openRedirect(auth, provider, authType, eventId) {
         _checkCordovaConfiguration(auth);
@@ -1412,7 +1409,7 @@ function generateNoEvent() {
         urlResponse: null,
         postBody: null,
         tenantId: null,
-        error: totp._createError("no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
+        error: _createError("no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
     };
 }
 
@@ -1436,108 +1433,8 @@ function generateNoEvent() {
 // It is not intended for direct use by developer apps. NO jsdoc here to intentionally leave it out
 // of autogenerated documentation pages to reduce accidental misuse.
 function addFrameworkForLogging(auth, framework) {
-    totp._castAuth(auth)._logFramework(framework);
+    _castAuth(auth)._logFramework(framework);
 }
 
-exports.ActionCodeOperation = totp.ActionCodeOperation;
-exports.ActionCodeURL = totp.ActionCodeURL;
-exports.AuthCredential = totp.AuthCredential;
-exports.AuthErrorCodes = totp.AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY;
-exports.AuthImpl = totp.AuthImpl;
-exports.EmailAuthCredential = totp.EmailAuthCredential;
-exports.EmailAuthProvider = totp.EmailAuthProvider;
-exports.FacebookAuthProvider = totp.FacebookAuthProvider;
-exports.FactorId = totp.FactorId;
-exports.FetchProvider = totp.FetchProvider;
-exports.GithubAuthProvider = totp.GithubAuthProvider;
-exports.GoogleAuthProvider = totp.GoogleAuthProvider;
-exports.OAuthCredential = totp.OAuthCredential;
-exports.OAuthProvider = totp.OAuthProvider;
-exports.OperationType = totp.OperationType;
-exports.PhoneAuthCredential = totp.PhoneAuthCredential;
-exports.PhoneAuthProvider = totp.PhoneAuthProvider;
-exports.PhoneMultiFactorGenerator = totp.PhoneMultiFactorGenerator;
-exports.ProviderId = totp.ProviderId;
-exports.RecaptchaVerifier = totp.RecaptchaVerifier;
-exports.SAMLAuthCredential = totp.SAMLAuthCredential;
-exports.SAMLAuthProvider = totp.SAMLAuthProvider;
-exports.SignInMethod = totp.SignInMethod;
-exports.TotpMultiFactorGenerator = totp.TotpMultiFactorGenerator;
-exports.TotpSecret = totp.TotpSecret;
-exports.TwitterAuthProvider = totp.TwitterAuthProvider;
-exports.UserImpl = totp.UserImpl;
-exports._assert = totp._assert;
-exports._castAuth = totp._castAuth;
-exports._fail = totp._fail;
-exports._getClientVersion = totp._getClientVersion;
-exports._getInstance = totp._getInstance;
-exports._persistenceKeyName = totp._persistenceKeyName;
-exports.applyActionCode = totp.applyActionCode;
-exports.beforeAuthStateChanged = totp.beforeAuthStateChanged;
-exports.browserCookiePersistence = totp.browserCookiePersistence;
-exports.browserLocalPersistence = totp.browserLocalPersistence;
-exports.browserPopupRedirectResolver = totp.browserPopupRedirectResolver;
-exports.browserSessionPersistence = totp.browserSessionPersistence;
-exports.checkActionCode = totp.checkActionCode;
-exports.confirmPasswordReset = totp.confirmPasswordReset;
-exports.connectAuthEmulator = totp.connectAuthEmulator;
-exports.createUserWithEmailAndPassword = totp.createUserWithEmailAndPassword;
-exports.debugErrorMap = totp.debugErrorMap;
-exports.deleteUser = totp.deleteUser;
-exports.fetchSignInMethodsForEmail = totp.fetchSignInMethodsForEmail;
-exports.getAdditionalUserInfo = totp.getAdditionalUserInfo;
-exports.getAuth = totp.getAuth;
-exports.getIdToken = totp.getIdToken;
-exports.getIdTokenResult = totp.getIdTokenResult;
-exports.getMultiFactorResolver = totp.getMultiFactorResolver;
-exports.getRedirectResult = totp.getRedirectResult;
-exports.inMemoryPersistence = totp.inMemoryPersistence;
-exports.indexedDBLocalPersistence = totp.indexedDBLocalPersistence;
-exports.initializeAuth = totp.initializeAuth;
-exports.initializeRecaptchaConfig = totp.initializeRecaptchaConfig;
-exports.isSignInWithEmailLink = totp.isSignInWithEmailLink;
-exports.linkWithCredential = totp.linkWithCredential;
-exports.linkWithPhoneNumber = totp.linkWithPhoneNumber;
-exports.linkWithPopup = totp.linkWithPopup;
-exports.linkWithRedirect = totp.linkWithRedirect;
-exports.multiFactor = totp.multiFactor;
-exports.onAuthStateChanged = totp.onAuthStateChanged;
-exports.onIdTokenChanged = totp.onIdTokenChanged;
-exports.parseActionCodeURL = totp.parseActionCodeURL;
-exports.prodErrorMap = totp.prodErrorMap;
-exports.reauthenticateWithCredential = totp.reauthenticateWithCredential;
-exports.reauthenticateWithPhoneNumber = totp.reauthenticateWithPhoneNumber;
-exports.reauthenticateWithPopup = totp.reauthenticateWithPopup;
-exports.reauthenticateWithRedirect = totp.reauthenticateWithRedirect;
-exports.reload = totp.reload;
-exports.revokeAccessToken = totp.revokeAccessToken;
-exports.sendEmailVerification = totp.sendEmailVerification;
-exports.sendPasswordResetEmail = totp.sendPasswordResetEmail;
-exports.sendSignInLinkToEmail = totp.sendSignInLinkToEmail;
-exports.setPersistence = totp.setPersistence;
-exports.signInAnonymously = totp.signInAnonymously;
-exports.signInWithCredential = totp.signInWithCredential;
-exports.signInWithCustomToken = totp.signInWithCustomToken;
-exports.signInWithEmailAndPassword = totp.signInWithEmailAndPassword;
-exports.signInWithEmailLink = totp.signInWithEmailLink;
-exports.signInWithPhoneNumber = totp.signInWithPhoneNumber;
-exports.signInWithPopup = totp.signInWithPopup;
-exports.signInWithRedirect = totp.signInWithRedirect;
-exports.signOut = totp.signOut;
-exports.unlink = totp.unlink;
-exports.updateCurrentUser = totp.updateCurrentUser;
-exports.updateEmail = totp.updateEmail;
-exports.updatePassword = totp.updatePassword;
-exports.updatePhoneNumber = totp.updatePhoneNumber;
-exports.updateProfile = totp.updateProfile;
-exports.useDeviceLanguage = totp.useDeviceLanguage;
-exports.validatePassword = totp.validatePassword;
-exports.verifyBeforeUpdateEmail = totp.verifyBeforeUpdateEmail;
-exports.verifyPasswordResetCode = totp.verifyPasswordResetCode;
-exports.AuthPopup = AuthPopup;
-exports._generateEventId = _generateEventId;
-exports._getRedirectResult = _getRedirectResult;
-exports._overrideRedirectResult = _overrideRedirectResult;
-exports.addFrameworkForLogging = addFrameworkForLogging;
-exports.cordovaPopupRedirectResolver = cordovaPopupRedirectResolver;
+export { AuthPopup, _generateEventId, _getRedirectResult, _overrideRedirectResult, addFrameworkForLogging, cordovaPopupRedirectResolver };
 //# sourceMappingURL=internal.js.map
