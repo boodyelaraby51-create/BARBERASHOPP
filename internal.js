@@ -2,11 +2,110 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var index = require('./index-e23bd279.js');
-var app = require('@firebase/app');
+var register = require('./register-a20238ea.js');
 var util = require('@firebase/util');
+var app = require('@firebase/app');
 require('@firebase/component');
 require('@firebase/logger');
+
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * An enum of factors that may be used for multifactor authentication.
+ *
+ * @public
+ */
+const FactorId = {
+    /** Phone as second factor */
+    PHONE: 'phone',
+    TOTP: 'totp'
+};
+/**
+ * Enumeration of supported providers.
+ *
+ * @public
+ */
+const ProviderId = {
+    /** Facebook provider ID */
+    FACEBOOK: 'facebook.com',
+    /** GitHub provider ID */
+    GITHUB: 'github.com',
+    /** Google provider ID */
+    GOOGLE: 'google.com',
+    /** Password provider */
+    PASSWORD: 'password',
+    /** Phone provider */
+    PHONE: 'phone',
+    /** Twitter provider ID */
+    TWITTER: 'twitter.com'
+};
+/**
+ * Enumeration of supported sign-in methods.
+ *
+ * @public
+ */
+const SignInMethod = {
+    /** Email link sign in method */
+    EMAIL_LINK: 'emailLink',
+    /** Email/password sign in method */
+    EMAIL_PASSWORD: 'password',
+    /** Facebook sign in method */
+    FACEBOOK: 'facebook.com',
+    /** GitHub sign in method */
+    GITHUB: 'github.com',
+    /** Google sign in method */
+    GOOGLE: 'google.com',
+    /** Phone sign in method */
+    PHONE: 'phone',
+    /** Twitter sign in method */
+    TWITTER: 'twitter.com'
+};
+/**
+ * Enumeration of supported operation types.
+ *
+ * @public
+ */
+const OperationType = {
+    /** Operation involving linking an additional provider to an already signed-in user. */
+    LINK: 'link',
+    /** Operation involving using a provider to reauthenticate an already signed-in user. */
+    REAUTHENTICATE: 'reauthenticate',
+    /** Operation involving signing in a user. */
+    SIGN_IN: 'signIn'
+};
+/**
+ * An enumeration of the possible email action types.
+ *
+ * @public
+ */
+const ActionCodeOperation = {
+    /** The email link sign-in action. */
+    EMAIL_SIGNIN: 'EMAIL_SIGNIN',
+    /** The password reset action. */
+    PASSWORD_RESET: 'PASSWORD_RESET',
+    /** The email revocation action. */
+    RECOVER_EMAIL: 'RECOVER_EMAIL',
+    /** The revert second factor addition email action. */
+    REVERT_SECOND_FACTOR_ADDITION: 'REVERT_SECOND_FACTOR_ADDITION',
+    /** The revert second factor addition email action. */
+    VERIFY_AND_CHANGE_EMAIL: 'VERIFY_AND_CHANGE_EMAIL',
+    /** The email verification action. */
+    VERIFY_EMAIL: 'VERIFY_EMAIL'
+};
 
 /**
  * @license
@@ -37,8 +136,8 @@ class BrowserPersistenceClass {
             if (!this.storage) {
                 return Promise.resolve(false);
             }
-            this.storage.setItem(index.STORAGE_AVAILABLE_KEY, '1');
-            this.storage.removeItem(index.STORAGE_AVAILABLE_KEY);
+            this.storage.setItem(register.STORAGE_AVAILABLE_KEY, '1');
+            this.storage.removeItem(register.STORAGE_AVAILABLE_KEY);
             return Promise.resolve(true);
         }
         catch {
@@ -79,7 +178,7 @@ class BrowserPersistenceClass {
  * limitations under the License.
  */
 // The polling period in case events are not supported
-const _POLLING_INTERVAL_MS$1 = 1000;
+const _POLLING_INTERVAL_MS = 1000;
 // The IE 10 localStorage cross tab synchronization delay in milliseconds
 const IE10_LOCAL_STORAGE_SYNC_DELAY = 10;
 class BrowserLocalPersistence extends BrowserPersistenceClass {
@@ -92,7 +191,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.pollTimer = null;
         // Whether to use polling instead of depending on window events
-        this.fallbackToPolling = index._isMobileBrowser();
+        this.fallbackToPolling = register._isMobileBrowser();
         this._shouldAllowMigration = true;
     }
     forAllChangedKeys(cb) {
@@ -141,7 +240,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
             this.notifyListeners(key, storedValue);
         };
         const storedValue = this.storage.getItem(key);
-        if (index._isIE10() &&
+        if (register._isIE10() &&
             storedValue !== event.newValue &&
             event.newValue !== event.oldValue) {
             // IE 10 has this weird bug where a storage event would trigger with the
@@ -174,7 +273,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
                 }), 
                 /* poll */ true);
             });
-        }, _POLLING_INTERVAL_MS$1);
+        }, _POLLING_INTERVAL_MS);
     }
     stopPolling() {
         if (this.pollTimer) {
@@ -426,7 +525,7 @@ const browserSessionPersistence = BrowserSessionPersistence;
 
 /**
  * @license
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -440,143 +539,89 @@ const browserSessionPersistence = BrowserSessionPersistence;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// ReCaptcha will load using the same callback, so the callback function needs
+// to be kept around
+const _JSLOAD_CALLBACK = register._generateCallbackName('rcb');
+const NETWORK_TIMEOUT_DELAY = new register.Delay(30000, 60000);
 /**
- * Shim for Promise.allSettled, note the slightly different format of `fulfilled` vs `status`.
- *
- * @param promises - Array of promises to wait on.
+ * Loader for the GReCaptcha library. There should only ever be one of this.
  */
-function _allSettled(promises) {
-    return Promise.all(promises.map(async (promise) => {
-        try {
-            const value = await promise;
-            return {
-                fulfilled: true,
-                value
+class ReCaptchaLoaderImpl {
+    constructor() {
+        this.hostLanguage = '';
+        this.counter = 0;
+        /**
+         * Check for `render()` method. `window.grecaptcha` will exist if the Enterprise
+         * version of the ReCAPTCHA script was loaded by someone else (e.g. App Check) but
+         * `window.grecaptcha.render()` will not. Another load will add it.
+         */
+        this.librarySeparatelyLoaded = !!register._window().grecaptcha?.render;
+    }
+    load(auth, hl = '') {
+        register._assert(isHostLanguageValid(hl), auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        if (this.shouldResolveImmediately(hl) && register.isV2(register._window().grecaptcha)) {
+            return Promise.resolve(register._window().grecaptcha);
+        }
+        return new Promise((resolve, reject) => {
+            const networkTimeout = register._window().setTimeout(() => {
+                reject(register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
+            }, NETWORK_TIMEOUT_DELAY.get());
+            register._window()[_JSLOAD_CALLBACK] = () => {
+                register._window().clearTimeout(networkTimeout);
+                delete register._window()[_JSLOAD_CALLBACK];
+                const recaptcha = register._window().grecaptcha;
+                if (!recaptcha || !register.isV2(recaptcha)) {
+                    reject(register._createError(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */));
+                    return;
+                }
+                // Wrap the recaptcha render function so that we know if the developer has
+                // called it separately
+                const render = recaptcha.render;
+                recaptcha.render = (container, params) => {
+                    const widgetId = render(container, params);
+                    this.counter++;
+                    return widgetId;
+                };
+                this.hostLanguage = hl;
+                resolve(recaptcha);
             };
-        }
-        catch (reason) {
-            return {
-                fulfilled: false,
-                reason
-            };
-        }
-    }));
-}
-
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Interface class for receiving messages.
- *
- */
-class Receiver {
-    constructor(eventTarget) {
-        this.eventTarget = eventTarget;
-        this.handlersMap = {};
-        this.boundEventHandler = this.handleEvent.bind(this);
-    }
-    /**
-     * Obtain an instance of a Receiver for a given event target, if none exists it will be created.
-     *
-     * @param eventTarget - An event target (such as window or self) through which the underlying
-     * messages will be received.
-     */
-    static _getInstance(eventTarget) {
-        // The results are stored in an array since objects can't be keys for other
-        // objects. In addition, setting a unique property on an event target as a
-        // hash map key may not be allowed due to CORS restrictions.
-        const existingInstance = this.receivers.find(receiver => receiver.isListeningto(eventTarget));
-        if (existingInstance) {
-            return existingInstance;
-        }
-        const newInstance = new Receiver(eventTarget);
-        this.receivers.push(newInstance);
-        return newInstance;
-    }
-    isListeningto(eventTarget) {
-        return this.eventTarget === eventTarget;
-    }
-    /**
-     * Fans out a MessageEvent to the appropriate listeners.
-     *
-     * @remarks
-     * Sends an {@link Status.ACK} upon receipt and a {@link Status.DONE} once all handlers have
-     * finished processing.
-     *
-     * @param event - The MessageEvent.
-     *
-     */
-    async handleEvent(event) {
-        const messageEvent = event;
-        const { eventId, eventType, data } = messageEvent.data;
-        const handlers = this.handlersMap[eventType];
-        if (!handlers?.size) {
-            return;
-        }
-        messageEvent.ports[0].postMessage({
-            status: "ack" /* _Status.ACK */,
-            eventId,
-            eventType
-        });
-        const promises = Array.from(handlers).map(async (handler) => handler(messageEvent.origin, data));
-        const response = await _allSettled(promises);
-        messageEvent.ports[0].postMessage({
-            status: "done" /* _Status.DONE */,
-            eventId,
-            eventType,
-            response
+            const url = `${register._recaptchaV2ScriptUrl()}?${util.querystring({
+                onload: _JSLOAD_CALLBACK,
+                render: 'explicit',
+                hl
+            })}`;
+            register._loadJS(url).catch(() => {
+                clearTimeout(networkTimeout);
+                reject(register._createError(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */));
+            });
         });
     }
-    /**
-     * Subscribe an event handler for a particular event.
-     *
-     * @param eventType - Event name to subscribe to.
-     * @param eventHandler - The event handler which should receive the events.
-     *
-     */
-    _subscribe(eventType, eventHandler) {
-        if (Object.keys(this.handlersMap).length === 0) {
-            this.eventTarget.addEventListener('message', this.boundEventHandler);
-        }
-        if (!this.handlersMap[eventType]) {
-            this.handlersMap[eventType] = new Set();
-        }
-        this.handlersMap[eventType].add(eventHandler);
+    clearedOneInstance() {
+        this.counter--;
     }
-    /**
-     * Unsubscribe an event handler from a particular event.
-     *
-     * @param eventType - Event name to unsubscribe from.
-     * @param eventHandler - Optional event handler, if none provided, unsubscribe all handlers on this event.
-     *
-     */
-    _unsubscribe(eventType, eventHandler) {
-        if (this.handlersMap[eventType] && eventHandler) {
-            this.handlersMap[eventType].delete(eventHandler);
-        }
-        if (!eventHandler || this.handlersMap[eventType].size === 0) {
-            delete this.handlersMap[eventType];
-        }
-        if (Object.keys(this.handlersMap).length === 0) {
-            this.eventTarget.removeEventListener('message', this.boundEventHandler);
-        }
+    shouldResolveImmediately(hl) {
+        // We can resolve immediately if:
+        //   • grecaptcha is already defined AND (
+        //     1. the requested language codes are the same OR
+        //     2. there exists already a ReCaptcha on the page
+        //     3. the library was already loaded by the app
+        // In cases (2) and (3), we _can't_ reload as it would break the recaptchas
+        // that are already in the page
+        return (!!register._window().grecaptcha?.render &&
+            (hl === this.hostLanguage ||
+                this.counter > 0 ||
+                this.librarySeparatelyLoaded));
     }
 }
-Receiver.receivers = [];
+function isHostLanguageValid(hl) {
+    return hl.length <= 6 && /^\s*[a-zA-Z0-9\-]*\s*$/.test(hl);
+}
+class MockReCaptchaLoaderImpl {
+    async load(auth) {
+        return new register.MockReCaptcha(auth);
+    }
+    clearedOneInstance() { }
+}
 
 /**
  * @license
@@ -594,467 +639,669 @@ Receiver.receivers = [];
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function _generateEventId(prefix = '', digits = 10) {
-    let random = '';
-    for (let i = 0; i < digits; i++) {
-        random += Math.floor(Math.random() * 10);
-    }
-    return prefix + random;
-}
-
+const RECAPTCHA_VERIFIER_TYPE = 'recaptcha';
+const DEFAULT_PARAMS = {
+    theme: 'light',
+    type: 'image'
+};
 /**
- * @license
- * Copyright 2019 Google LLC
+ * An {@link https://www.google.com/recaptcha/ | reCAPTCHA}-based application verifier.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * Interface for sending messages and waiting for a completion response.
- *
- */
-class Sender {
-    constructor(target) {
-        this.target = target;
-        this.handlers = new Set();
-    }
-    /**
-     * Unsubscribe the handler and remove it from our tracking Set.
-     *
-     * @param handler - The handler to unsubscribe.
-     */
-    removeMessageHandler(handler) {
-        if (handler.messageChannel) {
-            handler.messageChannel.port1.removeEventListener('message', handler.onMessage);
-            handler.messageChannel.port1.close();
-        }
-        this.handlers.delete(handler);
-    }
-    /**
-     * Send a message to the Receiver located at {@link target}.
-     *
-     * @remarks
-     * We'll first wait a bit for an ACK , if we get one we will wait significantly longer until the
-     * receiver has had a chance to fully process the event.
-     *
-     * @param eventType - Type of event to send.
-     * @param data - The payload of the event.
-     * @param timeout - Timeout for waiting on an ACK from the receiver.
-     *
-     * @returns An array of settled promises from all the handlers that were listening on the receiver.
-     */
-    async _send(eventType, data, timeout = 50 /* _TimeoutDuration.ACK */) {
-        const messageChannel = typeof MessageChannel !== 'undefined' ? new MessageChannel() : null;
-        if (!messageChannel) {
-            throw new Error("connection_unavailable" /* _MessageError.CONNECTION_UNAVAILABLE */);
-        }
-        // Node timers and browser timers return fundamentally different types.
-        // We don't actually care what the value is but TS won't accept unknown and
-        // we can't cast properly in both environments.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let completionTimer;
-        let handler;
-        return new Promise((resolve, reject) => {
-            const eventId = _generateEventId('', 20);
-            messageChannel.port1.start();
-            const ackTimer = setTimeout(() => {
-                reject(new Error("unsupported_event" /* _MessageError.UNSUPPORTED_EVENT */));
-            }, timeout);
-            handler = {
-                messageChannel,
-                onMessage(event) {
-                    const messageEvent = event;
-                    if (messageEvent.data.eventId !== eventId) {
-                        return;
-                    }
-                    switch (messageEvent.data.status) {
-                        case "ack" /* _Status.ACK */:
-                            // The receiver should ACK first.
-                            clearTimeout(ackTimer);
-                            completionTimer = setTimeout(() => {
-                                reject(new Error("timeout" /* _MessageError.TIMEOUT */));
-                            }, 3000 /* _TimeoutDuration.COMPLETION */);
-                            break;
-                        case "done" /* _Status.DONE */:
-                            // Once the receiver's handlers are finished we will get the results.
-                            clearTimeout(completionTimer);
-                            resolve(messageEvent.data.response);
-                            break;
-                        default:
-                            clearTimeout(ackTimer);
-                            clearTimeout(completionTimer);
-                            reject(new Error("invalid_response" /* _MessageError.INVALID_RESPONSE */));
-                            break;
-                    }
-                }
-            };
-            this.handlers.add(handler);
-            messageChannel.port1.addEventListener('message', handler.onMessage);
-            this.target.postMessage({
-                eventType,
-                eventId,
-                data
-            }, [messageChannel.port2]);
-        }).finally(() => {
-            if (handler) {
-                this.removeMessageHandler(handler);
-            }
-        });
-    }
-}
-
-/**
- * @license
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const DB_NAME = 'firebaseLocalStorageDb';
-const DB_VERSION = 1;
-const DB_OBJECTSTORE_NAME = 'firebaseLocalStorage';
-const DB_DATA_KEYPATH = 'fbase_key';
-/**
- * Promise wrapper for IDBRequest
- *
- * Unfortunately we can't cleanly extend Promise<T> since promises are not callable in ES6
- *
- */
-class DBPromise {
-    constructor(request) {
-        this.request = request;
-    }
-    toPromise() {
-        return new Promise((resolve, reject) => {
-            this.request.addEventListener('success', () => {
-                resolve(this.request.result);
-            });
-            this.request.addEventListener('error', () => {
-                reject(this.request.error);
-            });
-        });
-    }
-}
-function getObjectStore(db, isReadWrite) {
-    return db
-        .transaction([DB_OBJECTSTORE_NAME], isReadWrite ? 'readwrite' : 'readonly')
-        .objectStore(DB_OBJECTSTORE_NAME);
-}
-function _deleteDatabase() {
-    const request = indexedDB.deleteDatabase(DB_NAME);
-    return new DBPromise(request).toPromise();
-}
-function _openDatabase() {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    return new Promise((resolve, reject) => {
-        request.addEventListener('error', () => {
-            reject(request.error);
-        });
-        request.addEventListener('upgradeneeded', () => {
-            const db = request.result;
-            try {
-                db.createObjectStore(DB_OBJECTSTORE_NAME, { keyPath: DB_DATA_KEYPATH });
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
-        request.addEventListener('success', async () => {
-            const db = request.result;
-            // Strange bug that occurs in Firefox when multiple tabs are opened at the
-            // same time. The only way to recover seems to be deleting the database
-            // and re-initializing it.
-            // https://github.com/firebase/firebase-js-sdk/issues/634
-            if (!db.objectStoreNames.contains(DB_OBJECTSTORE_NAME)) {
-                // Need to close the database or else you get a `blocked` event
-                db.close();
-                await _deleteDatabase();
-                resolve(await _openDatabase());
-            }
-            else {
-                resolve(db);
-            }
-        });
-    });
-}
-async function _putObject(db, key, value) {
-    const request = getObjectStore(db, true).put({
-        [DB_DATA_KEYPATH]: key,
-        value
-    });
-    return new DBPromise(request).toPromise();
-}
-async function getObject(db, key) {
-    const request = getObjectStore(db, false).get(key);
-    const data = await new DBPromise(request).toPromise();
-    return data === undefined ? null : data.value;
-}
-function _deleteObject(db, key) {
-    const request = getObjectStore(db, true).delete(key);
-    return new DBPromise(request).toPromise();
-}
-const _POLLING_INTERVAL_MS = 800;
-const _TRANSACTION_RETRY_COUNT = 3;
-class IndexedDBLocalPersistence {
-    constructor() {
-        this.type = "LOCAL" /* PersistenceType.LOCAL */;
-        this._shouldAllowMigration = true;
-        this.listeners = {};
-        this.localCache = {};
-        // setTimeout return value is platform specific
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.pollTimer = null;
-        this.pendingWrites = 0;
-        this.receiver = null;
-        this.sender = null;
-        this.serviceWorkerReceiverAvailable = false;
-        this.activeServiceWorker = null;
-        // Fire & forget the service worker registration as it may never resolve
-        this._workerInitializationPromise =
-            this.initializeServiceWorkerMessaging().then(() => { }, () => { });
-    }
-    async _openDb() {
-        if (this.db) {
-            return this.db;
-        }
-        this.db = await _openDatabase();
-        return this.db;
-    }
-    async _withRetries(op) {
-        let numAttempts = 0;
-        while (true) {
-            try {
-                const db = await this._openDb();
-                return await op(db);
-            }
-            catch (e) {
-                if (numAttempts++ > _TRANSACTION_RETRY_COUNT) {
-                    throw e;
-                }
-                if (this.db) {
-                    this.db.close();
-                    this.db = undefined;
-                }
-                // TODO: consider adding exponential backoff
-            }
-        }
-    }
-    /**
-     * IndexedDB events do not propagate from the main window to the worker context.  We rely on a
-     * postMessage interface to send these events to the worker ourselves.
-     */
-    async initializeServiceWorkerMessaging() {
-        return index._isWorker() ? this.initializeReceiver() : this.initializeSender();
-    }
-    /**
-     * As the worker we should listen to events from the main window.
-     */
-    async initializeReceiver() {
-        this.receiver = Receiver._getInstance(index._getWorkerGlobalScope());
-        // Refresh from persistence if we receive a KeyChanged message.
-        this.receiver._subscribe("keyChanged" /* _EventType.KEY_CHANGED */, async (_origin, data) => {
-            const keys = await this._poll();
-            return {
-                keyProcessed: keys.includes(data.key)
-            };
-        });
-        // Let the sender know that we are listening so they give us more timeout.
-        this.receiver._subscribe("ping" /* _EventType.PING */, async (_origin, _data) => {
-            return ["keyChanged" /* _EventType.KEY_CHANGED */];
-        });
-    }
-    /**
-     * As the main window, we should let the worker know when keys change (set and remove).
-     *
-     * @remarks
-     * {@link https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/ready | ServiceWorkerContainer.ready}
-     * may not resolve.
-     */
-    async initializeSender() {
-        // Check to see if there's an active service worker.
-        this.activeServiceWorker = await index._getActiveServiceWorker();
-        if (!this.activeServiceWorker) {
-            return;
-        }
-        this.sender = new Sender(this.activeServiceWorker);
-        // Ping the service worker to check what events they can handle.
-        const results = await this.sender._send("ping" /* _EventType.PING */, {}, 800 /* _TimeoutDuration.LONG_ACK */);
-        if (!results) {
-            return;
-        }
-        if (results[0]?.fulfilled &&
-            results[0]?.value.includes("keyChanged" /* _EventType.KEY_CHANGED */)) {
-            this.serviceWorkerReceiverAvailable = true;
-        }
-    }
-    /**
-     * Let the worker know about a changed key, the exact key doesn't technically matter since the
-     * worker will just trigger a full sync anyway.
-     *
-     * @remarks
-     * For now, we only support one service worker per page.
-     *
-     * @param key - Storage key which changed.
-     */
-    async notifyServiceWorker(key) {
-        if (!this.sender ||
-            !this.activeServiceWorker ||
-            index._getServiceWorkerController() !== this.activeServiceWorker) {
-            return;
-        }
-        try {
-            await this.sender._send("keyChanged" /* _EventType.KEY_CHANGED */, { key }, 
-            // Use long timeout if receiver has previously responded to a ping from us.
-            this.serviceWorkerReceiverAvailable
-                ? 800 /* _TimeoutDuration.LONG_ACK */
-                : 50 /* _TimeoutDuration.ACK */);
-        }
-        catch {
-            // This is a best effort approach. Ignore errors.
-        }
-    }
-    async _isAvailable() {
-        try {
-            if (!indexedDB) {
-                return false;
-            }
-            const db = await _openDatabase();
-            await _putObject(db, index.STORAGE_AVAILABLE_KEY, '1');
-            await _deleteObject(db, index.STORAGE_AVAILABLE_KEY);
-            return true;
-        }
-        catch { }
-        return false;
-    }
-    async _withPendingWrite(write) {
-        this.pendingWrites++;
-        try {
-            await write();
-        }
-        finally {
-            this.pendingWrites--;
-        }
-    }
-    async _set(key, value) {
-        return this._withPendingWrite(async () => {
-            await this._withRetries((db) => _putObject(db, key, value));
-            this.localCache[key] = value;
-            return this.notifyServiceWorker(key);
-        });
-    }
-    async _get(key) {
-        const obj = (await this._withRetries((db) => getObject(db, key)));
-        this.localCache[key] = obj;
-        return obj;
-    }
-    async _remove(key) {
-        return this._withPendingWrite(async () => {
-            await this._withRetries((db) => _deleteObject(db, key));
-            delete this.localCache[key];
-            return this.notifyServiceWorker(key);
-        });
-    }
-    async _poll() {
-        // TODO: check if we need to fallback if getAll is not supported
-        const result = await this._withRetries((db) => {
-            const getAllRequest = getObjectStore(db, false).getAll();
-            return new DBPromise(getAllRequest).toPromise();
-        });
-        if (!result) {
-            return [];
-        }
-        // If we have pending writes in progress abort, we'll get picked up on the next poll
-        if (this.pendingWrites !== 0) {
-            return [];
-        }
-        const keys = [];
-        const keysInResult = new Set();
-        if (result.length !== 0) {
-            for (const { fbase_key: key, value } of result) {
-                keysInResult.add(key);
-                if (JSON.stringify(this.localCache[key]) !== JSON.stringify(value)) {
-                    this.notifyListeners(key, value);
-                    keys.push(key);
-                }
-            }
-        }
-        for (const localKey of Object.keys(this.localCache)) {
-            if (this.localCache[localKey] && !keysInResult.has(localKey)) {
-                // Deleted
-                this.notifyListeners(localKey, null);
-                keys.push(localKey);
-            }
-        }
-        return keys;
-    }
-    notifyListeners(key, newValue) {
-        this.localCache[key] = newValue;
-        const listeners = this.listeners[key];
-        if (listeners) {
-            for (const listener of Array.from(listeners)) {
-                listener(newValue);
-            }
-        }
-    }
-    startPolling() {
-        this.stopPolling();
-        this.pollTimer = setInterval(async () => this._poll(), _POLLING_INTERVAL_MS);
-    }
-    stopPolling() {
-        if (this.pollTimer) {
-            clearInterval(this.pollTimer);
-            this.pollTimer = null;
-        }
-    }
-    _addListener(key, listener) {
-        if (Object.keys(this.listeners).length === 0) {
-            this.startPolling();
-        }
-        if (!this.listeners[key]) {
-            this.listeners[key] = new Set();
-            // Populate the cache to avoid spuriously triggering on first poll.
-            void this._get(key); // This can happen in the background async and we can return immediately.
-        }
-        this.listeners[key].add(listener);
-    }
-    _removeListener(key, listener) {
-        if (this.listeners[key]) {
-            this.listeners[key].delete(listener);
-            if (this.listeners[key].size === 0) {
-                delete this.listeners[key];
-            }
-        }
-        if (Object.keys(this.listeners).length === 0) {
-            this.stopPolling();
-        }
-    }
-}
-IndexedDBLocalPersistence.type = 'LOCAL';
-/**
- * An implementation of {@link Persistence} of type `LOCAL` using `indexedDB`
- * for the underlying storage.
+ * @remarks
+ * `RecaptchaVerifier` does not work in a Node.js environment.
  *
  * @public
  */
-const indexedDBLocalPersistence = IndexedDBLocalPersistence;
+class RecaptchaVerifier {
+    /**
+     * @param authExtern - The corresponding Firebase {@link Auth} instance.
+     *
+     * @param containerOrId - The reCAPTCHA container parameter.
+     *
+     * @remarks
+     * This has different meaning depending on whether the reCAPTCHA is hidden or visible. For a
+     * visible reCAPTCHA the container must be empty. If a string is used, it has to correspond to
+     * an element ID. The corresponding element must also must be in the DOM at the time of
+     * initialization.
+     *
+     * @param parameters - The optional reCAPTCHA parameters.
+     *
+     * @remarks
+     * Check the reCAPTCHA docs for a comprehensive list. All parameters are accepted except for
+     * the sitekey. Firebase Auth backend provisions a reCAPTCHA for each project and will
+     * configure this upon rendering. For an invisible reCAPTCHA, a size key must have the value
+     * 'invisible'.
+     */
+    constructor(authExtern, containerOrId, parameters = {
+        ...DEFAULT_PARAMS
+    }) {
+        this.parameters = parameters;
+        /**
+         * The application verifier type.
+         *
+         * @remarks
+         * For a reCAPTCHA verifier, this is 'recaptcha'.
+         */
+        this.type = RECAPTCHA_VERIFIER_TYPE;
+        this.destroyed = false;
+        this.widgetId = null;
+        this.tokenChangeListeners = new Set();
+        this.renderPromise = null;
+        this.recaptcha = null;
+        this.auth = register._castAuth(authExtern);
+        this.isInvisible = this.parameters.size === 'invisible';
+        register._assert(typeof document !== 'undefined', this.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        const container = typeof containerOrId === 'string'
+            ? document.getElementById(containerOrId)
+            : containerOrId;
+        register._assert(container, this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        this.container = container;
+        this.parameters.callback = this.makeTokenCallback(this.parameters.callback);
+        this._recaptchaLoader = this.auth.settings.appVerificationDisabledForTesting
+            ? new MockReCaptchaLoaderImpl()
+            : new ReCaptchaLoaderImpl();
+        this.validateStartingState();
+        // TODO: Figure out if sdk version is needed
+    }
+    /**
+     * Waits for the user to solve the reCAPTCHA and resolves with the reCAPTCHA token.
+     *
+     * @returns A Promise for the reCAPTCHA token.
+     */
+    async verify() {
+        this.assertNotDestroyed();
+        const id = await this.render();
+        const recaptcha = this.getAssertedRecaptcha();
+        const response = recaptcha.getResponse(id);
+        if (response) {
+            return response;
+        }
+        return new Promise(resolve => {
+            const tokenChange = (token) => {
+                if (!token) {
+                    return; // Ignore token expirations.
+                }
+                this.tokenChangeListeners.delete(tokenChange);
+                resolve(token);
+            };
+            this.tokenChangeListeners.add(tokenChange);
+            if (this.isInvisible) {
+                recaptcha.execute(id);
+            }
+        });
+    }
+    /**
+     * Renders the reCAPTCHA widget on the page.
+     *
+     * @returns A Promise that resolves with the reCAPTCHA widget ID.
+     */
+    render() {
+        try {
+            this.assertNotDestroyed();
+        }
+        catch (e) {
+            // This method returns a promise. Since it's not async (we want to return the
+            // _same_ promise if rendering is still occurring), the API surface should
+            // reject with the error rather than just throw
+            return Promise.reject(e);
+        }
+        if (this.renderPromise) {
+            return this.renderPromise;
+        }
+        this.renderPromise = this.makeRenderPromise().catch(e => {
+            this.renderPromise = null;
+            throw e;
+        });
+        return this.renderPromise;
+    }
+    /** @internal */
+    _reset() {
+        this.assertNotDestroyed();
+        if (this.widgetId !== null) {
+            this.getAssertedRecaptcha().reset(this.widgetId);
+        }
+    }
+    /**
+     * Clears the reCAPTCHA widget from the page and destroys the instance.
+     */
+    clear() {
+        this.assertNotDestroyed();
+        this.destroyed = true;
+        this._recaptchaLoader.clearedOneInstance();
+        if (!this.isInvisible) {
+            this.container.childNodes.forEach(node => {
+                this.container.removeChild(node);
+            });
+        }
+    }
+    validateStartingState() {
+        register._assert(!this.parameters.sitekey, this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        register._assert(this.isInvisible || !this.container.hasChildNodes(), this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        register._assert(typeof document !== 'undefined', this.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+    }
+    makeTokenCallback(existing) {
+        return token => {
+            this.tokenChangeListeners.forEach(listener => listener(token));
+            if (typeof existing === 'function') {
+                existing(token);
+            }
+            else if (typeof existing === 'string') {
+                const globalFunc = register._window()[existing];
+                if (typeof globalFunc === 'function') {
+                    globalFunc(token);
+                }
+            }
+        };
+    }
+    assertNotDestroyed() {
+        register._assert(!this.destroyed, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    }
+    async makeRenderPromise() {
+        await this.init();
+        if (!this.widgetId) {
+            let container = this.container;
+            if (!this.isInvisible) {
+                const guaranteedEmpty = document.createElement('div');
+                container.appendChild(guaranteedEmpty);
+                container = guaranteedEmpty;
+            }
+            this.widgetId = this.getAssertedRecaptcha().render(container, this.parameters);
+        }
+        return this.widgetId;
+    }
+    async init() {
+        register._assert(register._isHttpOrHttps() && !register._isWorker(), this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        await domReady();
+        this.recaptcha = await this._recaptchaLoader.load(this.auth, this.auth.languageCode || undefined);
+        const siteKey = await register.getRecaptchaParams(this.auth);
+        register._assert(siteKey, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        this.parameters.sitekey = siteKey;
+    }
+    getAssertedRecaptcha() {
+        register._assert(this.recaptcha, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        return this.recaptcha;
+    }
+}
+function domReady() {
+    let resolver = null;
+    return new Promise(resolve => {
+        if (document.readyState === 'complete') {
+            resolve();
+            return;
+        }
+        // Document not ready, wait for load before resolving.
+        // Save resolver, so we can remove listener in case it was externally
+        // cancelled.
+        resolver = () => resolve();
+        window.addEventListener('load', resolver);
+    }).catch(e => {
+        if (resolver) {
+            window.removeEventListener('load', resolver);
+        }
+        throw e;
+    });
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class ConfirmationResultImpl {
+    constructor(verificationId, onConfirmation) {
+        this.verificationId = verificationId;
+        this.onConfirmation = onConfirmation;
+    }
+    confirm(verificationCode) {
+        const authCredential = register.PhoneAuthCredential._fromVerification(this.verificationId, verificationCode);
+        return this.onConfirmation(authCredential);
+    }
+}
+/**
+ * Asynchronously signs in using a phone number.
+ *
+ * @remarks
+ * This method sends a code via SMS to the given
+ * phone number, and returns a {@link ConfirmationResult}. After the user
+ * provides the code sent to their phone, call {@link ConfirmationResult.confirm}
+ * with the code to sign the user in.
+ *
+ * For abuse prevention, this method requires a {@link ApplicationVerifier}.
+ * This SDK includes an implementation based on reCAPTCHA v2, {@link RecaptchaVerifier}.
+ * This function can work on other platforms that do not support the
+ * {@link RecaptchaVerifier} (like React Native), but you need to use a
+ * third-party {@link ApplicationVerifier} implementation.
+ *
+ * If you've enabled project-level reCAPTCHA Enterprise bot protection in
+ * Enforce mode, you can omit the {@link ApplicationVerifier}.
+ *
+ * This method does not work in a Node.js environment or with {@link Auth} instances created with a
+ * {@link @firebase/app#FirebaseServerApp}.
+ *
+ * @example
+ * ```javascript
+ * // 'recaptcha-container' is the ID of an element in the DOM.
+ * const applicationVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+ * const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, applicationVerifier);
+ * // Obtain a verificationCode from the user.
+ * const credential = await confirmationResult.confirm(verificationCode);
+ * ```
+ *
+ * @param auth - The {@link Auth} instance.
+ * @param phoneNumber - The user's phone number in E.164 format (e.g. +16505550101).
+ * @param appVerifier - The {@link ApplicationVerifier}.
+ *
+ * @public
+ */
+async function signInWithPhoneNumber(auth, phoneNumber, appVerifier) {
+    if (app._isFirebaseServerApp(auth.app)) {
+        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(auth));
+    }
+    const authInternal = register._castAuth(auth);
+    const verificationId = await _verifyPhoneNumber(authInternal, phoneNumber, util.getModularInstance(appVerifier));
+    return new ConfirmationResultImpl(verificationId, cred => register.signInWithCredential(authInternal, cred));
+}
+/**
+ * Links the user account with the given phone number.
+ *
+ * @remarks
+ * This method does not work in a Node.js environment.
+ *
+ * @param user - The user.
+ * @param phoneNumber - The user's phone number in E.164 format (e.g. +16505550101).
+ * @param appVerifier - The {@link ApplicationVerifier}.
+ *
+ * @public
+ */
+async function linkWithPhoneNumber(user, phoneNumber, appVerifier) {
+    const userInternal = util.getModularInstance(user);
+    await register._assertLinkedStatus(false, userInternal, "phone" /* ProviderId.PHONE */);
+    const verificationId = await _verifyPhoneNumber(userInternal.auth, phoneNumber, util.getModularInstance(appVerifier));
+    return new ConfirmationResultImpl(verificationId, cred => register.linkWithCredential(userInternal, cred));
+}
+/**
+ * Re-authenticates a user using a fresh phone credential.
+ *
+ * @remarks
+ * Use before operations such as {@link updatePassword} that require tokens from recent sign-in attempts.
+ *
+ * This method does not work in a Node.js environment or on any {@link User} signed in by
+ * {@link Auth} instances created with a {@link @firebase/app#FirebaseServerApp}.
+ *
+ * @param user - The user.
+ * @param phoneNumber - The user's phone number in E.164 format (e.g. +16505550101).
+ * @param appVerifier - The {@link ApplicationVerifier}.
+ *
+ * @public
+ */
+async function reauthenticateWithPhoneNumber(user, phoneNumber, appVerifier) {
+    const userInternal = util.getModularInstance(user);
+    if (app._isFirebaseServerApp(userInternal.auth.app)) {
+        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
+    }
+    const verificationId = await _verifyPhoneNumber(userInternal.auth, phoneNumber, util.getModularInstance(appVerifier));
+    return new ConfirmationResultImpl(verificationId, cred => register.reauthenticateWithCredential(userInternal, cred));
+}
+/**
+ * Returns a verification ID to be used in conjunction with the SMS code that is sent.
+ *
+ */
+async function _verifyPhoneNumber(auth, options, verifier) {
+    if (!auth._getRecaptchaConfig()) {
+        try {
+            await register._initializeRecaptchaConfig(auth);
+        }
+        catch (error) {
+            // If an error occurs while fetching the config, there is no way to know the enablement state
+            // of Phone provider, so we proceed with recaptcha V2 verification.
+            // The error is likely "recaptchaKey undefined", as reCAPTCHA Enterprise is not
+            // enabled for any provider.
+            console.log('Failed to initialize reCAPTCHA Enterprise config. Triggering the reCAPTCHA v2 verification.');
+        }
+    }
+    try {
+        let phoneInfoOptions;
+        if (typeof options === 'string') {
+            phoneInfoOptions = {
+                phoneNumber: options
+            };
+        }
+        else {
+            phoneInfoOptions = options;
+        }
+        if ('session' in phoneInfoOptions) {
+            const session = phoneInfoOptions.session;
+            if ('phoneNumber' in phoneInfoOptions) {
+                register._assert(session.type === "enroll" /* MultiFactorSessionType.ENROLL */, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                const startPhoneMfaEnrollmentRequest = {
+                    idToken: session.credential,
+                    phoneEnrollmentInfo: {
+                        phoneNumber: phoneInfoOptions.phoneNumber,
+                        clientType: "CLIENT_TYPE_WEB" /* RecaptchaClientType.WEB */
+                    }
+                };
+                const startEnrollPhoneMfaActionCallback = async (authInstance, request) => {
+                    // If reCAPTCHA Enterprise token is FAKE_TOKEN, fetch reCAPTCHA v2 token and inject into request.
+                    if (request.phoneEnrollmentInfo.captchaResponse === register.FAKE_TOKEN) {
+                        register._assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+                        const requestWithRecaptchaV2 = await injectRecaptchaV2Token(authInstance, request, verifier);
+                        return register.startEnrollPhoneMfa(authInstance, requestWithRecaptchaV2);
+                    }
+                    return register.startEnrollPhoneMfa(authInstance, request);
+                };
+                const startPhoneMfaEnrollmentResponse = register.handleRecaptchaFlow(auth, startPhoneMfaEnrollmentRequest, "mfaSmsEnrollment" /* RecaptchaActionName.MFA_SMS_ENROLLMENT */, startEnrollPhoneMfaActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
+                const response = await startPhoneMfaEnrollmentResponse.catch(error => {
+                    return Promise.reject(error);
+                });
+                return response.phoneSessionInfo.sessionInfo;
+            }
+            else {
+                register._assert(session.type === "signin" /* MultiFactorSessionType.SIGN_IN */, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                const mfaEnrollmentId = phoneInfoOptions.multiFactorHint?.uid ||
+                    phoneInfoOptions.multiFactorUid;
+                register._assert(mfaEnrollmentId, auth, "missing-multi-factor-info" /* AuthErrorCode.MISSING_MFA_INFO */);
+                const startPhoneMfaSignInRequest = {
+                    mfaPendingCredential: session.credential,
+                    mfaEnrollmentId,
+                    phoneSignInInfo: {
+                        clientType: "CLIENT_TYPE_WEB" /* RecaptchaClientType.WEB */
+                    }
+                };
+                const startSignInPhoneMfaActionCallback = async (authInstance, request) => {
+                    // If reCAPTCHA Enterprise token is FAKE_TOKEN, fetch reCAPTCHA v2 token and inject into request.
+                    if (request.phoneSignInInfo.captchaResponse === register.FAKE_TOKEN) {
+                        register._assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+                        const requestWithRecaptchaV2 = await injectRecaptchaV2Token(authInstance, request, verifier);
+                        return register.startSignInPhoneMfa(authInstance, requestWithRecaptchaV2);
+                    }
+                    return register.startSignInPhoneMfa(authInstance, request);
+                };
+                const startPhoneMfaSignInResponse = register.handleRecaptchaFlow(auth, startPhoneMfaSignInRequest, "mfaSmsSignIn" /* RecaptchaActionName.MFA_SMS_SIGNIN */, startSignInPhoneMfaActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
+                const response = await startPhoneMfaSignInResponse.catch(error => {
+                    return Promise.reject(error);
+                });
+                return response.phoneResponseInfo.sessionInfo;
+            }
+        }
+        else {
+            const sendPhoneVerificationCodeRequest = {
+                phoneNumber: phoneInfoOptions.phoneNumber,
+                clientType: "CLIENT_TYPE_WEB" /* RecaptchaClientType.WEB */
+            };
+            const sendPhoneVerificationCodeActionCallback = async (authInstance, request) => {
+                // If reCAPTCHA Enterprise token is FAKE_TOKEN, fetch reCAPTCHA v2 token and inject into request.
+                if (request.captchaResponse === register.FAKE_TOKEN) {
+                    register._assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+                    const requestWithRecaptchaV2 = await injectRecaptchaV2Token(authInstance, request, verifier);
+                    return register.sendPhoneVerificationCode(authInstance, requestWithRecaptchaV2);
+                }
+                return register.sendPhoneVerificationCode(authInstance, request);
+            };
+            const sendPhoneVerificationCodeResponse = register.handleRecaptchaFlow(auth, sendPhoneVerificationCodeRequest, "sendVerificationCode" /* RecaptchaActionName.SEND_VERIFICATION_CODE */, sendPhoneVerificationCodeActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
+            const response = await sendPhoneVerificationCodeResponse.catch(error => {
+                return Promise.reject(error);
+            });
+            return response.sessionInfo;
+        }
+    }
+    finally {
+        verifier?._reset();
+    }
+}
+/**
+ * Updates the user's phone number.
+ *
+ * @remarks
+ * This method does not work in a Node.js environment or on any {@link User} signed in by
+ * {@link Auth} instances created with a {@link @firebase/app#FirebaseServerApp}.
+ *
+ * @example
+ * ```
+ * // 'recaptcha-container' is the ID of an element in the DOM.
+ * const applicationVerifier = new RecaptchaVerifier('recaptcha-container');
+ * const provider = new PhoneAuthProvider(auth);
+ * const verificationId = await provider.verifyPhoneNumber('+16505550101', applicationVerifier);
+ * // Obtain the verificationCode from the user.
+ * const phoneCredential = PhoneAuthProvider.credential(verificationId, verificationCode);
+ * await updatePhoneNumber(user, phoneCredential);
+ * ```
+ *
+ * @param user - The user.
+ * @param credential - A credential authenticating the new phone number.
+ *
+ * @public
+ */
+async function updatePhoneNumber(user, credential) {
+    const userInternal = util.getModularInstance(user);
+    if (app._isFirebaseServerApp(userInternal.auth.app)) {
+        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
+    }
+    await register._link(userInternal, credential);
+}
+// Helper function that fetches and injects a reCAPTCHA v2 token into the request.
+async function injectRecaptchaV2Token(auth, request, recaptchaV2Verifier) {
+    register._assert(recaptchaV2Verifier.type === RECAPTCHA_VERIFIER_TYPE, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    const recaptchaV2Token = await recaptchaV2Verifier.verify();
+    register._assert(typeof recaptchaV2Token === 'string', auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    const newRequest = { ...request };
+    if ('phoneEnrollmentInfo' in newRequest) {
+        const phoneNumber = newRequest.phoneEnrollmentInfo.phoneNumber;
+        const captchaResponse = newRequest.phoneEnrollmentInfo.captchaResponse;
+        const clientType = newRequest
+            .phoneEnrollmentInfo.clientType;
+        const recaptchaVersion = newRequest.phoneEnrollmentInfo.recaptchaVersion;
+        Object.assign(newRequest, {
+            'phoneEnrollmentInfo': {
+                phoneNumber,
+                recaptchaToken: recaptchaV2Token,
+                captchaResponse,
+                clientType,
+                recaptchaVersion
+            }
+        });
+        return newRequest;
+    }
+    else if ('phoneSignInInfo' in newRequest) {
+        const captchaResponse = newRequest.phoneSignInInfo.captchaResponse;
+        const clientType = newRequest
+            .phoneSignInInfo.clientType;
+        const recaptchaVersion = newRequest.phoneSignInInfo.recaptchaVersion;
+        Object.assign(newRequest, {
+            'phoneSignInInfo': {
+                recaptchaToken: recaptchaV2Token,
+                captchaResponse,
+                clientType,
+                recaptchaVersion
+            }
+        });
+        return newRequest;
+    }
+    else {
+        Object.assign(newRequest, { 'recaptchaToken': recaptchaV2Token });
+        return newRequest;
+    }
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Provider for generating an {@link PhoneAuthCredential}.
+ *
+ * @remarks
+ * `PhoneAuthProvider` does not work in a Node.js environment.
+ *
+ * @example
+ * ```javascript
+ * // 'recaptcha-container' is the ID of an element in the DOM.
+ * const applicationVerifier = new RecaptchaVerifier('recaptcha-container');
+ * const provider = new PhoneAuthProvider(auth);
+ * const verificationId = await provider.verifyPhoneNumber('+16505550101', applicationVerifier);
+ * // Obtain the verificationCode from the user.
+ * const phoneCredential = PhoneAuthProvider.credential(verificationId, verificationCode);
+ * const userCredential = await signInWithCredential(auth, phoneCredential);
+ * ```
+ *
+ * @public
+ */
+class PhoneAuthProvider {
+    /**
+     * @param auth - The Firebase {@link Auth} instance in which sign-ins should occur.
+     *
+     */
+    constructor(auth) {
+        /** Always set to {@link ProviderId}.PHONE. */
+        this.providerId = PhoneAuthProvider.PROVIDER_ID;
+        this.auth = register._castAuth(auth);
+    }
+    /**
+     *
+     * Starts a phone number authentication flow by sending a verification code to the given phone
+     * number.
+     *
+     * @example
+     * ```javascript
+     * const provider = new PhoneAuthProvider(auth);
+     * const verificationId = await provider.verifyPhoneNumber(phoneNumber, applicationVerifier);
+     * // Obtain verificationCode from the user.
+     * const authCredential = PhoneAuthProvider.credential(verificationId, verificationCode);
+     * const userCredential = await signInWithCredential(auth, authCredential);
+     * ```
+     *
+     * @example
+     * An alternative flow is provided using the `signInWithPhoneNumber` method.
+     * ```javascript
+     * const confirmationResult = signInWithPhoneNumber(auth, phoneNumber, applicationVerifier);
+     * // Obtain verificationCode from the user.
+     * const userCredential = confirmationResult.confirm(verificationCode);
+     * ```
+     *
+     * @param phoneInfoOptions - The user's {@link PhoneInfoOptions}. The phone number should be in
+     * E.164 format (e.g. +16505550101).
+     * @param applicationVerifier - An {@link ApplicationVerifier}, which prevents
+     * requests from unauthorized clients. This SDK includes an implementation
+     * based on reCAPTCHA v2, {@link RecaptchaVerifier}. If you've enabled
+     * reCAPTCHA Enterprise bot protection in Enforce mode, this parameter is
+     * optional; in all other configurations, the parameter is required.
+     *
+     * @returns A Promise for a verification ID that can be passed to
+     * {@link PhoneAuthProvider.credential} to identify this flow.
+     */
+    verifyPhoneNumber(phoneOptions, applicationVerifier) {
+        return _verifyPhoneNumber(this.auth, phoneOptions, util.getModularInstance(applicationVerifier));
+    }
+    /**
+     * Creates a phone auth credential, given the verification ID from
+     * {@link PhoneAuthProvider.verifyPhoneNumber} and the code that was sent to the user's
+     * mobile device.
+     *
+     * @example
+     * ```javascript
+     * const provider = new PhoneAuthProvider(auth);
+     * const verificationId = provider.verifyPhoneNumber(phoneNumber, applicationVerifier);
+     * // Obtain verificationCode from the user.
+     * const authCredential = PhoneAuthProvider.credential(verificationId, verificationCode);
+     * const userCredential = signInWithCredential(auth, authCredential);
+     * ```
+     *
+     * @example
+     * An alternative flow is provided using the `signInWithPhoneNumber` method.
+     * ```javascript
+     * const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, applicationVerifier);
+     * // Obtain verificationCode from the user.
+     * const userCredential = await confirmationResult.confirm(verificationCode);
+     * ```
+     *
+     * @param verificationId - The verification ID returned from {@link PhoneAuthProvider.verifyPhoneNumber}.
+     * @param verificationCode - The verification code sent to the user's mobile device.
+     *
+     * @returns The auth provider credential.
+     */
+    static credential(verificationId, verificationCode) {
+        return register.PhoneAuthCredential._fromVerification(verificationId, verificationCode);
+    }
+    /**
+     * Generates an {@link AuthCredential} from a {@link UserCredential}.
+     * @param userCredential - The user credential.
+     */
+    static credentialFromResult(userCredential) {
+        const credential = userCredential;
+        return PhoneAuthProvider.credentialFromTaggedObject(credential);
+    }
+    /**
+     * Returns an {@link AuthCredential} when passed an error.
+     *
+     * @remarks
+     *
+     * This method works for errors like
+     * `auth/account-exists-with-different-credentials`. This is useful for
+     * recovering when attempting to set a user's phone number but the number
+     * in question is already tied to another account. For example, the following
+     * code tries to update the current user's phone number, and if that
+     * fails, links the user with the account associated with that number:
+     *
+     * ```js
+     * const provider = new PhoneAuthProvider(auth);
+     * const verificationId = await provider.verifyPhoneNumber(number, verifier);
+     * try {
+     *   const code = ''; // Prompt the user for the verification code
+     *   await updatePhoneNumber(
+     *       auth.currentUser,
+     *       PhoneAuthProvider.credential(verificationId, code));
+     * } catch (e) {
+     *   if ((e as FirebaseError)?.code === 'auth/account-exists-with-different-credential') {
+     *     const cred = PhoneAuthProvider.credentialFromError(e);
+     *     await linkWithCredential(auth.currentUser, cred);
+     *   }
+     * }
+     *
+     * // At this point, auth.currentUser.phoneNumber === number.
+     * ```
+     *
+     * @param error - The error to generate a credential from.
+     */
+    static credentialFromError(error) {
+        return PhoneAuthProvider.credentialFromTaggedObject((error.customData || {}));
+    }
+    static credentialFromTaggedObject({ _tokenResponse: tokenResponse }) {
+        if (!tokenResponse) {
+            return null;
+        }
+        const { phoneNumber, temporaryProof } = tokenResponse;
+        if (phoneNumber && temporaryProof) {
+            return register.PhoneAuthCredential._fromTokenResponse(phoneNumber, temporaryProof);
+        }
+        return null;
+    }
+}
+/** Always set to {@link ProviderId}.PHONE. */
+PhoneAuthProvider.PROVIDER_ID = "phone" /* ProviderId.PHONE */;
+/** Always set to {@link SignInMethod}.PHONE. */
+PhoneAuthProvider.PHONE_SIGN_IN_METHOD = "phone" /* SignInMethod.PHONE */;
 
 /**
  * @license
@@ -1079,9 +1326,9 @@ const indexedDBLocalPersistence = IndexedDBLocalPersistence;
  */
 function _withDefaultResolver(auth, resolverOverride) {
     if (resolverOverride) {
-        return index._getInstance(resolverOverride);
+        return register._getInstance(resolverOverride);
     }
-    index._assert(auth._popupRedirectResolver, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    register._assert(auth._popupRedirectResolver, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
     return auth._popupRedirectResolver;
 }
 
@@ -1101,19 +1348,19 @@ function _withDefaultResolver(auth, resolverOverride) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class IdpCredential extends index.AuthCredential {
+class IdpCredential extends register.AuthCredential {
     constructor(params) {
         super("custom" /* ProviderId.CUSTOM */, "custom" /* ProviderId.CUSTOM */);
         this.params = params;
     }
     _getIdTokenResponse(auth) {
-        return index.signInWithIdp(auth, this._buildIdpRequest());
+        return register.signInWithIdp(auth, this._buildIdpRequest());
     }
     _linkToIdToken(auth, idToken) {
-        return index.signInWithIdp(auth, this._buildIdpRequest(idToken));
+        return register.signInWithIdp(auth, this._buildIdpRequest(idToken));
     }
     _getReauthenticationResolver(auth) {
-        return index.signInWithIdp(auth, this._buildIdpRequest());
+        return register.signInWithIdp(auth, this._buildIdpRequest());
     }
     _buildIdpRequest(idToken) {
         const request = {
@@ -1132,17 +1379,17 @@ class IdpCredential extends index.AuthCredential {
     }
 }
 function _signIn(params) {
-    return index._signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
+    return register._signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
 }
 function _reauth(params) {
     const { auth, user } = params;
-    index._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
-    return index._reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
+    register._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    return register._reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
 }
 async function _link(params) {
     const { auth, user } = params;
-    index._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
-    return index._link(user, new IdpCredential(params), params.bypassAuthState);
+    register._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    return register._link(user, new IdpCredential(params), params.bypassAuthState);
 }
 
 /**
@@ -1225,16 +1472,16 @@ class AbstractPopupRedirectOperation {
             case "reauthViaRedirect" /* AuthEventType.REAUTH_VIA_REDIRECT */:
                 return _reauth;
             default:
-                index._fail(this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                register._fail(this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         }
     }
     resolve(cred) {
-        index.debugAssert(this.pendingPromise, 'Pending promise was never set');
+        register.debugAssert(this.pendingPromise, 'Pending promise was never set');
         this.pendingPromise.resolve(cred);
         this.unregisterAndCleanUp();
     }
     reject(error) {
-        index.debugAssert(this.pendingPromise, 'Pending promise was never set');
+        register.debugAssert(this.pendingPromise, 'Pending promise was never set');
         this.pendingPromise.reject(error);
         this.unregisterAndCleanUp();
     }
@@ -1263,7 +1510,7 @@ class AbstractPopupRedirectOperation {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _POLL_WINDOW_CLOSE_TIMEOUT = new index.Delay(2000, 10000);
+const _POLL_WINDOW_CLOSE_TIMEOUT = new register.Delay(2000, 10000);
 /**
  * Authenticates a Firebase client using a popup-based OAuth authentication flow.
  *
@@ -1297,10 +1544,10 @@ const _POLL_WINDOW_CLOSE_TIMEOUT = new index.Delay(2000, 10000);
  */
 async function signInWithPopup(auth, provider, resolver) {
     if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(index._createError(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
+        return Promise.reject(register._createError(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
     }
-    const authInternal = index._castAuth(auth);
-    index._assertInstanceOf(auth, provider, index.FederatedAuthProvider);
+    const authInternal = register._castAuth(auth);
+    register._assertInstanceOf(auth, provider, register.FederatedAuthProvider);
     const resolverInternal = _withDefaultResolver(authInternal, resolver);
     const action = new PopupOperation(authInternal, "signInViaPopup" /* AuthEventType.SIGN_IN_VIA_POPUP */, provider, resolverInternal);
     return action.executeNotNull();
@@ -1336,9 +1583,9 @@ async function signInWithPopup(auth, provider, resolver) {
 async function reauthenticateWithPopup(user, provider, resolver) {
     const userInternal = util.getModularInstance(user);
     if (app._isFirebaseServerApp(userInternal.auth.app)) {
-        return Promise.reject(index._createError(userInternal.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
+        return Promise.reject(register._createError(userInternal.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
     }
-    index._assertInstanceOf(userInternal.auth, provider, index.FederatedAuthProvider);
+    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
     const resolverInternal = _withDefaultResolver(userInternal.auth, resolver);
     const action = new PopupOperation(userInternal.auth, "reauthViaPopup" /* AuthEventType.REAUTH_VIA_POPUP */, provider, resolverInternal, userInternal);
     return action.executeNotNull();
@@ -1370,7 +1617,7 @@ async function reauthenticateWithPopup(user, provider, resolver) {
  */
 async function linkWithPopup(user, provider, resolver) {
     const userInternal = util.getModularInstance(user);
-    index._assertInstanceOf(userInternal.auth, provider, index.FederatedAuthProvider);
+    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
     const resolverInternal = _withDefaultResolver(userInternal.auth, resolver);
     const action = new PopupOperation(userInternal.auth, "linkViaPopup" /* AuthEventType.LINK_VIA_POPUP */, provider, resolverInternal, userInternal);
     return action.executeNotNull();
@@ -1393,12 +1640,12 @@ class PopupOperation extends AbstractPopupRedirectOperation {
     }
     async executeNotNull() {
         const result = await this.execute();
-        index._assert(result, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        register._assert(result, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         return result;
     }
     async onExecution() {
-        index.debugAssert(this.filter.length === 1, 'Popup operations only handle one event');
-        const eventId = _generateEventId();
+        register.debugAssert(this.filter.length === 1, 'Popup operations only handle one event');
+        const eventId = register._generateEventId();
         this.authWindow = await this.resolver._openPopup(this.auth, this.provider, this.filter[0], // There's always one, see constructor
         eventId);
         this.authWindow.associatedEvent = eventId;
@@ -1414,7 +1661,7 @@ class PopupOperation extends AbstractPopupRedirectOperation {
         });
         this.resolver._isIframeWebStorageSupported(this.auth, isSupported => {
             if (!isSupported) {
-                this.reject(index._createError(this.auth, "web-storage-unsupported" /* AuthErrorCode.WEB_STORAGE_UNSUPPORTED */));
+                this.reject(register._createError(this.auth, "web-storage-unsupported" /* AuthErrorCode.WEB_STORAGE_UNSUPPORTED */));
             }
         });
         // Handle user closure. Notice this does *not* use await
@@ -1424,7 +1671,7 @@ class PopupOperation extends AbstractPopupRedirectOperation {
         return this.authWindow?.associatedEvent || null;
     }
     cancel() {
-        this.reject(index._createError(this.auth, "cancelled-popup-request" /* AuthErrorCode.EXPIRED_POPUP_REQUEST */));
+        this.reject(register._createError(this.auth, "cancelled-popup-request" /* AuthErrorCode.EXPIRED_POPUP_REQUEST */));
     }
     cleanUp() {
         if (this.authWindow) {
@@ -1447,7 +1694,7 @@ class PopupOperation extends AbstractPopupRedirectOperation {
                 // helper closes the popup.
                 this.pollId = window.setTimeout(() => {
                     this.pollId = null;
-                    this.reject(index._createError(this.auth, "popup-closed-by-user" /* AuthErrorCode.POPUP_CLOSED_BY_USER */));
+                    this.reject(register._createError(this.auth, "popup-closed-by-user" /* AuthErrorCode.POPUP_CLOSED_BY_USER */));
                 }, 8000 /* _Timeout.AUTH_EVENT */);
                 return;
             }
@@ -1557,10 +1804,10 @@ function _overrideRedirectResult(auth, result) {
     redirectOutcomeMap.set(auth._key(), result);
 }
 function resolverPersistence(resolver) {
-    return index._getInstance(resolver._redirectPersistence);
+    return register._getInstance(resolver._redirectPersistence);
 }
 function pendingRedirectKey(auth) {
-    return index._persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
+    return register._persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
 }
 
 /**
@@ -1628,10 +1875,10 @@ function signInWithRedirect(auth, provider, resolver) {
 }
 async function _signInWithRedirect(auth, provider, resolver) {
     if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(index._serverAppCurrentUserOperationNotSupportedError(auth));
+        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(auth));
     }
-    const authInternal = index._castAuth(auth);
-    index._assertInstanceOf(auth, provider, index.FederatedAuthProvider);
+    const authInternal = register._castAuth(auth);
+    register._assertInstanceOf(auth, provider, register.FederatedAuthProvider);
     // Wait for auth initialization to complete, this will process pending redirects and clear the
     // PENDING_REDIRECT_KEY in persistence. This should be completed before starting a new
     // redirect and creating a PENDING_REDIRECT_KEY entry.
@@ -1680,9 +1927,9 @@ function reauthenticateWithRedirect(user, provider, resolver) {
 }
 async function _reauthenticateWithRedirect(user, provider, resolver) {
     const userInternal = util.getModularInstance(user);
-    index._assertInstanceOf(userInternal.auth, provider, index.FederatedAuthProvider);
+    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
     if (app._isFirebaseServerApp(userInternal.auth.app)) {
-        return Promise.reject(index._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
+        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
     }
     // Wait for auth initialization to complete, this will process pending redirects and clear the
     // PENDING_REDIRECT_KEY in persistence. This should be completed before starting a new
@@ -1730,14 +1977,14 @@ function linkWithRedirect(user, provider, resolver) {
 }
 async function _linkWithRedirect(user, provider, resolver) {
     const userInternal = util.getModularInstance(user);
-    index._assertInstanceOf(userInternal.auth, provider, index.FederatedAuthProvider);
+    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
     // Wait for auth initialization to complete, this will process pending redirects and clear the
     // PENDING_REDIRECT_KEY in persistence. This should be completed before starting a new
     // redirect and creating a PENDING_REDIRECT_KEY entry.
     await userInternal.auth._initializationPromise;
     // Allow the resolver to error before persisting the redirect user
     const resolverInternal = _withDefaultResolver(userInternal.auth, resolver);
-    await index._assertLinkedStatus(false, userInternal, provider.providerId);
+    await register._assertLinkedStatus(false, userInternal, provider.providerId);
     await _setPendingRedirectStatus(resolverInternal, userInternal.auth);
     const eventId = await prepareUserForRedirect(userInternal);
     return resolverInternal._openRedirect(userInternal.auth, provider, "linkViaRedirect" /* AuthEventType.LINK_VIA_REDIRECT */, eventId);
@@ -1784,14 +2031,14 @@ async function _linkWithRedirect(user, provider, resolver) {
  * @public
  */
 async function getRedirectResult(auth, resolver) {
-    await index._castAuth(auth)._initializationPromise;
+    await register._castAuth(auth)._initializationPromise;
     return _getRedirectResult(auth, resolver, false);
 }
 async function _getRedirectResult(auth, resolverExtern, bypassAuthState = false) {
     if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(index._serverAppCurrentUserOperationNotSupportedError(auth));
+        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(auth));
     }
-    const authInternal = index._castAuth(auth);
+    const authInternal = register._castAuth(auth);
     const resolver = _withDefaultResolver(authInternal, resolverExtern);
     const action = new RedirectAction(authInternal, resolver, bypassAuthState);
     const result = await action.execute();
@@ -1803,7 +2050,7 @@ async function _getRedirectResult(auth, resolverExtern, bypassAuthState = false)
     return result;
 }
 async function prepareUserForRedirect(user) {
-    const eventId = _generateEventId(`${user.uid}:::`);
+    const eventId = register._generateEventId(`${user.uid}:::`);
     user._redirectEventId = eventId;
     await user.auth._setRedirectUser(user);
     await user.auth._persistUserIfCurrent(user);
@@ -1880,7 +2127,7 @@ class AuthEventManager {
         if (event.error && !isNullRedirectEvent(event)) {
             const code = event.error.code?.split('auth/')[1] ||
                 "internal-error" /* AuthErrorCode.INTERNAL_ERROR */;
-            consumer.onError(index._createError(this.auth, code));
+            consumer.onError(register._createError(this.auth, code));
         }
         else {
             consumer.onAuthEvent(event);
@@ -1940,7 +2187,7 @@ function isRedirectEvent(event) {
  * limitations under the License.
  */
 async function _getProjectConfig(auth, request = {}) {
-    return index._performApiRequest(auth, "GET" /* HttpMethod.GET */, "/v1/projects" /* Endpoint.GET_PROJECT_CONFIG */, request);
+    return register._performApiRequest(auth, "GET" /* HttpMethod.GET */, "/v1/projects" /* Endpoint.GET_PROJECT_CONFIG */, request);
 }
 
 /**
@@ -1978,10 +2225,10 @@ async function _validateOrigin$1(auth) {
         }
     }
     // In the old SDK, this error also provides helpful messages.
-    index._fail(auth, "unauthorized-domain" /* AuthErrorCode.INVALID_ORIGIN */);
+    register._fail(auth, "unauthorized-domain" /* AuthErrorCode.INVALID_ORIGIN */);
 }
 function matchDomain(expected) {
-    const currentUrl = index._getCurrentUrl();
+    const currentUrl = register._getCurrentUrl();
     const { protocol, hostname } = new URL(currentUrl);
     if (expected.startsWith('chrome-extension://')) {
         const ceUrl = new URL(expected);
@@ -2025,7 +2272,7 @@ function matchDomain(expected) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const NETWORK_TIMEOUT = new index.Delay(30000, 60000);
+const NETWORK_TIMEOUT = new register.Delay(30000, 60000);
 /**
  * Reset unloaded GApi modules. If gapi.load fails due to a network error,
  * it will stop working after a retrial. This is a hack to fix this issue.
@@ -2034,7 +2281,7 @@ function resetUnloadedGapiModules() {
     // Clear last failed gapi.load state to force next gapi.load to first
     // load the failed gapi.iframes module.
     // Get gapix.beacon context.
-    const beacon = index._window().___jsl;
+    const beacon = register._window().___jsl;
     // Get current hint.
     if (beacon?.H) {
         // Get gapi hint.
@@ -2074,16 +2321,16 @@ function loadGapi(auth) {
                     // failed attempt.
                     // Timeout when gapi.iframes.Iframe not loaded.
                     resetUnloadedGapiModules();
-                    reject(index._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
+                    reject(register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
                 },
                 timeout: NETWORK_TIMEOUT.get()
             });
         }
-        if (index._window().gapi?.iframes?.Iframe) {
+        if (register._window().gapi?.iframes?.Iframe) {
             // If gapi.iframes.Iframe available, resolve.
             resolve(gapi.iframes.getContext());
         }
-        else if (!!index._window().gapi?.load) {
+        else if (!!register._window().gapi?.load) {
             // Gapi loader ready, load gapi.iframes.
             loadGapiIframe();
         }
@@ -2093,20 +2340,20 @@ function loadGapi(auth) {
             // multiple times in parallel and could result in the later callback
             // overwriting the previous one. This would end up with a iframe
             // timeout.
-            const cbName = index._generateCallbackName('iframefcb');
+            const cbName = register._generateCallbackName('iframefcb');
             // GApi loader not available, dynamically load platform.js.
-            index._window()[cbName] = () => {
+            register._window()[cbName] = () => {
                 // GApi loader should be ready.
                 if (!!gapi.load) {
                     loadGapiIframe();
                 }
                 else {
                     // Gapi loader failed, throw error.
-                    reject(index._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
+                    reject(register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
                 }
             };
             // Load GApi loader.
-            return index._loadJS(`${index._gapiScriptUrl()}?onload=${cbName}`)
+            return register._loadJS(`${register._gapiScriptUrl()}?onload=${cbName}`)
                 .catch(e => reject(e));
         }
     }).catch(error => {
@@ -2137,7 +2384,7 @@ function _loadGapi(auth) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const PING_TIMEOUT = new index.Delay(5000, 15000);
+const PING_TIMEOUT = new register.Delay(5000, 15000);
 const IFRAME_PATH = '__/auth/iframe';
 const EMULATED_IFRAME_PATH = 'emulator/auth/iframe';
 const IFRAME_ATTRIBUTES = {
@@ -2159,9 +2406,9 @@ const EID_FROM_APIHOST = new Map([
 ]);
 function getIframeUrl(auth) {
     const config = auth.config;
-    index._assert(config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
+    register._assert(config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
     const url = config.emulator
-        ? index._emulatorUrl(config, EMULATED_IFRAME_PATH)
+        ? register._emulatorUrl(config, EMULATED_IFRAME_PATH)
         : `https://${auth.config.authDomain}/${IFRAME_PATH}`;
     const params = {
         apiKey: config.apiKey,
@@ -2180,8 +2427,8 @@ function getIframeUrl(auth) {
 }
 async function _openIframe(auth) {
     const context = await _loadGapi(auth);
-    const gapi = index._window().gapi;
-    index._assert(gapi, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    const gapi = register._window().gapi;
+    register._assert(gapi, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
     return context.open({
         where: document.body,
         url: getIframeUrl(auth),
@@ -2193,15 +2440,15 @@ async function _openIframe(auth) {
             // Prevent iframe from closing on mouse out.
             setHideOnLeave: false
         });
-        const networkError = index._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */);
+        const networkError = register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */);
         // Confirm iframe is correctly loaded.
         // To fallback on failure, set a timeout.
-        const networkErrorTimer = index._window().setTimeout(() => {
+        const networkErrorTimer = register._window().setTimeout(() => {
             reject(networkError);
         }, PING_TIMEOUT.get());
         // Clear timer and resolve pending iframe ready promise.
         function clearTimerAndResolve() {
-            index._window().clearTimeout(networkErrorTimer);
+            register._window().clearTimeout(networkErrorTimer);
             resolve(iframe);
         }
         // This returns an IThenable. However the reject part does not call
@@ -2267,9 +2514,9 @@ function _open(auth, url, name, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT) 
     // specified, even though the popup is not necessarily blocked.
     const ua = util.getUA().toLowerCase();
     if (name) {
-        target = index._isChromeIOS(ua) ? TARGET_BLANK : name;
+        target = register._isChromeIOS(ua) ? TARGET_BLANK : name;
     }
-    if (index._isFirefox(ua)) {
+    if (register._isFirefox(ua)) {
         // Firefox complains when invalid URLs are popped out. Hacky way to bypass.
         url = url || FIREFOX_EMPTY_URL;
         // Firefox disables by default scrolling on popup windows, which can create
@@ -2277,14 +2524,14 @@ function _open(auth, url, name, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT) 
         options.scrollbars = 'yes';
     }
     const optionsString = Object.entries(options).reduce((accum, [key, value]) => `${accum}${key}=${value},`, '');
-    if (index._isIOSStandalone(ua) && target !== '_self') {
+    if (register._isIOSStandalone(ua) && target !== '_self') {
         openAsNewWindowIOS(url || '', target);
         return new AuthPopup(null);
     }
     // about:blank getting sanitized causing browsers like IE/Edge to display
     // brief error message before redirecting to handler.
     const newWin = window.open(url || '', target, optionsString);
-    index._assert(newWin, auth, "popup-blocked" /* AuthErrorCode.POPUP_BLOCKED */);
+    register._assert(newWin, auth, "popup-blocked" /* AuthErrorCode.POPUP_BLOCKED */);
     // Flaky on IE edge, encapsulate with a try and catch.
     try {
         newWin.focus();
@@ -2336,8 +2583,8 @@ const EMULATOR_WIDGET_PATH = 'emulator/auth/handler';
  */
 const FIREBASE_APP_CHECK_FRAGMENT_ID = encodeURIComponent('fac');
 async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, additionalParams) {
-    index._assert(auth.config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
-    index._assert(auth.config.apiKey, auth, "invalid-api-key" /* AuthErrorCode.INVALID_API_KEY */);
+    register._assert(auth.config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
+    register._assert(auth.config.apiKey, auth, "invalid-api-key" /* AuthErrorCode.INVALID_API_KEY */);
     const params = {
         apiKey: auth.config.apiKey,
         appName: auth.name,
@@ -2346,7 +2593,7 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
         v: app.SDK_VERSION,
         eventId
     };
-    if (provider instanceof index.FederatedAuthProvider) {
+    if (provider instanceof register.FederatedAuthProvider) {
         provider.setDefaultLanguage(auth.languageCode);
         params.providerId = provider.providerId || '';
         if (!util.isEmpty(provider.getCustomParameters())) {
@@ -2357,7 +2604,7 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
             params[key] = value;
         }
     }
-    if (provider instanceof index.BaseOAuthProvider) {
+    if (provider instanceof register.BaseOAuthProvider) {
         const scopes = provider.getScopes().filter(scope => scope !== '');
         if (scopes.length > 0) {
             params.scopes = scopes.join(',');
@@ -2386,7 +2633,7 @@ function getHandlerBase({ config }) {
     if (!config.emulator) {
         return `https://${config.authDomain}/${WIDGET_PATH}`;
     }
-    return index._emulatorUrl(config, EMULATOR_WIDGET_PATH);
+    return register._emulatorUrl(config, EMULATOR_WIDGET_PATH);
 }
 
 /**
@@ -2422,14 +2669,14 @@ class BrowserPopupRedirectResolver {
     // Wrapping in async even though we don't await anywhere in order
     // to make sure errors are raised as promise rejections
     async _openPopup(auth, provider, authType, eventId) {
-        index.debugAssert(this.eventManagers[auth._key()]?.manager, '_initialize() not called before _openPopup()');
-        const url = await _getRedirectUrl(auth, provider, authType, index._getCurrentUrl(), eventId);
-        return _open(auth, url, _generateEventId());
+        register.debugAssert(this.eventManagers[auth._key()]?.manager, '_initialize() not called before _openPopup()');
+        const url = await _getRedirectUrl(auth, provider, authType, register._getCurrentUrl(), eventId);
+        return _open(auth, url, register._generateEventId());
     }
     async _openRedirect(auth, provider, authType, eventId) {
         await this._originValidation(auth);
-        const url = await _getRedirectUrl(auth, provider, authType, index._getCurrentUrl(), eventId);
-        index._setWindowLocation(url);
+        const url = await _getRedirectUrl(auth, provider, authType, register._getCurrentUrl(), eventId);
+        register._setWindowLocation(url);
         return new Promise(() => { });
     }
     _initialize(auth) {
@@ -2440,7 +2687,7 @@ class BrowserPopupRedirectResolver {
                 return Promise.resolve(manager);
             }
             else {
-                index.debugAssert(promise, 'If manager is not set, promise should be');
+                register.debugAssert(promise, 'If manager is not set, promise should be');
                 return promise;
             }
         }
@@ -2457,7 +2704,7 @@ class BrowserPopupRedirectResolver {
         const iframe = await _openIframe(auth);
         const manager = new AuthEventManager(auth);
         iframe.register('authEvent', (iframeEvent) => {
-            index._assert(iframeEvent?.authEvent, auth, "invalid-auth-event" /* AuthErrorCode.INVALID_AUTH_EVENT */);
+            register._assert(iframeEvent?.authEvent, auth, "invalid-auth-event" /* AuthErrorCode.INVALID_AUTH_EVENT */);
             // TODO: Consider splitting redirect and popup events earlier on
             const handled = manager.onEvent(iframeEvent.authEvent);
             return { status: handled ? "ACK" /* GapiOutcome.ACK */ : "ERROR" /* GapiOutcome.ERROR */ };
@@ -2473,7 +2720,7 @@ class BrowserPopupRedirectResolver {
             if (isSupported !== undefined) {
                 cb(!!isSupported);
             }
-            index._fail(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+            register._fail(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         }, gapi.iframes.CROSS_ORIGIN_IFRAMES_FILTER);
     }
     _originValidation(auth) {
@@ -2485,7 +2732,7 @@ class BrowserPopupRedirectResolver {
     }
     get _shouldInitProactively() {
         // Mobile browsers and Safari need to optimistically initialize
-        return index._isMobileBrowser() || index._isSafari() || index._isIOS();
+        return register._isMobileBrowser() || register._isSafari() || register._isIOS();
     }
 }
 /**
@@ -2498,6 +2745,62 @@ class BrowserPopupRedirectResolver {
  * @public
  */
 const browserPopupRedirectResolver = BrowserPopupRedirectResolver;
+
+/**
+ * {@inheritdoc PhoneMultiFactorAssertion}
+ *
+ * @public
+ */
+class PhoneMultiFactorAssertionImpl extends register.MultiFactorAssertionImpl {
+    constructor(credential) {
+        super("phone" /* FactorId.PHONE */);
+        this.credential = credential;
+    }
+    /** @internal */
+    static _fromCredential(credential) {
+        return new PhoneMultiFactorAssertionImpl(credential);
+    }
+    /** @internal */
+    _finalizeEnroll(auth, idToken, displayName) {
+        return register.finalizeEnrollPhoneMfa(auth, {
+            idToken,
+            displayName,
+            phoneVerificationInfo: this.credential._makeVerificationRequest()
+        });
+    }
+    /** @internal */
+    _finalizeSignIn(auth, mfaPendingCredential) {
+        return register.finalizeSignInPhoneMfa(auth, {
+            mfaPendingCredential,
+            phoneVerificationInfo: this.credential._makeVerificationRequest()
+        });
+    }
+}
+/**
+ * Provider for generating a {@link PhoneMultiFactorAssertion}.
+ *
+ * @public
+ */
+class PhoneMultiFactorGenerator {
+    constructor() { }
+    /**
+     * Provides a {@link PhoneMultiFactorAssertion} to confirm ownership of the phone second factor.
+     *
+     * @remarks
+     * This method does not work in a Node.js environment.
+     *
+     * @param phoneAuthCredential - A credential provided by {@link PhoneAuthProvider.credential}.
+     * @returns A {@link PhoneMultiFactorAssertion} which can be used with
+     * {@link MultiFactorResolver.resolveSignIn}
+     */
+    static assertion(credential) {
+        return PhoneMultiFactorAssertionImpl._fromCredential(credential);
+    }
+}
+/**
+ * The identifier of the phone second factor: `phone`.
+ */
+PhoneMultiFactorGenerator.FACTOR_ID = 'phone';
 
 /**
  * @license
@@ -2553,10 +2856,10 @@ function getAuth(app$1 = app.getApp()) {
     if (provider.isInitialized()) {
         return provider.getImmediate();
     }
-    const auth = index.initializeAuth(app$1, {
+    const auth = register.initializeAuth(app$1, {
         popupRedirectResolver: browserPopupRedirectResolver,
         persistence: [
-            indexedDBLocalPersistence,
+            register.indexedDBLocalPersistence,
             browserLocalPersistence,
             browserSessionPersistence
         ]
@@ -2570,20 +2873,20 @@ function getAuth(app$1 = app.getApp()) {
         const authTokenSyncUrl = new URL(authTokenSyncPath, location.origin);
         if (location.origin === authTokenSyncUrl.origin) {
             const mintCookie = mintCookieFactory(authTokenSyncUrl.toString());
-            index.beforeAuthStateChanged(auth, mintCookie, () => mintCookie(auth.currentUser));
-            index.onIdTokenChanged(auth, user => mintCookie(user));
+            register.beforeAuthStateChanged(auth, mintCookie, () => mintCookie(auth.currentUser));
+            register.onIdTokenChanged(auth, user => mintCookie(user));
         }
     }
     const authEmulatorHost = util.getDefaultEmulatorHost('auth');
     if (authEmulatorHost) {
-        index.connectAuthEmulator(auth, `http://${authEmulatorHost}`);
+        register.connectAuthEmulator(auth, `http://${authEmulatorHost}`);
     }
     return auth;
 }
 function getScriptParentElement() {
     return document.getElementsByTagName('head')?.[0] ?? document;
 }
-index._setExternalJSProvider({
+register._setExternalJSProvider({
     loadJS(url) {
         // TODO: consider adding timeout support & cancellation
         return new Promise((resolve, reject) => {
@@ -2591,7 +2894,7 @@ index._setExternalJSProvider({
             el.setAttribute('src', url);
             el.onload = resolve;
             el.onerror = e => {
-                const error = index._createError("internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                const error = register._createError("internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
                 error.customData = e;
                 reject(error);
             };
@@ -2604,7 +2907,7 @@ index._setExternalJSProvider({
     recaptchaV2Script: 'https://www.google.com/recaptcha/api.js',
     recaptchaEnterpriseScript: 'https://www.google.com/recaptcha/enterprise.js?render='
 });
-index.registerAuth("Browser" /* ClientPlatform.BROWSER */);
+register.registerAuth("Browser" /* ClientPlatform.BROWSER */);
 
 /**
  * @license
@@ -2653,19 +2956,19 @@ const REDIRECT_TIMEOUT_MS = 2000;
 async function _generateHandlerUrl(auth, event, provider) {
     // Get the cordova plugins
     const { BuildInfo } = _cordovaWindow();
-    index.debugAssert(event.sessionId, 'AuthEvent did not contain a session ID');
+    register.debugAssert(event.sessionId, 'AuthEvent did not contain a session ID');
     const sessionDigest = await computeSha256(event.sessionId);
     const additionalParams = {};
-    if (index._isIOS()) {
+    if (register._isIOS()) {
         // iOS app identifier
         additionalParams['ibi'] = BuildInfo.packageName;
     }
-    else if (index._isAndroid()) {
+    else if (register._isAndroid()) {
         // Android app identifier
         additionalParams['apn'] = BuildInfo.packageName;
     }
     else {
-        index._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        register._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     // Add the display name if available
     if (BuildInfo.displayName) {
@@ -2681,14 +2984,14 @@ async function _generateHandlerUrl(auth, event, provider) {
 async function _validateOrigin(auth) {
     const { BuildInfo } = _cordovaWindow();
     const request = {};
-    if (index._isIOS()) {
+    if (register._isIOS()) {
         request.iosBundleId = BuildInfo.packageName;
     }
-    else if (index._isAndroid()) {
+    else if (register._isAndroid()) {
         request.androidPackageName = BuildInfo.packageName;
     }
     else {
-        index._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        register._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     // Will fail automatically if package name is not authorized
     await _getProjectConfig(auth, request);
@@ -2704,7 +3007,7 @@ function _performRedirect(handlerUrl) {
             }
             else {
                 // TODO: Return the inappbrowser ref that's returned from the open call
-                iabRef = cordova.InAppBrowser.open(handlerUrl, index._isIOS7Or8() ? '_blank' : '_system', 'location=yes');
+                iabRef = cordova.InAppBrowser.open(handlerUrl, register._isIOS7Or8() ? '_blank' : '_system', 'location=yes');
             }
             resolve(iabRef);
         });
@@ -2745,7 +3048,7 @@ async function _waitForAppResume(auth, eventListener, iabRef) {
                 }
                 onCloseTimer = window.setTimeout(() => {
                     // Wait two seconds after resume then reject.
-                    reject(index._createError(auth, "redirect-cancelled-by-user" /* AuthErrorCode.REDIRECT_CANCELLED_BY_USER */));
+                    reject(register._createError(auth, "redirect-cancelled-by-user" /* AuthErrorCode.REDIRECT_CANCELLED_BY_USER */));
                 }, REDIRECT_TIMEOUT_MS);
             }
             function visibilityChanged() {
@@ -2758,7 +3061,7 @@ async function _waitForAppResume(auth, eventListener, iabRef) {
             eventListener.addPassiveListener(authEventSeen);
             // Listen for resume and visibility events
             document.addEventListener('resume', resumed, false);
-            if (index._isAndroid()) {
+            if (register._isAndroid()) {
                 document.addEventListener('visibilitychange', visibilityChanged, false);
             }
             // SETUP THE CLEANUP FUNCTION =====
@@ -2788,22 +3091,22 @@ function _checkCordovaConfiguration(auth) {
     // Note that cordova-universal-links-plugin has been abandoned.
     // A fork with latest fixes is available at:
     // https://www.npmjs.com/package/cordova-universal-links-plugin-fix
-    index._assert(typeof win?.universalLinks?.subscribe === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    register._assert(typeof win?.universalLinks?.subscribe === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-universal-links-plugin-fix'
     });
     // https://www.npmjs.com/package/cordova-plugin-buildinfo
-    index._assert(typeof win?.BuildInfo?.packageName !== 'undefined', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    register._assert(typeof win?.BuildInfo?.packageName !== 'undefined', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-buildInfo'
     });
     // https://github.com/google/cordova-plugin-browsertab
-    index._assert(typeof win?.cordova?.plugins?.browsertab?.openUrl === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    register._assert(typeof win?.cordova?.plugins?.browsertab?.openUrl === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-browsertab'
     });
-    index._assert(typeof win?.cordova?.plugins?.browsertab?.isAvailable === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    register._assert(typeof win?.cordova?.plugins?.browsertab?.isAvailable === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-browsertab'
     });
     // https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/
-    index._assert(typeof win?.cordova?.InAppBrowser?.open === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    register._assert(typeof win?.cordova?.InAppBrowser?.open === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-inappbrowser'
     });
 }
@@ -2825,7 +3128,7 @@ async function computeSha256(sessionId) {
 function stringToArrayBuffer(str) {
     // This function is only meant to deal with an ASCII charset and makes
     // certain simplifying assumptions.
-    index.debugAssert(/[0-9a-zA-Z]+/.test(str), 'Can only convert alpha-numeric strings');
+    register.debugAssert(/[0-9a-zA-Z]+/.test(str), 'Can only convert alpha-numeric strings');
     if (typeof TextEncoder !== 'undefined') {
         return new TextEncoder().encode(str);
     }
@@ -2896,7 +3199,7 @@ function _generateNewEvent(auth, type, eventId = null) {
         sessionId: generateSessionId(),
         postBody: null,
         tenantId: auth.tenantId,
-        error: index._createError(auth, "no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
+        error: register._createError(auth, "no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
     };
 }
 function _savePartialEvent(auth, event) {
@@ -2927,7 +3230,7 @@ function _eventFromPartialAndUrl(partialEvent, url) {
             ? parseJsonOrNull(decodeURIComponent(params['firebaseError']))
             : null;
         const code = errorObject?.['code']?.split('auth/')?.[1];
-        const error = code ? index._createError(code) : null;
+        const error = code ? register._createError(code) : null;
         if (error) {
             return {
                 type: partialEvent.type,
@@ -2962,10 +3265,10 @@ function generateSessionId() {
     return chars.join('');
 }
 function storage() {
-    return index._getInstance(browserLocalPersistence);
+    return register._getInstance(browserLocalPersistence);
 }
 function persistenceKey(auth) {
-    return index._persistenceKeyName("authEvent" /* KeyName.AUTH_EVENT */, auth.config.apiKey, auth.name);
+    return register._persistenceKeyName("authEvent" /* KeyName.AUTH_EVENT */, auth.config.apiKey, auth.name);
 }
 function parseJsonOrNull(json) {
     try {
@@ -3041,7 +3344,7 @@ class CordovaPopupRedirectResolver {
         return manager;
     }
     _openPopup(auth) {
-        index._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        register._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     async _openRedirect(auth, provider, authType, eventId) {
         _checkCordovaConfiguration(auth);
@@ -3135,7 +3438,7 @@ function generateNoEvent() {
         urlResponse: null,
         postBody: null,
         tenantId: null,
-        error: index._createError("no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
+        error: register._createError("no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
     };
 }
 
@@ -3159,93 +3462,90 @@ function generateNoEvent() {
 // It is not intended for direct use by developer apps. NO jsdoc here to intentionally leave it out
 // of autogenerated documentation pages to reduce accidental misuse.
 function addFrameworkForLogging(auth, framework) {
-    index._castAuth(auth)._logFramework(framework);
+    register._castAuth(auth)._logFramework(framework);
 }
 
-exports.ActionCodeOperation = index.ActionCodeOperation;
-exports.ActionCodeURL = index.ActionCodeURL;
-exports.AuthCredential = index.AuthCredential;
-exports.AuthErrorCodes = index.AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY;
-exports.AuthImpl = index.AuthImpl;
-exports.EmailAuthCredential = index.EmailAuthCredential;
-exports.EmailAuthProvider = index.EmailAuthProvider;
-exports.FacebookAuthProvider = index.FacebookAuthProvider;
-exports.FactorId = index.FactorId;
-exports.FetchProvider = index.FetchProvider;
-exports.GithubAuthProvider = index.GithubAuthProvider;
-exports.GoogleAuthProvider = index.GoogleAuthProvider;
-exports.OAuthCredential = index.OAuthCredential;
-exports.OAuthProvider = index.OAuthProvider;
-exports.OperationType = index.OperationType;
-exports.PhoneAuthCredential = index.PhoneAuthCredential;
-exports.PhoneAuthProvider = index.PhoneAuthProvider;
-exports.PhoneMultiFactorGenerator = index.PhoneMultiFactorGenerator;
-exports.ProviderId = index.ProviderId;
-exports.RecaptchaVerifier = index.RecaptchaVerifier;
-exports.SAMLAuthCredential = index.SAMLAuthCredential;
-exports.SAMLAuthProvider = index.SAMLAuthProvider;
-exports.SignInMethod = index.SignInMethod;
-exports.TotpMultiFactorGenerator = index.TotpMultiFactorGenerator;
-exports.TotpSecret = index.TotpSecret;
-exports.TwitterAuthProvider = index.TwitterAuthProvider;
-exports.UserImpl = index.UserImpl;
-exports._assert = index._assert;
-exports._castAuth = index._castAuth;
-exports._fail = index._fail;
-exports._getClientVersion = index._getClientVersion;
-exports._getInstance = index._getInstance;
-exports._persistenceKeyName = index._persistenceKeyName;
-exports.applyActionCode = index.applyActionCode;
-exports.beforeAuthStateChanged = index.beforeAuthStateChanged;
-exports.checkActionCode = index.checkActionCode;
-exports.confirmPasswordReset = index.confirmPasswordReset;
-exports.connectAuthEmulator = index.connectAuthEmulator;
-exports.createUserWithEmailAndPassword = index.createUserWithEmailAndPassword;
-exports.debugErrorMap = index.debugErrorMap;
-exports.deleteUser = index.deleteUser;
-exports.fetchSignInMethodsForEmail = index.fetchSignInMethodsForEmail;
-exports.getAdditionalUserInfo = index.getAdditionalUserInfo;
-exports.getIdToken = index.getIdToken;
-exports.getIdTokenResult = index.getIdTokenResult;
-exports.getMultiFactorResolver = index.getMultiFactorResolver;
-exports.inMemoryPersistence = index.inMemoryPersistence;
-exports.initializeAuth = index.initializeAuth;
-exports.initializeRecaptchaConfig = index.initializeRecaptchaConfig;
-exports.isSignInWithEmailLink = index.isSignInWithEmailLink;
-exports.linkWithCredential = index.linkWithCredential;
-exports.linkWithPhoneNumber = index.linkWithPhoneNumber;
-exports.multiFactor = index.multiFactor;
-exports.onAuthStateChanged = index.onAuthStateChanged;
-exports.onIdTokenChanged = index.onIdTokenChanged;
-exports.parseActionCodeURL = index.parseActionCodeURL;
-exports.prodErrorMap = index.prodErrorMap;
-exports.reauthenticateWithCredential = index.reauthenticateWithCredential;
-exports.reauthenticateWithPhoneNumber = index.reauthenticateWithPhoneNumber;
-exports.reload = index.reload;
-exports.revokeAccessToken = index.revokeAccessToken;
-exports.sendEmailVerification = index.sendEmailVerification;
-exports.sendPasswordResetEmail = index.sendPasswordResetEmail;
-exports.sendSignInLinkToEmail = index.sendSignInLinkToEmail;
-exports.setPersistence = index.setPersistence;
-exports.signInAnonymously = index.signInAnonymously;
-exports.signInWithCredential = index.signInWithCredential;
-exports.signInWithCustomToken = index.signInWithCustomToken;
-exports.signInWithEmailAndPassword = index.signInWithEmailAndPassword;
-exports.signInWithEmailLink = index.signInWithEmailLink;
-exports.signInWithPhoneNumber = index.signInWithPhoneNumber;
-exports.signOut = index.signOut;
-exports.unlink = index.unlink;
-exports.updateCurrentUser = index.updateCurrentUser;
-exports.updateEmail = index.updateEmail;
-exports.updatePassword = index.updatePassword;
-exports.updatePhoneNumber = index.updatePhoneNumber;
-exports.updateProfile = index.updateProfile;
-exports.useDeviceLanguage = index.useDeviceLanguage;
-exports.validatePassword = index.validatePassword;
-exports.verifyBeforeUpdateEmail = index.verifyBeforeUpdateEmail;
-exports.verifyPasswordResetCode = index.verifyPasswordResetCode;
+exports.ActionCodeURL = register.ActionCodeURL;
+exports.AuthCredential = register.AuthCredential;
+exports.AuthErrorCodes = register.AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY;
+exports.AuthImpl = register.AuthImpl;
+exports.EmailAuthCredential = register.EmailAuthCredential;
+exports.EmailAuthProvider = register.EmailAuthProvider;
+exports.FacebookAuthProvider = register.FacebookAuthProvider;
+exports.FetchProvider = register.FetchProvider;
+exports.GithubAuthProvider = register.GithubAuthProvider;
+exports.GoogleAuthProvider = register.GoogleAuthProvider;
+exports.OAuthCredential = register.OAuthCredential;
+exports.OAuthProvider = register.OAuthProvider;
+exports.PhoneAuthCredential = register.PhoneAuthCredential;
+exports.SAMLAuthCredential = register.SAMLAuthCredential;
+exports.SAMLAuthProvider = register.SAMLAuthProvider;
+exports.TotpMultiFactorGenerator = register.TotpMultiFactorGenerator;
+exports.TotpSecret = register.TotpSecret;
+exports.TwitterAuthProvider = register.TwitterAuthProvider;
+exports.UserImpl = register.UserImpl;
+exports._assert = register._assert;
+exports._castAuth = register._castAuth;
+exports._fail = register._fail;
+exports._generateEventId = register._generateEventId;
+exports._getClientVersion = register._getClientVersion;
+exports._getInstance = register._getInstance;
+exports._persistenceKeyName = register._persistenceKeyName;
+exports.applyActionCode = register.applyActionCode;
+exports.beforeAuthStateChanged = register.beforeAuthStateChanged;
+exports.checkActionCode = register.checkActionCode;
+exports.confirmPasswordReset = register.confirmPasswordReset;
+exports.connectAuthEmulator = register.connectAuthEmulator;
+exports.createUserWithEmailAndPassword = register.createUserWithEmailAndPassword;
+exports.debugErrorMap = register.debugErrorMap;
+exports.deleteUser = register.deleteUser;
+exports.fetchSignInMethodsForEmail = register.fetchSignInMethodsForEmail;
+exports.getAdditionalUserInfo = register.getAdditionalUserInfo;
+exports.getIdToken = register.getIdToken;
+exports.getIdTokenResult = register.getIdTokenResult;
+exports.getMultiFactorResolver = register.getMultiFactorResolver;
+exports.inMemoryPersistence = register.inMemoryPersistence;
+exports.indexedDBLocalPersistence = register.indexedDBLocalPersistence;
+exports.initializeAuth = register.initializeAuth;
+exports.initializeRecaptchaConfig = register.initializeRecaptchaConfig;
+exports.isSignInWithEmailLink = register.isSignInWithEmailLink;
+exports.linkWithCredential = register.linkWithCredential;
+exports.multiFactor = register.multiFactor;
+exports.onAuthStateChanged = register.onAuthStateChanged;
+exports.onIdTokenChanged = register.onIdTokenChanged;
+exports.parseActionCodeURL = register.parseActionCodeURL;
+exports.prodErrorMap = register.prodErrorMap;
+exports.reauthenticateWithCredential = register.reauthenticateWithCredential;
+exports.reload = register.reload;
+exports.revokeAccessToken = register.revokeAccessToken;
+exports.sendEmailVerification = register.sendEmailVerification;
+exports.sendPasswordResetEmail = register.sendPasswordResetEmail;
+exports.sendSignInLinkToEmail = register.sendSignInLinkToEmail;
+exports.setPersistence = register.setPersistence;
+exports.signInAnonymously = register.signInAnonymously;
+exports.signInWithCredential = register.signInWithCredential;
+exports.signInWithCustomToken = register.signInWithCustomToken;
+exports.signInWithEmailAndPassword = register.signInWithEmailAndPassword;
+exports.signInWithEmailLink = register.signInWithEmailLink;
+exports.signOut = register.signOut;
+exports.unlink = register.unlink;
+exports.updateCurrentUser = register.updateCurrentUser;
+exports.updateEmail = register.updateEmail;
+exports.updatePassword = register.updatePassword;
+exports.updateProfile = register.updateProfile;
+exports.useDeviceLanguage = register.useDeviceLanguage;
+exports.validatePassword = register.validatePassword;
+exports.verifyBeforeUpdateEmail = register.verifyBeforeUpdateEmail;
+exports.verifyPasswordResetCode = register.verifyPasswordResetCode;
+exports.ActionCodeOperation = ActionCodeOperation;
 exports.AuthPopup = AuthPopup;
-exports._generateEventId = _generateEventId;
+exports.FactorId = FactorId;
+exports.OperationType = OperationType;
+exports.PhoneAuthProvider = PhoneAuthProvider;
+exports.PhoneMultiFactorGenerator = PhoneMultiFactorGenerator;
+exports.ProviderId = ProviderId;
+exports.RecaptchaVerifier = RecaptchaVerifier;
+exports.SignInMethod = SignInMethod;
 exports._getRedirectResult = _getRedirectResult;
 exports._overrideRedirectResult = _overrideRedirectResult;
 exports.addFrameworkForLogging = addFrameworkForLogging;
@@ -3256,11 +3556,14 @@ exports.browserSessionPersistence = browserSessionPersistence;
 exports.cordovaPopupRedirectResolver = cordovaPopupRedirectResolver;
 exports.getAuth = getAuth;
 exports.getRedirectResult = getRedirectResult;
-exports.indexedDBLocalPersistence = indexedDBLocalPersistence;
+exports.linkWithPhoneNumber = linkWithPhoneNumber;
 exports.linkWithPopup = linkWithPopup;
 exports.linkWithRedirect = linkWithRedirect;
+exports.reauthenticateWithPhoneNumber = reauthenticateWithPhoneNumber;
 exports.reauthenticateWithPopup = reauthenticateWithPopup;
 exports.reauthenticateWithRedirect = reauthenticateWithRedirect;
+exports.signInWithPhoneNumber = signInWithPhoneNumber;
 exports.signInWithPopup = signInWithPopup;
 exports.signInWithRedirect = signInWithRedirect;
+exports.updatePhoneNumber = updatePhoneNumber;
 //# sourceMappingURL=internal.js.map
