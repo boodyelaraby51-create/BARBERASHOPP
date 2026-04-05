@@ -14,5 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './core';
-export * from './mfa';
+/**
+ * This is the file that people using Node.js will actually import. You should
+ * only include this file if you have something specific about your
+ * implementation that mandates having a separate entrypoint. Otherwise you can
+ * just use index.ts
+ */
+export * from './index';
+import './index';

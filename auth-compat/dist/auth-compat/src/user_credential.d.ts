@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2017 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './core';
-export * from './mfa';
+import * as exp from '@firebase/auth/internal';
+import * as compat from '@firebase/auth-types';
+export declare function convertCredential(auth: exp.Auth, credentialPromise: Promise<exp.UserCredential>): Promise<compat.UserCredential>;
+export declare function convertConfirmationResult(auth: exp.Auth, confirmationResultPromise: Promise<exp.ConfirmationResult>): Promise<compat.ConfirmationResult>;

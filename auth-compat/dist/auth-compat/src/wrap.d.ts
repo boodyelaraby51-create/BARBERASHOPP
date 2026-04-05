@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2017 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './core';
-export * from './mfa';
+/** Forward direction wrapper from Compat --unwrap-> Exp */
+export interface Wrapper<T> {
+    unwrap(): T;
+}
+/** Reverse direction wrapper from Exp --wrapped--> Compat */
+export interface ReverseWrapper<T> {
+    wrapped(): T;
+}
+export declare function unwrap<T>(object: unknown): T;
+export declare function wrapped<T>(object: unknown): T;

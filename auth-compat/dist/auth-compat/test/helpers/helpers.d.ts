@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2017 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './core';
-export * from './mfa';
+import '@firebase/auth-compat';
+import { Provider } from '@firebase/component';
+import '../..';
+export declare const FAKE_HEARTBEAT_CONTROLLER_PROVIDER: Provider<"heartbeat">;
+export declare const FAKE_APP_CHECK_CONTROLLER_PROVIDER: Provider<"app-check-internal">;
+export declare function initializeTestInstance(): void;
+export declare function cleanUpTestInstance(): Promise<void>;
+export declare function randomEmail(): string;
