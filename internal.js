@@ -1,12 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var register = require('./register-a20238ea.js');
-var util = require('@firebase/util');
-var app = require('@firebase/app');
-require('@firebase/component');
-require('@firebase/logger');
+import { a8 as STORAGE_AVAILABLE_KEY, a9 as _isMobileBrowser, aa as _isIE10, ab as Delay, ac as _window, ad as _assert, ae as isV2, af as _createError, ag as _recaptchaV2ScriptUrl, ah as _loadJS, ai as MockReCaptcha, aj as _generateCallbackName, ak as _castAuth, al as _isHttpOrHttps, am as _isWorker, an as getRecaptchaParams, ao as _serverAppCurrentUserOperationNotSupportedError, z as signInWithCredential, ap as _assertLinkedStatus, B as linkWithCredential, C as reauthenticateWithCredential, aq as _initializeRecaptchaConfig, ar as FAKE_TOKEN, as as startEnrollPhoneMfa, at as handleRecaptchaFlow, au as startSignInPhoneMfa, av as sendPhoneVerificationCode, aw as _link$1, P as PhoneAuthCredential, ax as _getInstance, ay as _signInWithCredential, az as _reauthenticate, m as AuthCredential, aA as signInWithIdp, aB as _fail, aC as debugAssert, aD as _assertInstanceOf, aE as _generateEventId, aF as FederatedAuthProvider, aG as _persistenceKeyName, aH as _performApiRequest, aI as _getCurrentUrl, aJ as _gapiScriptUrl, aK as _emulatorUrl, aL as _isChromeIOS, aM as _isFirefox, aN as _isIOSStandalone, aO as BaseOAuthProvider, aP as _setWindowLocation, aQ as _isSafari, aR as _isIOS, aS as MultiFactorAssertionImpl, aT as finalizeEnrollPhoneMfa, aU as finalizeSignInPhoneMfa, r as registerAuth, i as initializeAuth, a as indexedDBLocalPersistence, e as beforeAuthStateChanged, o as onIdTokenChanged, c as connectAuthEmulator, aV as _setExternalJSProvider, aW as _isAndroid, aX as _isIOS7Or8 } from './register-27e07cc8.js';
+export { Y as ActionCodeURL, m as AuthCredential, A as AuthErrorCodes, aZ as AuthImpl, E as EmailAuthCredential, q as EmailAuthProvider, F as FacebookAuthProvider, a$ as FetchProvider, t as GithubAuthProvider, G as GoogleAuthProvider, O as OAuthCredential, w as OAuthProvider, P as PhoneAuthCredential, b0 as SAMLAuthCredential, S as SAMLAuthProvider, T as TotpMultiFactorGenerator, b as TotpSecret, x as TwitterAuthProvider, aY as UserImpl, ad as _assert, ak as _castAuth, aB as _fail, aE as _generateEventId, a_ as _getClientVersion, ax as _getInstance, aG as _persistenceKeyName, J as applyActionCode, e as beforeAuthStateChanged, K as checkActionCode, I as confirmPasswordReset, c as connectAuthEmulator, M as createUserWithEmailAndPassword, l as debugErrorMap, k as deleteUser, V as fetchSignInMethodsForEmail, a4 as getAdditionalUserInfo, a1 as getIdToken, a2 as getIdTokenResult, a6 as getMultiFactorResolver, n as inMemoryPersistence, a as indexedDBLocalPersistence, i as initializeAuth, d as initializeRecaptchaConfig, R as isSignInWithEmailLink, B as linkWithCredential, a7 as multiFactor, f as onAuthStateChanged, o as onIdTokenChanged, Z as parseActionCodeURL, p as prodErrorMap, C as reauthenticateWithCredential, a5 as reload, j as revokeAccessToken, W as sendEmailVerification, H as sendPasswordResetEmail, Q as sendSignInLinkToEmail, s as setPersistence, y as signInAnonymously, z as signInWithCredential, D as signInWithCustomToken, N as signInWithEmailAndPassword, U as signInWithEmailLink, h as signOut, a3 as unlink, g as updateCurrentUser, $ as updateEmail, a0 as updatePassword, _ as updateProfile, u as useDeviceLanguage, v as validatePassword, X as verifyBeforeUpdateEmail, L as verifyPasswordResetCode } from './register-27e07cc8.js';
+import { querystring, getModularInstance, getUA, isEmpty, getExperimentalSetting, getDefaultEmulatorHost, querystringDecode } from '@firebase/util';
+import { _isFirebaseServerApp, SDK_VERSION, _getProvider, getApp } from '@firebase/app';
+import '@firebase/component';
+import '@firebase/logger';
 
 /**
  * @license
@@ -136,8 +133,8 @@ class BrowserPersistenceClass {
             if (!this.storage) {
                 return Promise.resolve(false);
             }
-            this.storage.setItem(register.STORAGE_AVAILABLE_KEY, '1');
-            this.storage.removeItem(register.STORAGE_AVAILABLE_KEY);
+            this.storage.setItem(STORAGE_AVAILABLE_KEY, '1');
+            this.storage.removeItem(STORAGE_AVAILABLE_KEY);
             return Promise.resolve(true);
         }
         catch {
@@ -191,7 +188,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.pollTimer = null;
         // Whether to use polling instead of depending on window events
-        this.fallbackToPolling = register._isMobileBrowser();
+        this.fallbackToPolling = _isMobileBrowser();
         this._shouldAllowMigration = true;
     }
     forAllChangedKeys(cb) {
@@ -240,7 +237,7 @@ class BrowserLocalPersistence extends BrowserPersistenceClass {
             this.notifyListeners(key, storedValue);
         };
         const storedValue = this.storage.getItem(key);
-        if (register._isIE10() &&
+        if (_isIE10() &&
             storedValue !== event.newValue &&
             event.newValue !== event.oldValue) {
             // IE 10 has this weird bug where a storage event would trigger with the
@@ -541,8 +538,8 @@ const browserSessionPersistence = BrowserSessionPersistence;
  */
 // ReCaptcha will load using the same callback, so the callback function needs
 // to be kept around
-const _JSLOAD_CALLBACK = register._generateCallbackName('rcb');
-const NETWORK_TIMEOUT_DELAY = new register.Delay(30000, 60000);
+const _JSLOAD_CALLBACK = _generateCallbackName('rcb');
+const NETWORK_TIMEOUT_DELAY = new Delay(30000, 60000);
 /**
  * Loader for the GReCaptcha library. There should only ever be one of this.
  */
@@ -555,23 +552,23 @@ class ReCaptchaLoaderImpl {
          * version of the ReCAPTCHA script was loaded by someone else (e.g. App Check) but
          * `window.grecaptcha.render()` will not. Another load will add it.
          */
-        this.librarySeparatelyLoaded = !!register._window().grecaptcha?.render;
+        this.librarySeparatelyLoaded = !!_window().grecaptcha?.render;
     }
     load(auth, hl = '') {
-        register._assert(isHostLanguageValid(hl), auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
-        if (this.shouldResolveImmediately(hl) && register.isV2(register._window().grecaptcha)) {
-            return Promise.resolve(register._window().grecaptcha);
+        _assert(isHostLanguageValid(hl), auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        if (this.shouldResolveImmediately(hl) && isV2(_window().grecaptcha)) {
+            return Promise.resolve(_window().grecaptcha);
         }
         return new Promise((resolve, reject) => {
-            const networkTimeout = register._window().setTimeout(() => {
-                reject(register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
+            const networkTimeout = _window().setTimeout(() => {
+                reject(_createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
             }, NETWORK_TIMEOUT_DELAY.get());
-            register._window()[_JSLOAD_CALLBACK] = () => {
-                register._window().clearTimeout(networkTimeout);
-                delete register._window()[_JSLOAD_CALLBACK];
-                const recaptcha = register._window().grecaptcha;
-                if (!recaptcha || !register.isV2(recaptcha)) {
-                    reject(register._createError(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */));
+            _window()[_JSLOAD_CALLBACK] = () => {
+                _window().clearTimeout(networkTimeout);
+                delete _window()[_JSLOAD_CALLBACK];
+                const recaptcha = _window().grecaptcha;
+                if (!recaptcha || !isV2(recaptcha)) {
+                    reject(_createError(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */));
                     return;
                 }
                 // Wrap the recaptcha render function so that we know if the developer has
@@ -585,14 +582,14 @@ class ReCaptchaLoaderImpl {
                 this.hostLanguage = hl;
                 resolve(recaptcha);
             };
-            const url = `${register._recaptchaV2ScriptUrl()}?${util.querystring({
+            const url = `${_recaptchaV2ScriptUrl()}?${querystring({
                 onload: _JSLOAD_CALLBACK,
                 render: 'explicit',
                 hl
             })}`;
-            register._loadJS(url).catch(() => {
+            _loadJS(url).catch(() => {
                 clearTimeout(networkTimeout);
-                reject(register._createError(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */));
+                reject(_createError(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */));
             });
         });
     }
@@ -607,7 +604,7 @@ class ReCaptchaLoaderImpl {
         //     3. the library was already loaded by the app
         // In cases (2) and (3), we _can't_ reload as it would break the recaptchas
         // that are already in the page
-        return (!!register._window().grecaptcha?.render &&
+        return (!!_window().grecaptcha?.render &&
             (hl === this.hostLanguage ||
                 this.counter > 0 ||
                 this.librarySeparatelyLoaded));
@@ -618,7 +615,7 @@ function isHostLanguageValid(hl) {
 }
 class MockReCaptchaLoaderImpl {
     async load(auth) {
-        return new register.MockReCaptcha(auth);
+        return new MockReCaptcha(auth);
     }
     clearedOneInstance() { }
 }
@@ -688,13 +685,13 @@ class RecaptchaVerifier {
         this.tokenChangeListeners = new Set();
         this.renderPromise = null;
         this.recaptcha = null;
-        this.auth = register._castAuth(authExtern);
+        this.auth = _castAuth(authExtern);
         this.isInvisible = this.parameters.size === 'invisible';
-        register._assert(typeof document !== 'undefined', this.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _assert(typeof document !== 'undefined', this.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
         const container = typeof containerOrId === 'string'
             ? document.getElementById(containerOrId)
             : containerOrId;
-        register._assert(container, this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        _assert(container, this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
         this.container = container;
         this.parameters.callback = this.makeTokenCallback(this.parameters.callback);
         this._recaptchaLoader = this.auth.settings.appVerificationDisabledForTesting
@@ -775,9 +772,9 @@ class RecaptchaVerifier {
         }
     }
     validateStartingState() {
-        register._assert(!this.parameters.sitekey, this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
-        register._assert(this.isInvisible || !this.container.hasChildNodes(), this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
-        register._assert(typeof document !== 'undefined', this.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _assert(!this.parameters.sitekey, this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        _assert(this.isInvisible || !this.container.hasChildNodes(), this.auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+        _assert(typeof document !== 'undefined', this.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     makeTokenCallback(existing) {
         return token => {
@@ -786,7 +783,7 @@ class RecaptchaVerifier {
                 existing(token);
             }
             else if (typeof existing === 'string') {
-                const globalFunc = register._window()[existing];
+                const globalFunc = _window()[existing];
                 if (typeof globalFunc === 'function') {
                     globalFunc(token);
                 }
@@ -794,7 +791,7 @@ class RecaptchaVerifier {
         };
     }
     assertNotDestroyed() {
-        register._assert(!this.destroyed, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        _assert(!this.destroyed, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
     }
     async makeRenderPromise() {
         await this.init();
@@ -810,15 +807,15 @@ class RecaptchaVerifier {
         return this.widgetId;
     }
     async init() {
-        register._assert(register._isHttpOrHttps() && !register._isWorker(), this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        _assert(_isHttpOrHttps() && !_isWorker(), this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         await domReady();
         this.recaptcha = await this._recaptchaLoader.load(this.auth, this.auth.languageCode || undefined);
-        const siteKey = await register.getRecaptchaParams(this.auth);
-        register._assert(siteKey, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        const siteKey = await getRecaptchaParams(this.auth);
+        _assert(siteKey, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         this.parameters.sitekey = siteKey;
     }
     getAssertedRecaptcha() {
-        register._assert(this.recaptcha, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        _assert(this.recaptcha, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         return this.recaptcha;
     }
 }
@@ -864,7 +861,7 @@ class ConfirmationResultImpl {
         this.onConfirmation = onConfirmation;
     }
     confirm(verificationCode) {
-        const authCredential = register.PhoneAuthCredential._fromVerification(this.verificationId, verificationCode);
+        const authCredential = PhoneAuthCredential._fromVerification(this.verificationId, verificationCode);
         return this.onConfirmation(authCredential);
     }
 }
@@ -905,12 +902,12 @@ class ConfirmationResultImpl {
  * @public
  */
 async function signInWithPhoneNumber(auth, phoneNumber, appVerifier) {
-    if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(auth));
+    if (_isFirebaseServerApp(auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
     }
-    const authInternal = register._castAuth(auth);
-    const verificationId = await _verifyPhoneNumber(authInternal, phoneNumber, util.getModularInstance(appVerifier));
-    return new ConfirmationResultImpl(verificationId, cred => register.signInWithCredential(authInternal, cred));
+    const authInternal = _castAuth(auth);
+    const verificationId = await _verifyPhoneNumber(authInternal, phoneNumber, getModularInstance(appVerifier));
+    return new ConfirmationResultImpl(verificationId, cred => signInWithCredential(authInternal, cred));
 }
 /**
  * Links the user account with the given phone number.
@@ -925,10 +922,10 @@ async function signInWithPhoneNumber(auth, phoneNumber, appVerifier) {
  * @public
  */
 async function linkWithPhoneNumber(user, phoneNumber, appVerifier) {
-    const userInternal = util.getModularInstance(user);
-    await register._assertLinkedStatus(false, userInternal, "phone" /* ProviderId.PHONE */);
-    const verificationId = await _verifyPhoneNumber(userInternal.auth, phoneNumber, util.getModularInstance(appVerifier));
-    return new ConfirmationResultImpl(verificationId, cred => register.linkWithCredential(userInternal, cred));
+    const userInternal = getModularInstance(user);
+    await _assertLinkedStatus(false, userInternal, "phone" /* ProviderId.PHONE */);
+    const verificationId = await _verifyPhoneNumber(userInternal.auth, phoneNumber, getModularInstance(appVerifier));
+    return new ConfirmationResultImpl(verificationId, cred => linkWithCredential(userInternal, cred));
 }
 /**
  * Re-authenticates a user using a fresh phone credential.
@@ -946,12 +943,12 @@ async function linkWithPhoneNumber(user, phoneNumber, appVerifier) {
  * @public
  */
 async function reauthenticateWithPhoneNumber(user, phoneNumber, appVerifier) {
-    const userInternal = util.getModularInstance(user);
-    if (app._isFirebaseServerApp(userInternal.auth.app)) {
-        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
+    const userInternal = getModularInstance(user);
+    if (_isFirebaseServerApp(userInternal.auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
     }
-    const verificationId = await _verifyPhoneNumber(userInternal.auth, phoneNumber, util.getModularInstance(appVerifier));
-    return new ConfirmationResultImpl(verificationId, cred => register.reauthenticateWithCredential(userInternal, cred));
+    const verificationId = await _verifyPhoneNumber(userInternal.auth, phoneNumber, getModularInstance(appVerifier));
+    return new ConfirmationResultImpl(verificationId, cred => reauthenticateWithCredential(userInternal, cred));
 }
 /**
  * Returns a verification ID to be used in conjunction with the SMS code that is sent.
@@ -960,7 +957,7 @@ async function reauthenticateWithPhoneNumber(user, phoneNumber, appVerifier) {
 async function _verifyPhoneNumber(auth, options, verifier) {
     if (!auth._getRecaptchaConfig()) {
         try {
-            await register._initializeRecaptchaConfig(auth);
+            await _initializeRecaptchaConfig(auth);
         }
         catch (error) {
             // If an error occurs while fetching the config, there is no way to know the enablement state
@@ -983,7 +980,7 @@ async function _verifyPhoneNumber(auth, options, verifier) {
         if ('session' in phoneInfoOptions) {
             const session = phoneInfoOptions.session;
             if ('phoneNumber' in phoneInfoOptions) {
-                register._assert(session.type === "enroll" /* MultiFactorSessionType.ENROLL */, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                _assert(session.type === "enroll" /* MultiFactorSessionType.ENROLL */, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
                 const startPhoneMfaEnrollmentRequest = {
                     idToken: session.credential,
                     phoneEnrollmentInfo: {
@@ -993,24 +990,24 @@ async function _verifyPhoneNumber(auth, options, verifier) {
                 };
                 const startEnrollPhoneMfaActionCallback = async (authInstance, request) => {
                     // If reCAPTCHA Enterprise token is FAKE_TOKEN, fetch reCAPTCHA v2 token and inject into request.
-                    if (request.phoneEnrollmentInfo.captchaResponse === register.FAKE_TOKEN) {
-                        register._assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+                    if (request.phoneEnrollmentInfo.captchaResponse === FAKE_TOKEN) {
+                        _assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
                         const requestWithRecaptchaV2 = await injectRecaptchaV2Token(authInstance, request, verifier);
-                        return register.startEnrollPhoneMfa(authInstance, requestWithRecaptchaV2);
+                        return startEnrollPhoneMfa(authInstance, requestWithRecaptchaV2);
                     }
-                    return register.startEnrollPhoneMfa(authInstance, request);
+                    return startEnrollPhoneMfa(authInstance, request);
                 };
-                const startPhoneMfaEnrollmentResponse = register.handleRecaptchaFlow(auth, startPhoneMfaEnrollmentRequest, "mfaSmsEnrollment" /* RecaptchaActionName.MFA_SMS_ENROLLMENT */, startEnrollPhoneMfaActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
+                const startPhoneMfaEnrollmentResponse = handleRecaptchaFlow(auth, startPhoneMfaEnrollmentRequest, "mfaSmsEnrollment" /* RecaptchaActionName.MFA_SMS_ENROLLMENT */, startEnrollPhoneMfaActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
                 const response = await startPhoneMfaEnrollmentResponse.catch(error => {
                     return Promise.reject(error);
                 });
                 return response.phoneSessionInfo.sessionInfo;
             }
             else {
-                register._assert(session.type === "signin" /* MultiFactorSessionType.SIGN_IN */, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                _assert(session.type === "signin" /* MultiFactorSessionType.SIGN_IN */, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
                 const mfaEnrollmentId = phoneInfoOptions.multiFactorHint?.uid ||
                     phoneInfoOptions.multiFactorUid;
-                register._assert(mfaEnrollmentId, auth, "missing-multi-factor-info" /* AuthErrorCode.MISSING_MFA_INFO */);
+                _assert(mfaEnrollmentId, auth, "missing-multi-factor-info" /* AuthErrorCode.MISSING_MFA_INFO */);
                 const startPhoneMfaSignInRequest = {
                     mfaPendingCredential: session.credential,
                     mfaEnrollmentId,
@@ -1020,14 +1017,14 @@ async function _verifyPhoneNumber(auth, options, verifier) {
                 };
                 const startSignInPhoneMfaActionCallback = async (authInstance, request) => {
                     // If reCAPTCHA Enterprise token is FAKE_TOKEN, fetch reCAPTCHA v2 token and inject into request.
-                    if (request.phoneSignInInfo.captchaResponse === register.FAKE_TOKEN) {
-                        register._assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+                    if (request.phoneSignInInfo.captchaResponse === FAKE_TOKEN) {
+                        _assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
                         const requestWithRecaptchaV2 = await injectRecaptchaV2Token(authInstance, request, verifier);
-                        return register.startSignInPhoneMfa(authInstance, requestWithRecaptchaV2);
+                        return startSignInPhoneMfa(authInstance, requestWithRecaptchaV2);
                     }
-                    return register.startSignInPhoneMfa(authInstance, request);
+                    return startSignInPhoneMfa(authInstance, request);
                 };
-                const startPhoneMfaSignInResponse = register.handleRecaptchaFlow(auth, startPhoneMfaSignInRequest, "mfaSmsSignIn" /* RecaptchaActionName.MFA_SMS_SIGNIN */, startSignInPhoneMfaActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
+                const startPhoneMfaSignInResponse = handleRecaptchaFlow(auth, startPhoneMfaSignInRequest, "mfaSmsSignIn" /* RecaptchaActionName.MFA_SMS_SIGNIN */, startSignInPhoneMfaActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
                 const response = await startPhoneMfaSignInResponse.catch(error => {
                     return Promise.reject(error);
                 });
@@ -1041,14 +1038,14 @@ async function _verifyPhoneNumber(auth, options, verifier) {
             };
             const sendPhoneVerificationCodeActionCallback = async (authInstance, request) => {
                 // If reCAPTCHA Enterprise token is FAKE_TOKEN, fetch reCAPTCHA v2 token and inject into request.
-                if (request.captchaResponse === register.FAKE_TOKEN) {
-                    register._assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+                if (request.captchaResponse === FAKE_TOKEN) {
+                    _assert(verifier?.type === RECAPTCHA_VERIFIER_TYPE, authInstance, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
                     const requestWithRecaptchaV2 = await injectRecaptchaV2Token(authInstance, request, verifier);
-                    return register.sendPhoneVerificationCode(authInstance, requestWithRecaptchaV2);
+                    return sendPhoneVerificationCode(authInstance, requestWithRecaptchaV2);
                 }
-                return register.sendPhoneVerificationCode(authInstance, request);
+                return sendPhoneVerificationCode(authInstance, request);
             };
-            const sendPhoneVerificationCodeResponse = register.handleRecaptchaFlow(auth, sendPhoneVerificationCodeRequest, "sendVerificationCode" /* RecaptchaActionName.SEND_VERIFICATION_CODE */, sendPhoneVerificationCodeActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
+            const sendPhoneVerificationCodeResponse = handleRecaptchaFlow(auth, sendPhoneVerificationCodeRequest, "sendVerificationCode" /* RecaptchaActionName.SEND_VERIFICATION_CODE */, sendPhoneVerificationCodeActionCallback, "PHONE_PROVIDER" /* RecaptchaAuthProvider.PHONE_PROVIDER */);
             const response = await sendPhoneVerificationCodeResponse.catch(error => {
                 return Promise.reject(error);
             });
@@ -1083,17 +1080,17 @@ async function _verifyPhoneNumber(auth, options, verifier) {
  * @public
  */
 async function updatePhoneNumber(user, credential) {
-    const userInternal = util.getModularInstance(user);
-    if (app._isFirebaseServerApp(userInternal.auth.app)) {
-        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
+    const userInternal = getModularInstance(user);
+    if (_isFirebaseServerApp(userInternal.auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
     }
-    await register._link(userInternal, credential);
+    await _link$1(userInternal, credential);
 }
 // Helper function that fetches and injects a reCAPTCHA v2 token into the request.
 async function injectRecaptchaV2Token(auth, request, recaptchaV2Verifier) {
-    register._assert(recaptchaV2Verifier.type === RECAPTCHA_VERIFIER_TYPE, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    _assert(recaptchaV2Verifier.type === RECAPTCHA_VERIFIER_TYPE, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
     const recaptchaV2Token = await recaptchaV2Verifier.verify();
-    register._assert(typeof recaptchaV2Token === 'string', auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    _assert(typeof recaptchaV2Token === 'string', auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
     const newRequest = { ...request };
     if ('phoneEnrollmentInfo' in newRequest) {
         const phoneNumber = newRequest.phoneEnrollmentInfo.phoneNumber;
@@ -1176,7 +1173,7 @@ class PhoneAuthProvider {
     constructor(auth) {
         /** Always set to {@link ProviderId}.PHONE. */
         this.providerId = PhoneAuthProvider.PROVIDER_ID;
-        this.auth = register._castAuth(auth);
+        this.auth = _castAuth(auth);
     }
     /**
      *
@@ -1212,7 +1209,7 @@ class PhoneAuthProvider {
      * {@link PhoneAuthProvider.credential} to identify this flow.
      */
     verifyPhoneNumber(phoneOptions, applicationVerifier) {
-        return _verifyPhoneNumber(this.auth, phoneOptions, util.getModularInstance(applicationVerifier));
+        return _verifyPhoneNumber(this.auth, phoneOptions, getModularInstance(applicationVerifier));
     }
     /**
      * Creates a phone auth credential, given the verification ID from
@@ -1242,7 +1239,7 @@ class PhoneAuthProvider {
      * @returns The auth provider credential.
      */
     static credential(verificationId, verificationCode) {
-        return register.PhoneAuthCredential._fromVerification(verificationId, verificationCode);
+        return PhoneAuthCredential._fromVerification(verificationId, verificationCode);
     }
     /**
      * Generates an {@link AuthCredential} from a {@link UserCredential}.
@@ -1293,7 +1290,7 @@ class PhoneAuthProvider {
         }
         const { phoneNumber, temporaryProof } = tokenResponse;
         if (phoneNumber && temporaryProof) {
-            return register.PhoneAuthCredential._fromTokenResponse(phoneNumber, temporaryProof);
+            return PhoneAuthCredential._fromTokenResponse(phoneNumber, temporaryProof);
         }
         return null;
     }
@@ -1326,9 +1323,9 @@ PhoneAuthProvider.PHONE_SIGN_IN_METHOD = "phone" /* SignInMethod.PHONE */;
  */
 function _withDefaultResolver(auth, resolverOverride) {
     if (resolverOverride) {
-        return register._getInstance(resolverOverride);
+        return _getInstance(resolverOverride);
     }
-    register._assert(auth._popupRedirectResolver, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
+    _assert(auth._popupRedirectResolver, auth, "argument-error" /* AuthErrorCode.ARGUMENT_ERROR */);
     return auth._popupRedirectResolver;
 }
 
@@ -1348,19 +1345,19 @@ function _withDefaultResolver(auth, resolverOverride) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class IdpCredential extends register.AuthCredential {
+class IdpCredential extends AuthCredential {
     constructor(params) {
         super("custom" /* ProviderId.CUSTOM */, "custom" /* ProviderId.CUSTOM */);
         this.params = params;
     }
     _getIdTokenResponse(auth) {
-        return register.signInWithIdp(auth, this._buildIdpRequest());
+        return signInWithIdp(auth, this._buildIdpRequest());
     }
     _linkToIdToken(auth, idToken) {
-        return register.signInWithIdp(auth, this._buildIdpRequest(idToken));
+        return signInWithIdp(auth, this._buildIdpRequest(idToken));
     }
     _getReauthenticationResolver(auth) {
-        return register.signInWithIdp(auth, this._buildIdpRequest());
+        return signInWithIdp(auth, this._buildIdpRequest());
     }
     _buildIdpRequest(idToken) {
         const request = {
@@ -1379,17 +1376,17 @@ class IdpCredential extends register.AuthCredential {
     }
 }
 function _signIn(params) {
-    return register._signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
+    return _signInWithCredential(params.auth, new IdpCredential(params), params.bypassAuthState);
 }
 function _reauth(params) {
     const { auth, user } = params;
-    register._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
-    return register._reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
+    _assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    return _reauthenticate(user, new IdpCredential(params), params.bypassAuthState);
 }
 async function _link(params) {
     const { auth, user } = params;
-    register._assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
-    return register._link(user, new IdpCredential(params), params.bypassAuthState);
+    _assert(user, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    return _link$1(user, new IdpCredential(params), params.bypassAuthState);
 }
 
 /**
@@ -1472,16 +1469,16 @@ class AbstractPopupRedirectOperation {
             case "reauthViaRedirect" /* AuthEventType.REAUTH_VIA_REDIRECT */:
                 return _reauth;
             default:
-                register._fail(this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                _fail(this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         }
     }
     resolve(cred) {
-        register.debugAssert(this.pendingPromise, 'Pending promise was never set');
+        debugAssert(this.pendingPromise, 'Pending promise was never set');
         this.pendingPromise.resolve(cred);
         this.unregisterAndCleanUp();
     }
     reject(error) {
-        register.debugAssert(this.pendingPromise, 'Pending promise was never set');
+        debugAssert(this.pendingPromise, 'Pending promise was never set');
         this.pendingPromise.reject(error);
         this.unregisterAndCleanUp();
     }
@@ -1510,7 +1507,7 @@ class AbstractPopupRedirectOperation {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _POLL_WINDOW_CLOSE_TIMEOUT = new register.Delay(2000, 10000);
+const _POLL_WINDOW_CLOSE_TIMEOUT = new Delay(2000, 10000);
 /**
  * Authenticates a Firebase client using a popup-based OAuth authentication flow.
  *
@@ -1543,11 +1540,11 @@ const _POLL_WINDOW_CLOSE_TIMEOUT = new register.Delay(2000, 10000);
  * @public
  */
 async function signInWithPopup(auth, provider, resolver) {
-    if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(register._createError(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
+    if (_isFirebaseServerApp(auth.app)) {
+        return Promise.reject(_createError(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
     }
-    const authInternal = register._castAuth(auth);
-    register._assertInstanceOf(auth, provider, register.FederatedAuthProvider);
+    const authInternal = _castAuth(auth);
+    _assertInstanceOf(auth, provider, FederatedAuthProvider);
     const resolverInternal = _withDefaultResolver(authInternal, resolver);
     const action = new PopupOperation(authInternal, "signInViaPopup" /* AuthEventType.SIGN_IN_VIA_POPUP */, provider, resolverInternal);
     return action.executeNotNull();
@@ -1581,11 +1578,11 @@ async function signInWithPopup(auth, provider, resolver) {
  * @public
  */
 async function reauthenticateWithPopup(user, provider, resolver) {
-    const userInternal = util.getModularInstance(user);
-    if (app._isFirebaseServerApp(userInternal.auth.app)) {
-        return Promise.reject(register._createError(userInternal.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
+    const userInternal = getModularInstance(user);
+    if (_isFirebaseServerApp(userInternal.auth.app)) {
+        return Promise.reject(_createError(userInternal.auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */));
     }
-    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
+    _assertInstanceOf(userInternal.auth, provider, FederatedAuthProvider);
     const resolverInternal = _withDefaultResolver(userInternal.auth, resolver);
     const action = new PopupOperation(userInternal.auth, "reauthViaPopup" /* AuthEventType.REAUTH_VIA_POPUP */, provider, resolverInternal, userInternal);
     return action.executeNotNull();
@@ -1616,8 +1613,8 @@ async function reauthenticateWithPopup(user, provider, resolver) {
  * @public
  */
 async function linkWithPopup(user, provider, resolver) {
-    const userInternal = util.getModularInstance(user);
-    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
+    const userInternal = getModularInstance(user);
+    _assertInstanceOf(userInternal.auth, provider, FederatedAuthProvider);
     const resolverInternal = _withDefaultResolver(userInternal.auth, resolver);
     const action = new PopupOperation(userInternal.auth, "linkViaPopup" /* AuthEventType.LINK_VIA_POPUP */, provider, resolverInternal, userInternal);
     return action.executeNotNull();
@@ -1640,12 +1637,12 @@ class PopupOperation extends AbstractPopupRedirectOperation {
     }
     async executeNotNull() {
         const result = await this.execute();
-        register._assert(result, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+        _assert(result, this.auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         return result;
     }
     async onExecution() {
-        register.debugAssert(this.filter.length === 1, 'Popup operations only handle one event');
-        const eventId = register._generateEventId();
+        debugAssert(this.filter.length === 1, 'Popup operations only handle one event');
+        const eventId = _generateEventId();
         this.authWindow = await this.resolver._openPopup(this.auth, this.provider, this.filter[0], // There's always one, see constructor
         eventId);
         this.authWindow.associatedEvent = eventId;
@@ -1661,7 +1658,7 @@ class PopupOperation extends AbstractPopupRedirectOperation {
         });
         this.resolver._isIframeWebStorageSupported(this.auth, isSupported => {
             if (!isSupported) {
-                this.reject(register._createError(this.auth, "web-storage-unsupported" /* AuthErrorCode.WEB_STORAGE_UNSUPPORTED */));
+                this.reject(_createError(this.auth, "web-storage-unsupported" /* AuthErrorCode.WEB_STORAGE_UNSUPPORTED */));
             }
         });
         // Handle user closure. Notice this does *not* use await
@@ -1671,7 +1668,7 @@ class PopupOperation extends AbstractPopupRedirectOperation {
         return this.authWindow?.associatedEvent || null;
     }
     cancel() {
-        this.reject(register._createError(this.auth, "cancelled-popup-request" /* AuthErrorCode.EXPIRED_POPUP_REQUEST */));
+        this.reject(_createError(this.auth, "cancelled-popup-request" /* AuthErrorCode.EXPIRED_POPUP_REQUEST */));
     }
     cleanUp() {
         if (this.authWindow) {
@@ -1694,7 +1691,7 @@ class PopupOperation extends AbstractPopupRedirectOperation {
                 // helper closes the popup.
                 this.pollId = window.setTimeout(() => {
                     this.pollId = null;
-                    this.reject(register._createError(this.auth, "popup-closed-by-user" /* AuthErrorCode.POPUP_CLOSED_BY_USER */));
+                    this.reject(_createError(this.auth, "popup-closed-by-user" /* AuthErrorCode.POPUP_CLOSED_BY_USER */));
                 }, 8000 /* _Timeout.AUTH_EVENT */);
                 return;
             }
@@ -1804,10 +1801,10 @@ function _overrideRedirectResult(auth, result) {
     redirectOutcomeMap.set(auth._key(), result);
 }
 function resolverPersistence(resolver) {
-    return register._getInstance(resolver._redirectPersistence);
+    return _getInstance(resolver._redirectPersistence);
 }
 function pendingRedirectKey(auth) {
-    return register._persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
+    return _persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
 }
 
 /**
@@ -1874,11 +1871,11 @@ function signInWithRedirect(auth, provider, resolver) {
     return _signInWithRedirect(auth, provider, resolver);
 }
 async function _signInWithRedirect(auth, provider, resolver) {
-    if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(auth));
+    if (_isFirebaseServerApp(auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
     }
-    const authInternal = register._castAuth(auth);
-    register._assertInstanceOf(auth, provider, register.FederatedAuthProvider);
+    const authInternal = _castAuth(auth);
+    _assertInstanceOf(auth, provider, FederatedAuthProvider);
     // Wait for auth initialization to complete, this will process pending redirects and clear the
     // PENDING_REDIRECT_KEY in persistence. This should be completed before starting a new
     // redirect and creating a PENDING_REDIRECT_KEY entry.
@@ -1926,10 +1923,10 @@ function reauthenticateWithRedirect(user, provider, resolver) {
     return _reauthenticateWithRedirect(user, provider, resolver);
 }
 async function _reauthenticateWithRedirect(user, provider, resolver) {
-    const userInternal = util.getModularInstance(user);
-    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
-    if (app._isFirebaseServerApp(userInternal.auth.app)) {
-        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
+    const userInternal = getModularInstance(user);
+    _assertInstanceOf(userInternal.auth, provider, FederatedAuthProvider);
+    if (_isFirebaseServerApp(userInternal.auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(userInternal.auth));
     }
     // Wait for auth initialization to complete, this will process pending redirects and clear the
     // PENDING_REDIRECT_KEY in persistence. This should be completed before starting a new
@@ -1976,15 +1973,15 @@ function linkWithRedirect(user, provider, resolver) {
     return _linkWithRedirect(user, provider, resolver);
 }
 async function _linkWithRedirect(user, provider, resolver) {
-    const userInternal = util.getModularInstance(user);
-    register._assertInstanceOf(userInternal.auth, provider, register.FederatedAuthProvider);
+    const userInternal = getModularInstance(user);
+    _assertInstanceOf(userInternal.auth, provider, FederatedAuthProvider);
     // Wait for auth initialization to complete, this will process pending redirects and clear the
     // PENDING_REDIRECT_KEY in persistence. This should be completed before starting a new
     // redirect and creating a PENDING_REDIRECT_KEY entry.
     await userInternal.auth._initializationPromise;
     // Allow the resolver to error before persisting the redirect user
     const resolverInternal = _withDefaultResolver(userInternal.auth, resolver);
-    await register._assertLinkedStatus(false, userInternal, provider.providerId);
+    await _assertLinkedStatus(false, userInternal, provider.providerId);
     await _setPendingRedirectStatus(resolverInternal, userInternal.auth);
     const eventId = await prepareUserForRedirect(userInternal);
     return resolverInternal._openRedirect(userInternal.auth, provider, "linkViaRedirect" /* AuthEventType.LINK_VIA_REDIRECT */, eventId);
@@ -2031,14 +2028,14 @@ async function _linkWithRedirect(user, provider, resolver) {
  * @public
  */
 async function getRedirectResult(auth, resolver) {
-    await register._castAuth(auth)._initializationPromise;
+    await _castAuth(auth)._initializationPromise;
     return _getRedirectResult(auth, resolver, false);
 }
 async function _getRedirectResult(auth, resolverExtern, bypassAuthState = false) {
-    if (app._isFirebaseServerApp(auth.app)) {
-        return Promise.reject(register._serverAppCurrentUserOperationNotSupportedError(auth));
+    if (_isFirebaseServerApp(auth.app)) {
+        return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
     }
-    const authInternal = register._castAuth(auth);
+    const authInternal = _castAuth(auth);
     const resolver = _withDefaultResolver(authInternal, resolverExtern);
     const action = new RedirectAction(authInternal, resolver, bypassAuthState);
     const result = await action.execute();
@@ -2050,7 +2047,7 @@ async function _getRedirectResult(auth, resolverExtern, bypassAuthState = false)
     return result;
 }
 async function prepareUserForRedirect(user) {
-    const eventId = register._generateEventId(`${user.uid}:::`);
+    const eventId = _generateEventId(`${user.uid}:::`);
     user._redirectEventId = eventId;
     await user.auth._setRedirectUser(user);
     await user.auth._persistUserIfCurrent(user);
@@ -2127,7 +2124,7 @@ class AuthEventManager {
         if (event.error && !isNullRedirectEvent(event)) {
             const code = event.error.code?.split('auth/')[1] ||
                 "internal-error" /* AuthErrorCode.INTERNAL_ERROR */;
-            consumer.onError(register._createError(this.auth, code));
+            consumer.onError(_createError(this.auth, code));
         }
         else {
             consumer.onAuthEvent(event);
@@ -2187,7 +2184,7 @@ function isRedirectEvent(event) {
  * limitations under the License.
  */
 async function _getProjectConfig(auth, request = {}) {
-    return register._performApiRequest(auth, "GET" /* HttpMethod.GET */, "/v1/projects" /* Endpoint.GET_PROJECT_CONFIG */, request);
+    return _performApiRequest(auth, "GET" /* HttpMethod.GET */, "/v1/projects" /* Endpoint.GET_PROJECT_CONFIG */, request);
 }
 
 /**
@@ -2225,10 +2222,10 @@ async function _validateOrigin$1(auth) {
         }
     }
     // In the old SDK, this error also provides helpful messages.
-    register._fail(auth, "unauthorized-domain" /* AuthErrorCode.INVALID_ORIGIN */);
+    _fail(auth, "unauthorized-domain" /* AuthErrorCode.INVALID_ORIGIN */);
 }
 function matchDomain(expected) {
-    const currentUrl = register._getCurrentUrl();
+    const currentUrl = _getCurrentUrl();
     const { protocol, hostname } = new URL(currentUrl);
     if (expected.startsWith('chrome-extension://')) {
         const ceUrl = new URL(expected);
@@ -2272,7 +2269,7 @@ function matchDomain(expected) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const NETWORK_TIMEOUT = new register.Delay(30000, 60000);
+const NETWORK_TIMEOUT = new Delay(30000, 60000);
 /**
  * Reset unloaded GApi modules. If gapi.load fails due to a network error,
  * it will stop working after a retrial. This is a hack to fix this issue.
@@ -2281,7 +2278,7 @@ function resetUnloadedGapiModules() {
     // Clear last failed gapi.load state to force next gapi.load to first
     // load the failed gapi.iframes module.
     // Get gapix.beacon context.
-    const beacon = register._window().___jsl;
+    const beacon = _window().___jsl;
     // Get current hint.
     if (beacon?.H) {
         // Get gapi hint.
@@ -2321,16 +2318,16 @@ function loadGapi(auth) {
                     // failed attempt.
                     // Timeout when gapi.iframes.Iframe not loaded.
                     resetUnloadedGapiModules();
-                    reject(register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
+                    reject(_createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
                 },
                 timeout: NETWORK_TIMEOUT.get()
             });
         }
-        if (register._window().gapi?.iframes?.Iframe) {
+        if (_window().gapi?.iframes?.Iframe) {
             // If gapi.iframes.Iframe available, resolve.
             resolve(gapi.iframes.getContext());
         }
-        else if (!!register._window().gapi?.load) {
+        else if (!!_window().gapi?.load) {
             // Gapi loader ready, load gapi.iframes.
             loadGapiIframe();
         }
@@ -2340,20 +2337,20 @@ function loadGapi(auth) {
             // multiple times in parallel and could result in the later callback
             // overwriting the previous one. This would end up with a iframe
             // timeout.
-            const cbName = register._generateCallbackName('iframefcb');
+            const cbName = _generateCallbackName('iframefcb');
             // GApi loader not available, dynamically load platform.js.
-            register._window()[cbName] = () => {
+            _window()[cbName] = () => {
                 // GApi loader should be ready.
                 if (!!gapi.load) {
                     loadGapiIframe();
                 }
                 else {
                     // Gapi loader failed, throw error.
-                    reject(register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
+                    reject(_createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */));
                 }
             };
             // Load GApi loader.
-            return register._loadJS(`${register._gapiScriptUrl()}?onload=${cbName}`)
+            return _loadJS(`${_gapiScriptUrl()}?onload=${cbName}`)
                 .catch(e => reject(e));
         }
     }).catch(error => {
@@ -2384,7 +2381,7 @@ function _loadGapi(auth) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const PING_TIMEOUT = new register.Delay(5000, 15000);
+const PING_TIMEOUT = new Delay(5000, 15000);
 const IFRAME_PATH = '__/auth/iframe';
 const EMULATED_IFRAME_PATH = 'emulator/auth/iframe';
 const IFRAME_ATTRIBUTES = {
@@ -2406,14 +2403,14 @@ const EID_FROM_APIHOST = new Map([
 ]);
 function getIframeUrl(auth) {
     const config = auth.config;
-    register._assert(config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
+    _assert(config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
     const url = config.emulator
-        ? register._emulatorUrl(config, EMULATED_IFRAME_PATH)
+        ? _emulatorUrl(config, EMULATED_IFRAME_PATH)
         : `https://${auth.config.authDomain}/${IFRAME_PATH}`;
     const params = {
         apiKey: config.apiKey,
         appName: auth.name,
-        v: app.SDK_VERSION
+        v: SDK_VERSION
     };
     const eid = EID_FROM_APIHOST.get(auth.config.apiHost);
     if (eid) {
@@ -2423,12 +2420,12 @@ function getIframeUrl(auth) {
     if (frameworks.length) {
         params.fw = frameworks.join(',');
     }
-    return `${url}?${util.querystring(params).slice(1)}`;
+    return `${url}?${querystring(params).slice(1)}`;
 }
 async function _openIframe(auth) {
     const context = await _loadGapi(auth);
-    const gapi = register._window().gapi;
-    register._assert(gapi, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+    const gapi = _window().gapi;
+    _assert(gapi, auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
     return context.open({
         where: document.body,
         url: getIframeUrl(auth),
@@ -2440,15 +2437,15 @@ async function _openIframe(auth) {
             // Prevent iframe from closing on mouse out.
             setHideOnLeave: false
         });
-        const networkError = register._createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */);
+        const networkError = _createError(auth, "network-request-failed" /* AuthErrorCode.NETWORK_REQUEST_FAILED */);
         // Confirm iframe is correctly loaded.
         // To fallback on failure, set a timeout.
-        const networkErrorTimer = register._window().setTimeout(() => {
+        const networkErrorTimer = _window().setTimeout(() => {
             reject(networkError);
         }, PING_TIMEOUT.get());
         // Clear timer and resolve pending iframe ready promise.
         function clearTimerAndResolve() {
-            register._window().clearTimeout(networkErrorTimer);
+            _window().clearTimeout(networkErrorTimer);
             resolve(iframe);
         }
         // This returns an IThenable. However the reject part does not call
@@ -2512,11 +2509,11 @@ function _open(auth, url, name, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT) 
     };
     // Chrome iOS 7 and 8 is returning an undefined popup win when target is
     // specified, even though the popup is not necessarily blocked.
-    const ua = util.getUA().toLowerCase();
+    const ua = getUA().toLowerCase();
     if (name) {
-        target = register._isChromeIOS(ua) ? TARGET_BLANK : name;
+        target = _isChromeIOS(ua) ? TARGET_BLANK : name;
     }
-    if (register._isFirefox(ua)) {
+    if (_isFirefox(ua)) {
         // Firefox complains when invalid URLs are popped out. Hacky way to bypass.
         url = url || FIREFOX_EMPTY_URL;
         // Firefox disables by default scrolling on popup windows, which can create
@@ -2524,14 +2521,14 @@ function _open(auth, url, name, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT) 
         options.scrollbars = 'yes';
     }
     const optionsString = Object.entries(options).reduce((accum, [key, value]) => `${accum}${key}=${value},`, '');
-    if (register._isIOSStandalone(ua) && target !== '_self') {
+    if (_isIOSStandalone(ua) && target !== '_self') {
         openAsNewWindowIOS(url || '', target);
         return new AuthPopup(null);
     }
     // about:blank getting sanitized causing browsers like IE/Edge to display
     // brief error message before redirecting to handler.
     const newWin = window.open(url || '', target, optionsString);
-    register._assert(newWin, auth, "popup-blocked" /* AuthErrorCode.POPUP_BLOCKED */);
+    _assert(newWin, auth, "popup-blocked" /* AuthErrorCode.POPUP_BLOCKED */);
     // Flaky on IE edge, encapsulate with a try and catch.
     try {
         newWin.focus();
@@ -2583,20 +2580,20 @@ const EMULATOR_WIDGET_PATH = 'emulator/auth/handler';
  */
 const FIREBASE_APP_CHECK_FRAGMENT_ID = encodeURIComponent('fac');
 async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, additionalParams) {
-    register._assert(auth.config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
-    register._assert(auth.config.apiKey, auth, "invalid-api-key" /* AuthErrorCode.INVALID_API_KEY */);
+    _assert(auth.config.authDomain, auth, "auth-domain-config-required" /* AuthErrorCode.MISSING_AUTH_DOMAIN */);
+    _assert(auth.config.apiKey, auth, "invalid-api-key" /* AuthErrorCode.INVALID_API_KEY */);
     const params = {
         apiKey: auth.config.apiKey,
         appName: auth.name,
         authType,
         redirectUrl,
-        v: app.SDK_VERSION,
+        v: SDK_VERSION,
         eventId
     };
-    if (provider instanceof register.FederatedAuthProvider) {
+    if (provider instanceof FederatedAuthProvider) {
         provider.setDefaultLanguage(auth.languageCode);
         params.providerId = provider.providerId || '';
-        if (!util.isEmpty(provider.getCustomParameters())) {
+        if (!isEmpty(provider.getCustomParameters())) {
             params.customParameters = JSON.stringify(provider.getCustomParameters());
         }
         // TODO set additionalParams from the provider as well?
@@ -2604,7 +2601,7 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
             params[key] = value;
         }
     }
-    if (provider instanceof register.BaseOAuthProvider) {
+    if (provider instanceof BaseOAuthProvider) {
         const scopes = provider.getScopes().filter(scope => scope !== '');
         if (scopes.length > 0) {
             params.scopes = scopes.join(',');
@@ -2627,13 +2624,13 @@ async function _getRedirectUrl(auth, provider, authType, redirectUrl, eventId, a
         ? `#${FIREBASE_APP_CHECK_FRAGMENT_ID}=${encodeURIComponent(appCheckToken)}`
         : '';
     // Start at index 1 to skip the leading '&' in the query string
-    return `${getHandlerBase(auth)}?${util.querystring(paramsDict).slice(1)}${appCheckTokenFragment}`;
+    return `${getHandlerBase(auth)}?${querystring(paramsDict).slice(1)}${appCheckTokenFragment}`;
 }
 function getHandlerBase({ config }) {
     if (!config.emulator) {
         return `https://${config.authDomain}/${WIDGET_PATH}`;
     }
-    return register._emulatorUrl(config, EMULATOR_WIDGET_PATH);
+    return _emulatorUrl(config, EMULATOR_WIDGET_PATH);
 }
 
 /**
@@ -2669,14 +2666,14 @@ class BrowserPopupRedirectResolver {
     // Wrapping in async even though we don't await anywhere in order
     // to make sure errors are raised as promise rejections
     async _openPopup(auth, provider, authType, eventId) {
-        register.debugAssert(this.eventManagers[auth._key()]?.manager, '_initialize() not called before _openPopup()');
-        const url = await _getRedirectUrl(auth, provider, authType, register._getCurrentUrl(), eventId);
-        return _open(auth, url, register._generateEventId());
+        debugAssert(this.eventManagers[auth._key()]?.manager, '_initialize() not called before _openPopup()');
+        const url = await _getRedirectUrl(auth, provider, authType, _getCurrentUrl(), eventId);
+        return _open(auth, url, _generateEventId());
     }
     async _openRedirect(auth, provider, authType, eventId) {
         await this._originValidation(auth);
-        const url = await _getRedirectUrl(auth, provider, authType, register._getCurrentUrl(), eventId);
-        register._setWindowLocation(url);
+        const url = await _getRedirectUrl(auth, provider, authType, _getCurrentUrl(), eventId);
+        _setWindowLocation(url);
         return new Promise(() => { });
     }
     _initialize(auth) {
@@ -2687,7 +2684,7 @@ class BrowserPopupRedirectResolver {
                 return Promise.resolve(manager);
             }
             else {
-                register.debugAssert(promise, 'If manager is not set, promise should be');
+                debugAssert(promise, 'If manager is not set, promise should be');
                 return promise;
             }
         }
@@ -2704,7 +2701,7 @@ class BrowserPopupRedirectResolver {
         const iframe = await _openIframe(auth);
         const manager = new AuthEventManager(auth);
         iframe.register('authEvent', (iframeEvent) => {
-            register._assert(iframeEvent?.authEvent, auth, "invalid-auth-event" /* AuthErrorCode.INVALID_AUTH_EVENT */);
+            _assert(iframeEvent?.authEvent, auth, "invalid-auth-event" /* AuthErrorCode.INVALID_AUTH_EVENT */);
             // TODO: Consider splitting redirect and popup events earlier on
             const handled = manager.onEvent(iframeEvent.authEvent);
             return { status: handled ? "ACK" /* GapiOutcome.ACK */ : "ERROR" /* GapiOutcome.ERROR */ };
@@ -2720,7 +2717,7 @@ class BrowserPopupRedirectResolver {
             if (isSupported !== undefined) {
                 cb(!!isSupported);
             }
-            register._fail(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+            _fail(auth, "internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
         }, gapi.iframes.CROSS_ORIGIN_IFRAMES_FILTER);
     }
     _originValidation(auth) {
@@ -2732,7 +2729,7 @@ class BrowserPopupRedirectResolver {
     }
     get _shouldInitProactively() {
         // Mobile browsers and Safari need to optimistically initialize
-        return register._isMobileBrowser() || register._isSafari() || register._isIOS();
+        return _isMobileBrowser() || _isSafari() || _isIOS();
     }
 }
 /**
@@ -2751,7 +2748,7 @@ const browserPopupRedirectResolver = BrowserPopupRedirectResolver;
  *
  * @public
  */
-class PhoneMultiFactorAssertionImpl extends register.MultiFactorAssertionImpl {
+class PhoneMultiFactorAssertionImpl extends MultiFactorAssertionImpl {
     constructor(credential) {
         super("phone" /* FactorId.PHONE */);
         this.credential = credential;
@@ -2762,7 +2759,7 @@ class PhoneMultiFactorAssertionImpl extends register.MultiFactorAssertionImpl {
     }
     /** @internal */
     _finalizeEnroll(auth, idToken, displayName) {
-        return register.finalizeEnrollPhoneMfa(auth, {
+        return finalizeEnrollPhoneMfa(auth, {
             idToken,
             displayName,
             phoneVerificationInfo: this.credential._makeVerificationRequest()
@@ -2770,7 +2767,7 @@ class PhoneMultiFactorAssertionImpl extends register.MultiFactorAssertionImpl {
     }
     /** @internal */
     _finalizeSignIn(auth, mfaPendingCredential) {
-        return register.finalizeSignInPhoneMfa(auth, {
+        return finalizeSignInPhoneMfa(auth, {
             mfaPendingCredential,
             phoneVerificationInfo: this.credential._makeVerificationRequest()
         });
@@ -2819,7 +2816,7 @@ PhoneMultiFactorGenerator.FACTOR_ID = 'phone';
  * limitations under the License.
  */
 const DEFAULT_ID_TOKEN_MAX_AGE = 5 * 60;
-const authIdTokenMaxAge = util.getExperimentalSetting('authIdTokenMaxAge') || DEFAULT_ID_TOKEN_MAX_AGE;
+const authIdTokenMaxAge = getExperimentalSetting('authIdTokenMaxAge') || DEFAULT_ID_TOKEN_MAX_AGE;
 let lastPostedIdToken = null;
 const mintCookieFactory = (url) => async (user) => {
     const idTokenResult = user && (await user.getIdTokenResult());
@@ -2851,20 +2848,20 @@ const mintCookieFactory = (url) => async (user) => {
  *
  * @public
  */
-function getAuth(app$1 = app.getApp()) {
-    const provider = app._getProvider(app$1, 'auth');
+function getAuth(app = getApp()) {
+    const provider = _getProvider(app, 'auth');
     if (provider.isInitialized()) {
         return provider.getImmediate();
     }
-    const auth = register.initializeAuth(app$1, {
+    const auth = initializeAuth(app, {
         popupRedirectResolver: browserPopupRedirectResolver,
         persistence: [
-            register.indexedDBLocalPersistence,
+            indexedDBLocalPersistence,
             browserLocalPersistence,
             browserSessionPersistence
         ]
     });
-    const authTokenSyncPath = util.getExperimentalSetting('authTokenSyncURL');
+    const authTokenSyncPath = getExperimentalSetting('authTokenSyncURL');
     // Only do the Cookie exchange in a secure context
     if (authTokenSyncPath &&
         typeof isSecureContext === 'boolean' &&
@@ -2873,20 +2870,20 @@ function getAuth(app$1 = app.getApp()) {
         const authTokenSyncUrl = new URL(authTokenSyncPath, location.origin);
         if (location.origin === authTokenSyncUrl.origin) {
             const mintCookie = mintCookieFactory(authTokenSyncUrl.toString());
-            register.beforeAuthStateChanged(auth, mintCookie, () => mintCookie(auth.currentUser));
-            register.onIdTokenChanged(auth, user => mintCookie(user));
+            beforeAuthStateChanged(auth, mintCookie, () => mintCookie(auth.currentUser));
+            onIdTokenChanged(auth, user => mintCookie(user));
         }
     }
-    const authEmulatorHost = util.getDefaultEmulatorHost('auth');
+    const authEmulatorHost = getDefaultEmulatorHost('auth');
     if (authEmulatorHost) {
-        register.connectAuthEmulator(auth, `http://${authEmulatorHost}`);
+        connectAuthEmulator(auth, `http://${authEmulatorHost}`);
     }
     return auth;
 }
 function getScriptParentElement() {
     return document.getElementsByTagName('head')?.[0] ?? document;
 }
-register._setExternalJSProvider({
+_setExternalJSProvider({
     loadJS(url) {
         // TODO: consider adding timeout support & cancellation
         return new Promise((resolve, reject) => {
@@ -2894,7 +2891,7 @@ register._setExternalJSProvider({
             el.setAttribute('src', url);
             el.onload = resolve;
             el.onerror = e => {
-                const error = register._createError("internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
+                const error = _createError("internal-error" /* AuthErrorCode.INTERNAL_ERROR */);
                 error.customData = e;
                 reject(error);
             };
@@ -2907,7 +2904,7 @@ register._setExternalJSProvider({
     recaptchaV2Script: 'https://www.google.com/recaptcha/api.js',
     recaptchaEnterpriseScript: 'https://www.google.com/recaptcha/enterprise.js?render='
 });
-register.registerAuth("Browser" /* ClientPlatform.BROWSER */);
+registerAuth("Browser" /* ClientPlatform.BROWSER */);
 
 /**
  * @license
@@ -2956,19 +2953,19 @@ const REDIRECT_TIMEOUT_MS = 2000;
 async function _generateHandlerUrl(auth, event, provider) {
     // Get the cordova plugins
     const { BuildInfo } = _cordovaWindow();
-    register.debugAssert(event.sessionId, 'AuthEvent did not contain a session ID');
+    debugAssert(event.sessionId, 'AuthEvent did not contain a session ID');
     const sessionDigest = await computeSha256(event.sessionId);
     const additionalParams = {};
-    if (register._isIOS()) {
+    if (_isIOS()) {
         // iOS app identifier
         additionalParams['ibi'] = BuildInfo.packageName;
     }
-    else if (register._isAndroid()) {
+    else if (_isAndroid()) {
         // Android app identifier
         additionalParams['apn'] = BuildInfo.packageName;
     }
     else {
-        register._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     // Add the display name if available
     if (BuildInfo.displayName) {
@@ -2984,14 +2981,14 @@ async function _generateHandlerUrl(auth, event, provider) {
 async function _validateOrigin(auth) {
     const { BuildInfo } = _cordovaWindow();
     const request = {};
-    if (register._isIOS()) {
+    if (_isIOS()) {
         request.iosBundleId = BuildInfo.packageName;
     }
-    else if (register._isAndroid()) {
+    else if (_isAndroid()) {
         request.androidPackageName = BuildInfo.packageName;
     }
     else {
-        register._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     // Will fail automatically if package name is not authorized
     await _getProjectConfig(auth, request);
@@ -3007,7 +3004,7 @@ function _performRedirect(handlerUrl) {
             }
             else {
                 // TODO: Return the inappbrowser ref that's returned from the open call
-                iabRef = cordova.InAppBrowser.open(handlerUrl, register._isIOS7Or8() ? '_blank' : '_system', 'location=yes');
+                iabRef = cordova.InAppBrowser.open(handlerUrl, _isIOS7Or8() ? '_blank' : '_system', 'location=yes');
             }
             resolve(iabRef);
         });
@@ -3048,7 +3045,7 @@ async function _waitForAppResume(auth, eventListener, iabRef) {
                 }
                 onCloseTimer = window.setTimeout(() => {
                     // Wait two seconds after resume then reject.
-                    reject(register._createError(auth, "redirect-cancelled-by-user" /* AuthErrorCode.REDIRECT_CANCELLED_BY_USER */));
+                    reject(_createError(auth, "redirect-cancelled-by-user" /* AuthErrorCode.REDIRECT_CANCELLED_BY_USER */));
                 }, REDIRECT_TIMEOUT_MS);
             }
             function visibilityChanged() {
@@ -3061,7 +3058,7 @@ async function _waitForAppResume(auth, eventListener, iabRef) {
             eventListener.addPassiveListener(authEventSeen);
             // Listen for resume and visibility events
             document.addEventListener('resume', resumed, false);
-            if (register._isAndroid()) {
+            if (_isAndroid()) {
                 document.addEventListener('visibilitychange', visibilityChanged, false);
             }
             // SETUP THE CLEANUP FUNCTION =====
@@ -3091,22 +3088,22 @@ function _checkCordovaConfiguration(auth) {
     // Note that cordova-universal-links-plugin has been abandoned.
     // A fork with latest fixes is available at:
     // https://www.npmjs.com/package/cordova-universal-links-plugin-fix
-    register._assert(typeof win?.universalLinks?.subscribe === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.universalLinks?.subscribe === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-universal-links-plugin-fix'
     });
     // https://www.npmjs.com/package/cordova-plugin-buildinfo
-    register._assert(typeof win?.BuildInfo?.packageName !== 'undefined', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.BuildInfo?.packageName !== 'undefined', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-buildInfo'
     });
     // https://github.com/google/cordova-plugin-browsertab
-    register._assert(typeof win?.cordova?.plugins?.browsertab?.openUrl === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.cordova?.plugins?.browsertab?.openUrl === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-browsertab'
     });
-    register._assert(typeof win?.cordova?.plugins?.browsertab?.isAvailable === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.cordova?.plugins?.browsertab?.isAvailable === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-browsertab'
     });
     // https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-inappbrowser/
-    register._assert(typeof win?.cordova?.InAppBrowser?.open === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
+    _assert(typeof win?.cordova?.InAppBrowser?.open === 'function', auth, "invalid-cordova-configuration" /* AuthErrorCode.INVALID_CORDOVA_CONFIGURATION */, {
         missingPlugin: 'cordova-plugin-inappbrowser'
     });
 }
@@ -3128,7 +3125,7 @@ async function computeSha256(sessionId) {
 function stringToArrayBuffer(str) {
     // This function is only meant to deal with an ASCII charset and makes
     // certain simplifying assumptions.
-    register.debugAssert(/[0-9a-zA-Z]+/.test(str), 'Can only convert alpha-numeric strings');
+    debugAssert(/[0-9a-zA-Z]+/.test(str), 'Can only convert alpha-numeric strings');
     if (typeof TextEncoder !== 'undefined') {
         return new TextEncoder().encode(str);
     }
@@ -3199,7 +3196,7 @@ function _generateNewEvent(auth, type, eventId = null) {
         sessionId: generateSessionId(),
         postBody: null,
         tenantId: auth.tenantId,
-        error: register._createError(auth, "no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
+        error: _createError(auth, "no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
     };
 }
 function _savePartialEvent(auth, event) {
@@ -3230,7 +3227,7 @@ function _eventFromPartialAndUrl(partialEvent, url) {
             ? parseJsonOrNull(decodeURIComponent(params['firebaseError']))
             : null;
         const code = errorObject?.['code']?.split('auth/')?.[1];
-        const error = code ? register._createError(code) : null;
+        const error = code ? _createError(code) : null;
         if (error) {
             return {
                 type: partialEvent.type,
@@ -3265,10 +3262,10 @@ function generateSessionId() {
     return chars.join('');
 }
 function storage() {
-    return register._getInstance(browserLocalPersistence);
+    return _getInstance(browserLocalPersistence);
 }
 function persistenceKey(auth) {
-    return register._persistenceKeyName("authEvent" /* KeyName.AUTH_EVENT */, auth.config.apiKey, auth.name);
+    return _persistenceKeyName("authEvent" /* KeyName.AUTH_EVENT */, auth.config.apiKey, auth.name);
 }
 function parseJsonOrNull(json) {
     try {
@@ -3300,7 +3297,7 @@ function searchParamsOrEmpty(url) {
         return {};
     }
     const [_, ...rest] = url.split('?');
-    return util.querystringDecode(rest.join('?'));
+    return querystringDecode(rest.join('?'));
 }
 
 /**
@@ -3344,7 +3341,7 @@ class CordovaPopupRedirectResolver {
         return manager;
     }
     _openPopup(auth) {
-        register._fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
+        _fail(auth, "operation-not-supported-in-this-environment" /* AuthErrorCode.OPERATION_NOT_SUPPORTED */);
     }
     async _openRedirect(auth, provider, authType, eventId) {
         _checkCordovaConfiguration(auth);
@@ -3438,7 +3435,7 @@ function generateNoEvent() {
         urlResponse: null,
         postBody: null,
         tenantId: null,
-        error: register._createError("no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
+        error: _createError("no-auth-event" /* AuthErrorCode.NO_AUTH_EVENT */)
     };
 }
 
@@ -3462,108 +3459,8 @@ function generateNoEvent() {
 // It is not intended for direct use by developer apps. NO jsdoc here to intentionally leave it out
 // of autogenerated documentation pages to reduce accidental misuse.
 function addFrameworkForLogging(auth, framework) {
-    register._castAuth(auth)._logFramework(framework);
+    _castAuth(auth)._logFramework(framework);
 }
 
-exports.ActionCodeURL = register.ActionCodeURL;
-exports.AuthCredential = register.AuthCredential;
-exports.AuthErrorCodes = register.AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY;
-exports.AuthImpl = register.AuthImpl;
-exports.EmailAuthCredential = register.EmailAuthCredential;
-exports.EmailAuthProvider = register.EmailAuthProvider;
-exports.FacebookAuthProvider = register.FacebookAuthProvider;
-exports.FetchProvider = register.FetchProvider;
-exports.GithubAuthProvider = register.GithubAuthProvider;
-exports.GoogleAuthProvider = register.GoogleAuthProvider;
-exports.OAuthCredential = register.OAuthCredential;
-exports.OAuthProvider = register.OAuthProvider;
-exports.PhoneAuthCredential = register.PhoneAuthCredential;
-exports.SAMLAuthCredential = register.SAMLAuthCredential;
-exports.SAMLAuthProvider = register.SAMLAuthProvider;
-exports.TotpMultiFactorGenerator = register.TotpMultiFactorGenerator;
-exports.TotpSecret = register.TotpSecret;
-exports.TwitterAuthProvider = register.TwitterAuthProvider;
-exports.UserImpl = register.UserImpl;
-exports._assert = register._assert;
-exports._castAuth = register._castAuth;
-exports._fail = register._fail;
-exports._generateEventId = register._generateEventId;
-exports._getClientVersion = register._getClientVersion;
-exports._getInstance = register._getInstance;
-exports._persistenceKeyName = register._persistenceKeyName;
-exports.applyActionCode = register.applyActionCode;
-exports.beforeAuthStateChanged = register.beforeAuthStateChanged;
-exports.checkActionCode = register.checkActionCode;
-exports.confirmPasswordReset = register.confirmPasswordReset;
-exports.connectAuthEmulator = register.connectAuthEmulator;
-exports.createUserWithEmailAndPassword = register.createUserWithEmailAndPassword;
-exports.debugErrorMap = register.debugErrorMap;
-exports.deleteUser = register.deleteUser;
-exports.fetchSignInMethodsForEmail = register.fetchSignInMethodsForEmail;
-exports.getAdditionalUserInfo = register.getAdditionalUserInfo;
-exports.getIdToken = register.getIdToken;
-exports.getIdTokenResult = register.getIdTokenResult;
-exports.getMultiFactorResolver = register.getMultiFactorResolver;
-exports.inMemoryPersistence = register.inMemoryPersistence;
-exports.indexedDBLocalPersistence = register.indexedDBLocalPersistence;
-exports.initializeAuth = register.initializeAuth;
-exports.initializeRecaptchaConfig = register.initializeRecaptchaConfig;
-exports.isSignInWithEmailLink = register.isSignInWithEmailLink;
-exports.linkWithCredential = register.linkWithCredential;
-exports.multiFactor = register.multiFactor;
-exports.onAuthStateChanged = register.onAuthStateChanged;
-exports.onIdTokenChanged = register.onIdTokenChanged;
-exports.parseActionCodeURL = register.parseActionCodeURL;
-exports.prodErrorMap = register.prodErrorMap;
-exports.reauthenticateWithCredential = register.reauthenticateWithCredential;
-exports.reload = register.reload;
-exports.revokeAccessToken = register.revokeAccessToken;
-exports.sendEmailVerification = register.sendEmailVerification;
-exports.sendPasswordResetEmail = register.sendPasswordResetEmail;
-exports.sendSignInLinkToEmail = register.sendSignInLinkToEmail;
-exports.setPersistence = register.setPersistence;
-exports.signInAnonymously = register.signInAnonymously;
-exports.signInWithCredential = register.signInWithCredential;
-exports.signInWithCustomToken = register.signInWithCustomToken;
-exports.signInWithEmailAndPassword = register.signInWithEmailAndPassword;
-exports.signInWithEmailLink = register.signInWithEmailLink;
-exports.signOut = register.signOut;
-exports.unlink = register.unlink;
-exports.updateCurrentUser = register.updateCurrentUser;
-exports.updateEmail = register.updateEmail;
-exports.updatePassword = register.updatePassword;
-exports.updateProfile = register.updateProfile;
-exports.useDeviceLanguage = register.useDeviceLanguage;
-exports.validatePassword = register.validatePassword;
-exports.verifyBeforeUpdateEmail = register.verifyBeforeUpdateEmail;
-exports.verifyPasswordResetCode = register.verifyPasswordResetCode;
-exports.ActionCodeOperation = ActionCodeOperation;
-exports.AuthPopup = AuthPopup;
-exports.FactorId = FactorId;
-exports.OperationType = OperationType;
-exports.PhoneAuthProvider = PhoneAuthProvider;
-exports.PhoneMultiFactorGenerator = PhoneMultiFactorGenerator;
-exports.ProviderId = ProviderId;
-exports.RecaptchaVerifier = RecaptchaVerifier;
-exports.SignInMethod = SignInMethod;
-exports._getRedirectResult = _getRedirectResult;
-exports._overrideRedirectResult = _overrideRedirectResult;
-exports.addFrameworkForLogging = addFrameworkForLogging;
-exports.browserCookiePersistence = browserCookiePersistence;
-exports.browserLocalPersistence = browserLocalPersistence;
-exports.browserPopupRedirectResolver = browserPopupRedirectResolver;
-exports.browserSessionPersistence = browserSessionPersistence;
-exports.cordovaPopupRedirectResolver = cordovaPopupRedirectResolver;
-exports.getAuth = getAuth;
-exports.getRedirectResult = getRedirectResult;
-exports.linkWithPhoneNumber = linkWithPhoneNumber;
-exports.linkWithPopup = linkWithPopup;
-exports.linkWithRedirect = linkWithRedirect;
-exports.reauthenticateWithPhoneNumber = reauthenticateWithPhoneNumber;
-exports.reauthenticateWithPopup = reauthenticateWithPopup;
-exports.reauthenticateWithRedirect = reauthenticateWithRedirect;
-exports.signInWithPhoneNumber = signInWithPhoneNumber;
-exports.signInWithPopup = signInWithPopup;
-exports.signInWithRedirect = signInWithRedirect;
-exports.updatePhoneNumber = updatePhoneNumber;
+export { ActionCodeOperation, AuthPopup, FactorId, OperationType, PhoneAuthProvider, PhoneMultiFactorGenerator, ProviderId, RecaptchaVerifier, SignInMethod, _getRedirectResult, _overrideRedirectResult, addFrameworkForLogging, browserCookiePersistence, browserLocalPersistence, browserPopupRedirectResolver, browserSessionPersistence, cordovaPopupRedirectResolver, getAuth, getRedirectResult, linkWithPhoneNumber, linkWithPopup, linkWithRedirect, reauthenticateWithPhoneNumber, reauthenticateWithPopup, reauthenticateWithRedirect, signInWithPhoneNumber, signInWithPopup, signInWithRedirect, updatePhoneNumber };
 //# sourceMappingURL=internal.js.map

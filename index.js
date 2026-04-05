@@ -1,12 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var register = require('./register-a20238ea.js');
-var app = require('@firebase/app');
-var util = require('@firebase/util');
-require('@firebase/component');
-require('@firebase/logger');
+import { r as registerAuth, i as initializeAuth, a as indexedDBLocalPersistence, c as connectAuthEmulator } from './register-27e07cc8.js';
+export { Y as ActionCodeURL, m as AuthCredential, A as AuthErrorCodes, E as EmailAuthCredential, q as EmailAuthProvider, F as FacebookAuthProvider, t as GithubAuthProvider, G as GoogleAuthProvider, O as OAuthCredential, w as OAuthProvider, P as PhoneAuthCredential, S as SAMLAuthProvider, T as TotpMultiFactorGenerator, b as TotpSecret, x as TwitterAuthProvider, J as applyActionCode, e as beforeAuthStateChanged, K as checkActionCode, I as confirmPasswordReset, c as connectAuthEmulator, M as createUserWithEmailAndPassword, l as debugErrorMap, k as deleteUser, V as fetchSignInMethodsForEmail, a4 as getAdditionalUserInfo, a1 as getIdToken, a2 as getIdTokenResult, a6 as getMultiFactorResolver, n as inMemoryPersistence, a as indexedDBLocalPersistence, i as initializeAuth, d as initializeRecaptchaConfig, R as isSignInWithEmailLink, B as linkWithCredential, a7 as multiFactor, f as onAuthStateChanged, o as onIdTokenChanged, Z as parseActionCodeURL, p as prodErrorMap, C as reauthenticateWithCredential, a5 as reload, j as revokeAccessToken, W as sendEmailVerification, H as sendPasswordResetEmail, Q as sendSignInLinkToEmail, s as setPersistence, y as signInAnonymously, z as signInWithCredential, D as signInWithCustomToken, N as signInWithEmailAndPassword, U as signInWithEmailLink, h as signOut, a3 as unlink, g as updateCurrentUser, $ as updateEmail, a0 as updatePassword, _ as updateProfile, u as useDeviceLanguage, v as validatePassword, X as verifyBeforeUpdateEmail, L as verifyPasswordResetCode } from './register-27e07cc8.js';
+import { _getProvider, getApp } from '@firebase/app';
+import { getDefaultEmulatorHost } from '@firebase/util';
+import '@firebase/component';
+import '@firebase/logger';
 
 /**
  * @license
@@ -32,82 +29,21 @@ require('@firebase/logger');
  *
  * @public
  */
-function getAuth(app$1 = app.getApp()) {
-    const provider = app._getProvider(app$1, 'auth');
+function getAuth(app = getApp()) {
+    const provider = _getProvider(app, 'auth');
     if (provider.isInitialized()) {
         return provider.getImmediate();
     }
-    const auth = register.initializeAuth(app$1, {
-        persistence: [register.indexedDBLocalPersistence]
+    const auth = initializeAuth(app, {
+        persistence: [indexedDBLocalPersistence]
     });
-    const authEmulatorHost = util.getDefaultEmulatorHost('auth');
+    const authEmulatorHost = getDefaultEmulatorHost('auth');
     if (authEmulatorHost) {
-        register.connectAuthEmulator(auth, `http://${authEmulatorHost}`);
+        connectAuthEmulator(auth, `http://${authEmulatorHost}`);
     }
     return auth;
 }
-register.registerAuth("WebExtension" /* ClientPlatform.WEB_EXTENSION */);
+registerAuth("WebExtension" /* ClientPlatform.WEB_EXTENSION */);
 
-exports.ActionCodeURL = register.ActionCodeURL;
-exports.AuthCredential = register.AuthCredential;
-exports.AuthErrorCodes = register.AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY;
-exports.EmailAuthCredential = register.EmailAuthCredential;
-exports.EmailAuthProvider = register.EmailAuthProvider;
-exports.FacebookAuthProvider = register.FacebookAuthProvider;
-exports.GithubAuthProvider = register.GithubAuthProvider;
-exports.GoogleAuthProvider = register.GoogleAuthProvider;
-exports.OAuthCredential = register.OAuthCredential;
-exports.OAuthProvider = register.OAuthProvider;
-exports.PhoneAuthCredential = register.PhoneAuthCredential;
-exports.SAMLAuthProvider = register.SAMLAuthProvider;
-exports.TotpMultiFactorGenerator = register.TotpMultiFactorGenerator;
-exports.TotpSecret = register.TotpSecret;
-exports.TwitterAuthProvider = register.TwitterAuthProvider;
-exports.applyActionCode = register.applyActionCode;
-exports.beforeAuthStateChanged = register.beforeAuthStateChanged;
-exports.checkActionCode = register.checkActionCode;
-exports.confirmPasswordReset = register.confirmPasswordReset;
-exports.connectAuthEmulator = register.connectAuthEmulator;
-exports.createUserWithEmailAndPassword = register.createUserWithEmailAndPassword;
-exports.debugErrorMap = register.debugErrorMap;
-exports.deleteUser = register.deleteUser;
-exports.fetchSignInMethodsForEmail = register.fetchSignInMethodsForEmail;
-exports.getAdditionalUserInfo = register.getAdditionalUserInfo;
-exports.getIdToken = register.getIdToken;
-exports.getIdTokenResult = register.getIdTokenResult;
-exports.getMultiFactorResolver = register.getMultiFactorResolver;
-exports.inMemoryPersistence = register.inMemoryPersistence;
-exports.indexedDBLocalPersistence = register.indexedDBLocalPersistence;
-exports.initializeAuth = register.initializeAuth;
-exports.initializeRecaptchaConfig = register.initializeRecaptchaConfig;
-exports.isSignInWithEmailLink = register.isSignInWithEmailLink;
-exports.linkWithCredential = register.linkWithCredential;
-exports.multiFactor = register.multiFactor;
-exports.onAuthStateChanged = register.onAuthStateChanged;
-exports.onIdTokenChanged = register.onIdTokenChanged;
-exports.parseActionCodeURL = register.parseActionCodeURL;
-exports.prodErrorMap = register.prodErrorMap;
-exports.reauthenticateWithCredential = register.reauthenticateWithCredential;
-exports.reload = register.reload;
-exports.revokeAccessToken = register.revokeAccessToken;
-exports.sendEmailVerification = register.sendEmailVerification;
-exports.sendPasswordResetEmail = register.sendPasswordResetEmail;
-exports.sendSignInLinkToEmail = register.sendSignInLinkToEmail;
-exports.setPersistence = register.setPersistence;
-exports.signInAnonymously = register.signInAnonymously;
-exports.signInWithCredential = register.signInWithCredential;
-exports.signInWithCustomToken = register.signInWithCustomToken;
-exports.signInWithEmailAndPassword = register.signInWithEmailAndPassword;
-exports.signInWithEmailLink = register.signInWithEmailLink;
-exports.signOut = register.signOut;
-exports.unlink = register.unlink;
-exports.updateCurrentUser = register.updateCurrentUser;
-exports.updateEmail = register.updateEmail;
-exports.updatePassword = register.updatePassword;
-exports.updateProfile = register.updateProfile;
-exports.useDeviceLanguage = register.useDeviceLanguage;
-exports.validatePassword = register.validatePassword;
-exports.verifyBeforeUpdateEmail = register.verifyBeforeUpdateEmail;
-exports.verifyPasswordResetCode = register.verifyPasswordResetCode;
-exports.getAuth = getAuth;
+export { getAuth };
 //# sourceMappingURL=index.js.map
