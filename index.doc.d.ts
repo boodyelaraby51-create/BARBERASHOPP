@@ -1,4 +1,9 @@
 /**
+ * Firebase Authentication
+ *
+ * @packageDocumentation
+ */
+/**
  * @license
  * Copyright 2021 Google LLC
  *
@@ -15,3 +20,5 @@
  * limitations under the License.
  */
 export * from './index';
+export { cordovaPopupRedirectResolver } from './index.cordova';
+export { getReactNativePersistence } from './index.rn';

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+import { Condition } from 'selenium-webdriver';
+/**
+ * A condition that looks for the presence of a specified function. This is
+ * used with WebDriver .wait() as a proxy for determining when the JS has
+ * finished loading in a page.
+ */
+export declare class JsLoadCondition extends Condition<boolean> {
+    constructor(globalValue: string);
+}

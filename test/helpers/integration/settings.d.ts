@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+import { FirebaseOptions } from '@firebase/app';
+export declare const USE_EMULATOR: boolean;
+export declare const PROJECT_ID: any;
+export declare const AUTH_DOMAIN: any;
+export declare const API_KEY: any;
+export declare function getAppConfig(): FirebaseOptions;
+export declare function getEmulatorUrl(): string | null;

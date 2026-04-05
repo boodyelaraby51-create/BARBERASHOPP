@@ -14,4 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+export * from './src/model/public_types';
+export { FactorId, ProviderId, SignInMethod, OperationType, ActionCodeOperation } from './src/model/enum_maps';
+export * from './src';

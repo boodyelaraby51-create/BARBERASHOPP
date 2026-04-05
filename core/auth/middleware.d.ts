@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+import { AuthInternal } from '../../model/auth';
+import { Unsubscribe, User } from '../../model/public_types';
+export declare class AuthMiddlewareQueue {
+    private readonly auth;
+    private readonly queue;
+    constructor(auth: AuthInternal);
+    pushCallback(callback: (user: User | null) => void | Promise<void>, onAbort?: () => void): Unsubscribe;
+    runMiddleware(nextUser: User | null): Promise<void>;
+}

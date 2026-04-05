@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+import { Endpoint } from '../../../src/api';
+import { Route } from '../mock_fetch';
+export declare function endpointUrl(endpoint: Endpoint): string;
+export declare function endpointUrlWithParams(endpoint: Endpoint, params: Record<string, any>): string;
+export declare function mockEndpoint(endpoint: Endpoint, response: object, status?: number): Route;
+export declare function mockEndpointWithParams(endpoint: Endpoint, params: Record<string, any>, response: object, status?: number): Route;

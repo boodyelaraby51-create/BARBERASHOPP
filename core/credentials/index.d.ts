@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+/**
+ * This file is required due to the circular dependency from the parent class to its children
+ */
+export { AuthCredential } from './auth_credential';
+export { EmailAuthCredential } from './email';
+export { OAuthCredential } from './oauth';
+export { PhoneAuthCredential as PhoneAuthCredential } from './phone';

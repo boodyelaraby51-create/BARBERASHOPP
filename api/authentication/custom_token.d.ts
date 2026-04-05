@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+import { IdTokenResponse } from '../../model/id_token';
+import { Auth } from '../../model/public_types';
+export interface SignInWithCustomTokenRequest {
+    token: string;
+    returnSecureToken: boolean;
+    tenantId?: string;
+}
+export interface SignInWithCustomTokenResponse extends IdTokenResponse {
+}
+export declare function signInWithCustomToken(auth: Auth, request: SignInWithCustomTokenRequest): Promise<SignInWithCustomTokenResponse>;

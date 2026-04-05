@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './index';
+import { PersistenceValue } from '../../src/core/persistence';
+import { InMemoryPersistence } from '../../src/core/persistence/in_memory';
+/** Helper class for handling redirect persistence */
+export declare class RedirectPersistence extends InMemoryPersistence {
+    hasPendingRedirect: boolean;
+    redirectUser: object | null;
+    _get<T extends PersistenceValue>(key: string): Promise<T | null>;
+}
