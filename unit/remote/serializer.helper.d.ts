@@ -1,11 +1,6 @@
 /**
- * Cloud Firestore
- *
- * @packageDocumentation
- */
-/**
  * @license
- * Copyright 2020 Google LLC
+ * Copyright 2017 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Firestore } from './api/database';
-export * from './api';
-declare module '@firebase/component' {
-    interface NameServiceMapping {
-        'firestore': Firestore;
-    }
-}
+import * as api from '../../../src/protos/firestore_proto_api';
+/**
+ * Runs the serializer test with an optional ProtobufJS verification step
+ * (only provided in Node).
+ *
+ * These tests are initialized in 'serializer.browser.test.ts' and
+ * 'serializer.node.test.ts'.
+ */
+export declare function serializerTest(protobufJsVerifier?: (jsonValue: api.Value) => void): void;

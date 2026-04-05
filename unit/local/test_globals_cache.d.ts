@@ -1,11 +1,6 @@
 /**
- * Cloud Firestore
- *
- * @packageDocumentation
- */
-/**
  * @license
- * Copyright 2020 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Firestore } from './api/database';
-export * from './api';
-declare module '@firebase/component' {
-    interface NameServiceMapping {
-        'firestore': Firestore;
-    }
+import { Persistence } from '../../../src/local/persistence';
+import { ByteString } from '../../../src/util/byte_string';
+/**
+ * A wrapper around a GlobalsCache that automatically creates a
+ * transaction around every operation to reduce test boilerplate.
+ */
+export declare class TestGlobalsCache {
+    private readonly persistence;
+    private readonly cache;
+    constructor(persistence: Persistence);
+    getSessionToken(): Promise<ByteString>;
+    setSessionToken(sessionToken: ByteString): Promise<void>;
 }
