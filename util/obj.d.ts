@@ -1,11 +1,6 @@
 /**
- * Cloud Firestore
- *
- * @packageDocumentation
- */
-/**
  * @license
- * Copyright 2020 Google LLC
+ * Copyright 2017 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Firestore } from './api/database';
-export * from './api';
-declare module '@firebase/component' {
-    interface NameServiceMapping {
-        'firestore': Firestore;
-    }
+export interface Dict<V> {
+    [stringKey: string]: V;
 }
+export declare function objectSize(obj: object): number;
+export declare function forEach<V>(obj: Record<string, V> | undefined, fn: (key: string, val: V) => void): void;
+export declare function mapToArray<V, R>(obj: Dict<V>, fn: (element: V, key: string, obj: Dict<V>) => R): R[];
+export declare function isEmpty<V>(obj: Dict<V>): boolean;

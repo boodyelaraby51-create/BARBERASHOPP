@@ -1,11 +1,6 @@
 /**
- * Cloud Firestore
- *
- * @packageDocumentation
- */
-/**
  * @license
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Firestore } from './api/database';
-export * from './api';
-declare module '@firebase/component' {
-    interface NameServiceMapping {
-        'firestore': Firestore;
-    }
-}
+/**
+ * Generates and returns a unique ID as a hexadecimal string.
+ *
+ * The returned ID is intended to be used in debug logging messages to help
+ * correlate log messages that may be spatially separated in the logs, but
+ * logically related. For example, a network connection could include the same
+ * "debug ID" string in all of its log messages to help trace a specific
+ * connection over time.
+ *
+ * @returns the 10-character generated ID (e.g. "0xa1b2c3d4").
+ */
+export declare function generateUniqueDebugId(): string;
