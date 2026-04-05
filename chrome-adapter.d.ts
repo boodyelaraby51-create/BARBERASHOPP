@@ -14,111 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { CountTokensRequest, GenerateContentRequest, InferenceMode, OnDeviceParams } from '../types';
-import { ChromeAdapter } from '../types/chrome-adapter';
-import { LanguageModel } from '../types/language-model';
+import { InferenceMode } from './enums';
+import { CountTokensRequest, GenerateContentRequest } from './requests';
 /**
  * Defines an inference "backend" that uses Chrome's on-device model,
  * and encapsulates logic for detecting when on-device inference is
  * possible.
+ *
+ * These methods should not be called directly by the user.
+ *
+ * @beta
  */
-export declare class ChromeAdapterImpl implements ChromeAdapter {
-    languageModelProvider: LanguageModel;
-    mode: InferenceMode;
-    static SUPPORTED_MIME_TYPES: string[];
-    private isDownloading;
-    private downloadPromise;
-    private oldSession;
-    onDeviceParams: OnDeviceParams;
-    constructor(languageModelProvider: LanguageModel, mode: InferenceMode, onDeviceParams?: OnDeviceParams);
+export interface ChromeAdapter {
     /**
-     * Checks if a given request can be made on-device.
-     *
-     * Encapsulates a few concerns:
-     *   the mode
-     *   API existence
-     *   prompt formatting
-     *   model availability, including triggering download if necessary
-     *
-     *
-     * Pros: callers needn't be concerned with details of on-device availability.</p>
-     * Cons: this method spans a few concerns and splits request validation from usage.
-     * If instance variables weren't already part of the API, we could consider a better
-     * separation of concerns.
+     * @internal
+     */
+    mode: InferenceMode;
+    /**
+     * Checks if the on-device model is capable of handling a given
+     * request.
+     * @param request - A potential request to be passed to the model.
      */
     isAvailable(request: GenerateContentRequest): Promise<boolean>;
     /**
-     * Generates content on device.
+     * Generates content using on-device inference.
      *
      * @remarks
-     * This is comparable to {@link GenerativeModel.generateContent} for generating content in
-     * Cloud.
+     * This is comparable to {@link GenerativeModel.generateContent} for generating
+     * content using in-cloud inference.
      * @param request - a standard Firebase AI {@link GenerateContentRequest}
-     * @returns {@link Response}, so we can reuse common response formatting.
      */
     generateContent(request: GenerateContentRequest): Promise<Response>;
     /**
-     * Generates content stream on device.
+     * Generates a content stream using on-device inference.
      *
      * @remarks
-     * This is comparable to {@link GenerativeModel.generateContentStream} for generating content in
-     * Cloud.
+     * This is comparable to {@link GenerativeModel.generateContentStream} for generating
+     * a content stream using in-cloud inference.
      * @param request - a standard Firebase AI {@link GenerateContentRequest}
-     * @returns {@link Response}, so we can reuse common response formatting.
      */
     generateContentStream(request: GenerateContentRequest): Promise<Response>;
-    countTokens(_request: CountTokensRequest): Promise<Response>;
     /**
-     * Asserts inference for the given request can be performed by an on-device model.
+     * @internal
      */
-    private static isOnDeviceRequest;
-    /**
-     * Encapsulates logic to get availability and download a model if one is downloadable.
-     */
-    private downloadIfAvailable;
-    /**
-     * Triggers out-of-band download of an on-device model.
-     *
-     * Chrome only downloads models as needed. Chrome knows a model is needed when code calls
-     * LanguageModel.create.
-     *
-     * Since Chrome manages the download, the SDK can only avoid redundant download requests by
-     * tracking if a download has previously been requested.
-     */
-    private download;
-    /**
-     * Converts Firebase AI {@link Content} object to a Chrome {@link LanguageModelMessage} object.
-     */
-    private static toLanguageModelMessage;
-    /**
-     * Converts a Firebase AI Part object to a Chrome LanguageModelMessageContent object.
-     */
-    private static toLanguageModelMessageContent;
-    /**
-     * Converts a Firebase AI {@link Role} string to a {@link LanguageModelMessageRole} string.
-     */
-    private static toLanguageModelMessageRole;
-    /**
-     * Abstracts Chrome session creation.
-     *
-     * Chrome uses a multi-turn session for all inference. Firebase AI uses single-turn for all
-     * inference. To map the Firebase AI API to Chrome's API, the SDK creates a new session for all
-     * inference.
-     *
-     * Chrome will remove a model from memory if it's no longer in use, so this method ensures a
-     * new session is created before an old session is destroyed.
-     */
-    private createSession;
-    /**
-     * Formats string returned by Chrome as a {@link Response} returned by Firebase AI.
-     */
-    private static toResponse;
-    /**
-     * Formats string stream returned by Chrome as SSE returned by Firebase AI.
-     */
-    private static toStreamResponse;
+    countTokens(request: CountTokensRequest): Promise<Response>;
 }
-/**
- * Creates a ChromeAdapterImpl on demand.
- */
-export declare function chromeAdapterFactory(mode: InferenceMode, window?: Window, params?: OnDeviceParams): ChromeAdapterImpl | undefined;
